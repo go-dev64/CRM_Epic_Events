@@ -6,12 +6,12 @@ class User:
         self.date_created = ""
 
 
-class Suppporter:
+class Supporter:
     department = "Support"
 
-    def __init__(self, user, role) -> None:
+    def __init__(self, user, status) -> None:
         self.user = user
-        self.role = role
+        self.status = status
         self.list_of_events = []
 
     def update_event(self, event):
@@ -21,9 +21,9 @@ class Suppporter:
 class Manager:
     department = "Management"
 
-    def __init__(self, user, role) -> None:
+    def __init__(self, user, status) -> None:
         self.user = user
-        self.role = role
+        self.status = status
 
     def create_colaborator(self):
         pass
@@ -47,9 +47,11 @@ class Manager:
 class Seller:
     department = "Sales"
 
-    def __init__(self, user, role) -> None:
+    def __init__(self, user, status) -> None:
         self.user = user
-        self.role = role
+        self.status = status
+        self.list_of_contracts = []
+        self.list_of_customer = []
 
     def create_customer(self):
         pass
