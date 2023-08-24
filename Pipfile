@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 flake8 = "*"
 sqlalchemy = "*"
+pytest = "*"
+psycopg2-binary = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
