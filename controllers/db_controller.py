@@ -1,22 +1,24 @@
 import os
+import psycopg2
 from dotenv import load_dotenv
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker
-from models.customer import Base
+from models.base import Base
 
 
 load_dotenv()
 
+URL_OBJECT = URL.create(
+    os.getenv("DATABASE_TYPE"),
+    username=os.getenv("USERNAME_DB"),
+    password=os.getenv("PASSWORD"),
+    host=os.getenv("HOST"),
+    database=os.getenv("DATABASE_NAME"),
+)
+
 
 def database_engine():
-    url_object = URL.create(
-        os.getenv("DATABASE_TYPE"),
-        username=os.getenv("USERNAME_DB"),
-        password=os.getenv("PASSWORD"),
-        host=os.getenv("HOST"),
-        database=os.getenv("DATABASE_NAME"),
-    )
-    engine = create_engine(url_object, echo=True)
+    engine = create_engine(URL_OBJECT, echo=True)
     return engine
 
 

@@ -14,7 +14,7 @@ class TestDatabase:
             pytest.fail(f"Échec de la connexion à la base de données : {e}")
 
     def test_create_table(self):
-        tables = [
+        tables_models = [
             "supporter_table",
             "manager_table",
             "seller_table",
@@ -27,10 +27,16 @@ class TestDatabase:
         db_controller.create_tables()
         engine = db_controller.database_engine()
         inspector = inspect(engine)
-        tables_names = inspector.get_table_names()
-        assert len(tables) == len(tables_names)
-        for t in tables_names:
-            assert t in tables
+        tables_db = inspector.get_table_names()
+        assert len(tables_models) == len(tables_db)
+        for t in tables_db:
+            assert t in tables_models
 
-    def test_create_user(self):
+    def test_create_manager(self):
+        pass
+
+    def test_create_seller(self):
+        pass
+
+    def test_create_supporter(self):
         pass
