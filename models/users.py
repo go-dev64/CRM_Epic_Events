@@ -20,34 +20,45 @@ timestamp = Annotated[
 
 
 class User:
+    id: Mapped[intpk]
     name: Mapped[required_name]
-    email_address: Mapped[str] = mapped_column(String(100))
+    email_address: Mapped[str] = mapped_column(String(100), unique=True)
     phone_number: Mapped[str] = mapped_column(String(10))
     created_date: Mapped[timestamp]
     password: Mapped[str] = mapped_column(String)
+    department: Mapped[str] = mapped_column(String())
 
+    def __init__(self, name, email, phone, password) -> None:
+        self.name = name
+        self.email_address = email
+        self.phone_number = phone
+        self.password = password
 
-class Supporter(Base, User):
-    __tablename__ = "supporter_table"
-
-    id: Mapped[intpk]
-    department: Mapped[str] = mapped_column(String(), default="Support")
-
-    # listes des evenements gerer( one-to-many)
-    events = relationship("Event", back_populates="supporter")
-
-    def update_event(self, event):
+    def authenticated(self, email, password):
         pass
 
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
 
 
+class Supporter(Base, User):
+    __tablename__ = "supporter_table"
+
+    # listes des evenements gerer( one-to-many)
+    events = relationship("Event", back_populates="supporter")
+
+    def __init__(self):
+        self.department = "Support"
+
+    def update_event(self, event):
+        pass
+
+
 class Manager(Base, User):
     __tablename__ = "manager_table"
 
-    id: Mapped[intpk]
-    department: Mapped[str] = mapped_column(String(), default="Management")
+    def __init__(self):
+        self.department = "Manage"
 
     def create_colaborator(self):
         pass
@@ -67,21 +78,18 @@ class Manager(Base, User):
     def update_event(self, event):
         pass
 
-    def __repr__(self):
-        return f"User {self.name} - team:{self.department}"
-
 
 class Seller(Base, User):
     __tablename__ = "seller_table"
-
-    id: Mapped[intpk]
-    department: Mapped[str] = mapped_column(String(), default="Sales")
 
     # relationship
     # listes des clients gerer( one-to-many)
     customers = relationship("Customer", back_populates="customer_contact")
     # listes des contrats gerer( one-to-many)
     contracts = relationship("Contract", back_populates="contrat_manager")
+
+    def __init__(self):
+        self.department = "Sales"
 
     def create_customer(self):
         pass
@@ -94,6 +102,3 @@ class Seller(Base, User):
 
     def create_event(self):
         pass
-
-    def __repr__(self):
-        return f"User {self.name} - team:{self.department}"
