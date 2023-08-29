@@ -9,6 +9,7 @@ sqlalchemy = "*"
 pytest = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
+factory-boy = "*"
 
 [dev-packages]
 

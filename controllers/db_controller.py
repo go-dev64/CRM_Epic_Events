@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker
 from models.customer import Base
 
@@ -9,8 +9,14 @@ load_dotenv()
 
 
 def database_engine():
-    database_url = os.environ.get("DATABASE_URL")
-    engine = create_engine(database_url, echo=True)
+    url_object = URL.create(
+        os.getenv("DATABASE_TYPE"),
+        username=os.getenv("USERNAME_DB"),
+        password=os.getenv("PASSWORD"),
+        host=os.getenv("HOST"),
+        database=os.getenv("DATABASE_NAME"),
+    )
+    engine = create_engine(url_object, echo=True)
     return engine
 
 
@@ -34,4 +40,4 @@ def create_tables():
     Base.metadata.create_all(engine)
 
 
-create_tables()
+# create_tables()
