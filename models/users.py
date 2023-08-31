@@ -1,32 +1,20 @@
-import datetime
+from typing import Optional
 
-from typing_extensions import Annotated
-from sqlalchemy import DateTime, Integer, ForeignKey, String
-from sqlalchemy import func
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-
-
-intpk = Annotated[int, mapped_column(Integer(), primary_key=True, autoincrement=True)]
-required_name = Annotated[str, mapped_column(String(50), nullable=False)]
-timestamp = Annotated[
-    datetime.datetime,
-    mapped_column(nullable=False, server_default=func.CURRENT_TIMESTAMP()),
-]
+from models.base import Base, intpk, required_name, timestamp
 
 
 class User:
     id: Mapped[intpk]
     name: Mapped[required_name]
-    email_address: Mapped[str] = mapped_column(String(100), unique=True)
-    phone_number: Mapped[str] = mapped_column(String(10))
+    email_address: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    phone_number: Mapped[Optional[str]] = mapped_column(String(10))
     created_date: Mapped[timestamp]
-    password: Mapped[str] = mapped_column(String)
-    department: Mapped[str] = mapped_column(String())
+    password: Mapped[str] = mapped_column()
+    department: Mapped[str] = mapped_column()
 
     def __init__(self, name, email, phone, password) -> None:
         self.name = name
@@ -44,11 +32,10 @@ class User:
 class Supporter(Base, User):
     __tablename__ = "supporter_table"
 
+    department = "Support"
+
     # listes des evenements gerer( one-to-many)
     events = relationship("Event", back_populates="supporter")
-
-    def __init__(self):
-        self.department = "Support"
 
     def update_event(self, event):
         pass
@@ -57,8 +44,7 @@ class Supporter(Base, User):
 class Manager(Base, User):
     __tablename__ = "manager_table"
 
-    def __init__(self):
-        self.department = "Manage"
+    department = "Manage"
 
     def create_colaborator(self):
         pass
@@ -88,8 +74,7 @@ class Seller(Base, User):
     # listes des contrats gerer( one-to-many)
     contracts = relationship("Contract", back_populates="contrat_manager")
 
-    def __init__(self):
-        self.department = "Sales"
+    department = "Sales"
 
     def create_customer(self):
         pass

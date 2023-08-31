@@ -1,5 +1,10 @@
-from controllers.db_controller import create_tables
+from controllers.db_controller import Database
+
+
+def main():
+    db = Database()
+    db.create_tables()
 
 
 if __name__ == "__main__":
-    create_tables()
+    main()

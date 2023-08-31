@@ -1,10 +1,9 @@
-import datetime
+from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from models.users import intpk, required_name, timestamp
-from models.element_administratif import Base
+from models.base import Base, intpk, required_name, timestamp
 
 
 class Company(Base):
@@ -12,7 +11,7 @@ class Company(Base):
 
     id: Mapped[intpk]
     name: Mapped[required_name]
-    phone_number: Mapped[str] = mapped_column(String(10))
+    phone_number: Mapped[Optional[str]] = mapped_column(String(12))
     number_of_employee: Mapped[int] = mapped_column()
 
     address_id: Mapped[int] = mapped_column(ForeignKey("company_table.id"))
@@ -27,7 +26,7 @@ class Customer(Base):
     id: Mapped[intpk]
     name: Mapped[required_name]
     email_address: Mapped[str] = mapped_column(String(100))
-    phone_number: Mapped[str] = mapped_column(String(12))
+    phone_number: Mapped[Optional[str]] = mapped_column(String(12))
     created_date: Mapped[timestamp]
 
     updated_date = mapped_column(DateTime)
@@ -38,5 +37,5 @@ class Customer(Base):
     events = relationship("Event", back_populates="customer")
     contracts = relationship("Contract", back_populates="customer")
 
-    seller_contact_id = mapped_column(ForeignKey("seller_table.id"))
+    seller_contact_id = mapped_column(ForeignKey("seller_table.id"), nullable=False)
     seller_contact = relationship("Seller", back_populates="customer")

@@ -1,8 +1,9 @@
+from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from models.users import Base, Supporter, intpk, required_name, timestamp
+from models.base import Base, intpk, required_name, timestamp
 
 
 class Event(Base):
@@ -10,9 +11,10 @@ class Event(Base):
 
     id: Mapped[intpk]
     name: Mapped[required_name]
-    note: Mapped[str] = mapped_column(String(2048))
-    date_start = mapped_column(DateTime)
-    date_end = mapped_column(DateTime)
+    date_start = mapped_column(DateTime, nullable=False)
+    date_end = mapped_column(DateTime, nullable=False)
+    attendees: Mapped[int] = mapped_column()
+    note: Mapped[Optional[str]] = mapped_column(String(2048))
 
     # relationship to customer
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer_table.id"))
@@ -22,7 +24,7 @@ class Event(Base):
     contract: Mapped["Contract"] = relationship(back_populates="event")
     # relationship to support
     supporter_id = mapped_column(ForeignKey("supporter_table.id"))
-    supporter: Mapped["Supporter"] = relationship(back_populates="events")
+    supporter = relationship("Supporter", back_populates="events")
 
     address_id: Mapped[int] = mapped_column(ForeignKey("address_table.id"))
     address: Mapped["Address"] = relationship(back_populates="event")
@@ -56,7 +58,7 @@ class Address(Base):
     city: Mapped[str] = mapped_column(String(100))
     postal_code: Mapped[int] = mapped_column()
     country: Mapped[str] = mapped_column(String(50))
-    note: Mapped[str] = mapped_column(String(2048))
+    note: Mapped[Optional[str]] = mapped_column(String(2048))
 
-    event: Mapped["Event"] = relationship(back_populates="address")
+    event = relationship("Event", back_populates="address")
     company = relationship("Company", back_populates="address")
