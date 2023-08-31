@@ -11,6 +11,8 @@ psycopg2-binary = "*"
 python-dotenv = "*"
 factory-boy = "*"
 alembic = "*"
+pytest-mock = "*"
+pytest-sqlalchemy = "*"
 
 [dev-packages]
 

@@ -25,7 +25,3 @@ class Database:
         Session = sessionmaker(bind=engine)
         session = Session()
         return session
-
-    """def create_tables(self):
-        engine = self.database_engine()
-        models.base.Base.metadata.create_all(engine)"""
