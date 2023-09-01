@@ -1,20 +1,20 @@
 import pytest
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 from controllers.db_controller import Database
 from models.base import Base
 import models.users
 import models.customer
 import models.element_administratif
+from tests.conftest import clean_db_test
+from tests.factory.user_factory import Manager, ManagerFactory
 
 db = Database()
 
 
 class TestDatabase:
-    def test_database_connection(self):
+    def test_database_connection(self, connection):
         # test try to connect to database
         try:
-            engine = db.database_engine()
-            connection = engine.connect()
             assert connection is not None
         except Exception as e:
             pytest.fail(f"Échec de la connexion à la base de données : {e}")
@@ -44,7 +44,16 @@ class TestDatabase:
     def test_create_supporter(self):
         pass
 
-    def test_create_table(self):
+    def test_toto(self, mocked_session):
+        with mocked_session as session:
+            user = Manager(name="toto", email_address="toto@gmail.com", phone_number="+0335651", password="toto")
+            session.add_all([user])
+
+            assert session.query(Manager).one()
+
+            session.rollback()
+
+    def test_create_table(self, mocked_session):
         tables_models = [
             "supporter_table",
             "manager_table",
@@ -54,11 +63,8 @@ class TestDatabase:
             "address_table",
             "company_table",
             "customer_table",
-            "alembic_version",
         ]
-        engine = db.database_engine()
-        inspector = inspect(engine)
-        tables_db = inspector.get_table_names()
-        assert len(tables_models) == len(tables_db)
-        for t in tables_db:
-            assert t in tables_models
+        for table in tables_models:
+            texte = text(f"SELECT * from {table};")
+            data = mocked_session.execute(texte).all()
+            assert data == []
