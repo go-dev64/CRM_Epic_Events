@@ -70,9 +70,9 @@ class Seller(Base, User):
 
     # relationship
     # listes des clients gerer( one-to-many)
-    customers = relationship("Customer", back_populates="customer_contact")
+    customers = relationship("Customer", back_populates="seller_contact")
     # listes des contrats gerer( one-to-many)
-    contracts = relationship("Contract", back_populates="contrat_manager")
+    contracts = relationship("Contract", back_populates="seller")
 
     department = "Sales"
 

@@ -18,7 +18,7 @@ class Event(Base):
 
     # relationship to customer
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer_table.id"))
-    customer = relationship("Customer", back_populates="customer_event")
+    customer = relationship("Customer", back_populates="events")
     # relationship to contract
     contract_id: Mapped[int] = mapped_column(ForeignKey("contract_table.id"))
     contract: Mapped["Contract"] = relationship(back_populates="event")
@@ -40,13 +40,13 @@ class Contract(Base):
     signed_contract: Mapped[bool] = mapped_column()
 
     # relasionship
-    event: Mapped["Event"] = relationship(uselist=False, back_populates="event_contract")
+    event: Mapped["Event"] = relationship(uselist=False, back_populates="contract")
 
     seller_id: Mapped[int] = mapped_column(ForeignKey("seller_table.id"))
-    seller = relationship("Seller", back_populates="contract")
+    seller = relationship("Seller", back_populates="contracts")
 
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer_table.id"))
-    customer = relationship("Customer", back_populates="customer_contract")
+    customer = relationship("Customer", back_populates="contracts")
 
 
 class Address(Base):

@@ -3,6 +3,11 @@ from dotenv import load_dotenv
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker
 
+from models.base import Base
+import models.users
+import models.customer
+import models.element_administratif
+
 
 load_dotenv()
 
@@ -25,3 +30,7 @@ class Database:
         Session = sessionmaker(bind=engine)
         session = Session()
         return session
+
+    def create_tables(self):
+        engine = self.database_engine()
+        Base.metadata.create_all(engine)

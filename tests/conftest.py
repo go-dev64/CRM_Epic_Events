@@ -1,10 +1,14 @@
 import os
 import pytest
+import functools
 
 from sqlalchemy import URL, create_engine
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.orm import sessionmaker, scoped_session
 from dotenv import load_dotenv
+from models.base import Base
+import models.users
+import models.customer
+import models.element_administratif
 
 load_dotenv()
 
@@ -15,21 +19,10 @@ url_object = URL.create(
     host=os.getenv("HOST"),
     database=os.getenv("DATABASE_NAME"),
 )
+
 engine = create_engine(url_object)
-Session = sessionmaker()
-
-
-@pytest.fixture(scope="module")
-def connection():
-    connection = engine.connect()
-    yield connection
-    connection.close()
 
 
 @pytest.fixture(scope="function")
-def session(connection):
-    transaction = connection.begin()
-    session = Session(bind=connection)
-    yield session
-    session.close()
-    transaction.rollback()
+def sqlalchemy_declarative_base():
+    return Base

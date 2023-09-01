@@ -1,13 +1,14 @@
 import factory
 from datetime import datetime
+
+import sqlalchemy
 from models.users import Manager, Seller, Supporter, User
-from tests.conftest import session
+import tests.conftest
 
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
-        sqlalchemy_session = session
         sqlalchemy_session_persistence = "commit"
 
     id = factory.Sequence(lambda n: "%s" % n)

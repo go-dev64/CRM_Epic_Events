@@ -10,9 +10,9 @@ pytest = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 factory-boy = "*"
-alembic = "*"
 pytest-mock = "*"
 pytest-sqlalchemy = "*"
+pytest-sqlalchemy-mock = "*"
 
 [dev-packages]
 
