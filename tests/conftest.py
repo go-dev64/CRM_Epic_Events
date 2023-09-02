@@ -5,10 +5,10 @@ import functools
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from dotenv import load_dotenv
-from models.base import Base
-import models.users
-import models.customer
-import models.element_administratif
+from crm_app.user.models.base import Base
+import crm_app.user.models.users
+import crm_app.crm.models.customer
+import crm_app.crm.models.element_administratif
 
 load_dotenv()
 

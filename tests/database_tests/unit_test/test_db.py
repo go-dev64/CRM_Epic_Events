@@ -1,10 +1,10 @@
 import pytest
 from sqlalchemy import text
-from controllers.db_controller import Database
-from models.base import Base
-import models.users
-import models.customer
-import models.element_administratif
+from crm_app.database.models.db_controller import Database
+from crm_app.user.models.base import Base
+import crm_app.user.models.users
+import crm_app.crm.models.customer
+import crm_app.crm.models.element_administratif
 from tests.factory.user_factory import Manager, ManagerFactory
 
 db = Database()

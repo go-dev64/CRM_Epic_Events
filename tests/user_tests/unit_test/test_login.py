@@ -1,6 +1,6 @@
 # utiliser setup et towdnown
 import pytest
-from models.users import Manager, Seller, Supporter
+from crm_app.user.models.users import Manager, Seller, Supporter
 
 
 class TestLogin:
