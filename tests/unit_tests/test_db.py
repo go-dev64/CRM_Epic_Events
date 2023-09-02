@@ -1,11 +1,10 @@
 import pytest
-from sqlalchemy import inspect, text
+from sqlalchemy import text
 from controllers.db_controller import Database
 from models.base import Base
 import models.users
 import models.customer
 import models.element_administratif
-from tests.conftest import clean_db_test
 from tests.factory.user_factory import Manager, ManagerFactory
 
 db = Database()
