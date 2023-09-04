@@ -26,3 +26,25 @@ engine = create_engine(url_object)
 @pytest.fixture(scope="function")
 def sqlalchemy_declarative_base():
     return Base
+
+
+@pytest.fixture(scope="function")
+def db_session(mocked_session):
+    session = mocked_session
+    yield session
+    session.rollback()
+    session.close()
+
+
+@pytest.fixture(scope="function")
+def users():
+    manager = crm_app.user.models.users.Manager(
+        name="manager", email_address="manager@gmail.com", phone_number="+0335651", password="password"
+    )
+    seller = crm_app.user.models.users.Seller(
+        name="seller", email_address="seller@gmail.com", phone_number="+0335651", password="password"
+    )
+    supporter = crm_app.user.models.users.Supporter(
+        name="supporter", email_address="supporter@gmail.com", phone_number="+0335651", password="password"
+    )
+    return [manager, seller, supporter]

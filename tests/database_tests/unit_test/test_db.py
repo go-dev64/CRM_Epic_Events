@@ -34,16 +34,7 @@ class TestDatabase:
         for t in tables_meta:
             assert t.name in tables_models
 
-    def test_create_manager(self):
-        pass
-
-    def test_create_seller(self):
-        pass
-
-    def test_create_supporter(self):
-        pass
-
-    def test_toto(self, mocked_session):
+    def test_check_add_user(self, mocked_session):
         with mocked_session as session:
             user = Manager(name="toto", email_address="toto@gmail.com", phone_number="+0335651", password="toto")
             session.add_all([user])
