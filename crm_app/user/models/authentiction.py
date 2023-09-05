@@ -8,15 +8,8 @@ class Authentication:
 
     def find_user_with_email(self, email):
         with self.session as session:
-            try:
-                stmt = select(User).where(User.email_address == email)
-
-                user = session.scalars(stmt).all()
-                for i in user:
-                    print(i)
-                if user == []:
-                    raise ValueError
-            except ValueError:
+            stmt = select(User).where(User.email_address == email)
+            user = session.scalars(stmt).all()
+            if user == []:
                 return None
-            else:
-                return user[0]
+            return user[0]

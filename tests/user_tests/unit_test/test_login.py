@@ -18,5 +18,11 @@ class TestLogin:
         db_session.commit()
         auth = Authentication(db_session)
         user = auth.find_user_with_email(email=email)
-        print(user)
         assert user.name == user_name
+
+    def test_find_user_with_wrong(self, db_session, users):
+        db_session.add_all(users)
+        db_session.commit()
+        auth = Authentication(db_session)
+        user = auth.find_user_with_email(email="toto@gmail.fr")
+        assert user == None
