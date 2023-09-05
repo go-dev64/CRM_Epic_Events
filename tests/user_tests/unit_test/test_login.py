@@ -17,7 +17,7 @@ class TestAuthentication:
             ("supporter@gmail.com", "supporter"),
         ],
     )
-    def test_find_user_with_right_email(self, db_session, users, email, user_name):
+    def test_login_with_right_email_and_password(self, db_session, users, email, user_name):
         self._create_users(db_session, users)
         auth = Authentication(db_session)
         user = auth.find_user_with_email(email=email)
