@@ -14,6 +14,8 @@ pytest-mock = "*"
 pytest-sqlalchemy = "*"
 pytest-sqlalchemy-mock = "*"
 alembic = "*"
+passlib = "*"
+argon2-cffi = "*"
 
 [dev-packages]
 

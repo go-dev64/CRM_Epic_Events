@@ -1,6 +1,7 @@
 import os
 import pytest
 import functools
+from argon2 import PasswordHasher
 
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -11,6 +12,8 @@ import crm_app.crm.models.customer
 import crm_app.crm.models.element_administratif
 
 load_dotenv()
+
+ph = PasswordHasher()
 
 url_object = URL.create(
     os.getenv("DATABASE_TYPE"),
@@ -38,13 +41,16 @@ def db_session(mocked_session):
 
 @pytest.fixture(scope="function")
 def users():
+    password_manager = ph.hash("password_manager")
     manager = crm_app.user.models.users.Manager(
-        name="manager", email_address="manager@gmail.com", phone_number="+0335651", password="password_manager"
+        name="manager", email_address="manager@gmail.com", phone_number="+0335651", password=password_manager
     )
+    password_seller = ph.hash("password_seller")
     seller = crm_app.user.models.users.Seller(
-        name="seller", email_address="seller@gmail.com", phone_number="+0335651", password="password_seller"
+        name="seller", email_address="seller@gmail.com", phone_number="+0335651", password=password_seller
     )
+    password_supporter = ph.hash("password_supporter")
     supporter = crm_app.user.models.users.Supporter(
-        name="supporter", email_address="supporter@gmail.com", phone_number="+0335651", password="password_supporter"
+        name="supporter", email_address="supporter@gmail.com", phone_number="+0335651", password=password_supporter
     )
     return [manager, seller, supporter]
