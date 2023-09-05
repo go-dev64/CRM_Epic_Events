@@ -39,12 +39,12 @@ def db_session(mocked_session):
 @pytest.fixture(scope="function")
 def users():
     manager = crm_app.user.models.users.Manager(
-        name="manager", email_address="manager@gmail.com", phone_number="+0335651", password="password"
+        name="manager", email_address="manager@gmail.com", phone_number="+0335651", password="password_manager"
     )
     seller = crm_app.user.models.users.Seller(
-        name="seller", email_address="seller@gmail.com", phone_number="+0335651", password="password"
+        name="seller", email_address="seller@gmail.com", phone_number="+0335651", password="password_seller"
     )
     supporter = crm_app.user.models.users.Supporter(
-        name="supporter", email_address="supporter@gmail.com", phone_number="+0335651", password="password"
+        name="supporter", email_address="supporter@gmail.com", phone_number="+0335651", password="password_supporter"
     )
     return [manager, seller, supporter]
