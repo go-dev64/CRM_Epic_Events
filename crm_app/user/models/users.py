@@ -1,26 +1,27 @@
 from typing import Optional
 
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from models.base import Base, intpk, required_name, timestamp
+from crm_app.user.models.base import Base, intpk, required_name, timestamp
 
 
-class User:
+class User(Base):
+    __tablename__ = "user_table"
+
     id: Mapped[intpk]
     name: Mapped[required_name]
     email_address: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     phone_number: Mapped[Optional[str]] = mapped_column(String(10))
     created_date: Mapped[timestamp]
-    password: Mapped[str] = mapped_column()
-    department: Mapped[str] = mapped_column()
+    password: Mapped[str]
+    department: Mapped[str]
 
-    def __init__(self, name, email, phone, password) -> None:
-        self.name = name
-        self.email_address = email
-        self.phone_number = phone
-        self.password = password
+    __mapper_args__ = {
+        "polymorphic_identity": "user_table",
+        "polymorphic_on": "department",
+    }
 
     def authenticated(self, email, password):
         pass
@@ -29,22 +30,26 @@ class User:
         return f"User {self.name} - team:{self.department}"
 
 
-class Supporter(Base, User):
+class Supporter(User):
     __tablename__ = "supporter_table"
 
-    department = "Support"
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
 
     # listes des evenements gerer( one-to-many)
     events = relationship("Event", back_populates="supporter")
+
+    __mapper_args__ = {"polymorphic_identity": "supporter_table"}
 
     def update_event(self, event):
         pass
 
 
-class Manager(Base, User):
+class Manager(User):
     __tablename__ = "manager_table"
 
-    department = "Manage"
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
+
+    __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
     def create_colaborator(self):
         pass
@@ -65,16 +70,18 @@ class Manager(Base, User):
         pass
 
 
-class Seller(Base, User):
+class Seller(User):
     __tablename__ = "seller_table"
+
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
+
+    __mapper_args__ = {"polymorphic_identity": "seller_table"}
 
     # relationship
     # listes des clients gerer( one-to-many)
-    customers = relationship("Customer", back_populates="customer_contact")
+    customers = relationship("Customer", back_populates="seller_contact")
     # listes des contrats gerer( one-to-many)
-    contracts = relationship("Contract", back_populates="contrat_manager")
-
-    department = "Sales"
+    contracts = relationship("Contract", back_populates="seller")
 
     def create_customer(self):
         pass

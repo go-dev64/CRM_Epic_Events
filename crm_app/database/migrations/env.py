@@ -1,44 +1,47 @@
-import os
-from alembic import context
-from dotenv import load_dotenv
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from sqlalchemy import URL
+from sqlalchemy import pool, URL
 
+from alembic import context
 
-from models.base import Base
-import models.users
-import models.customer
-import models.element_administratif
+import os, sys
+from dotenv import load_dotenv
 
 load_dotenv()
-
 URL_OBJECT = URL.create(
     os.getenv("DATABASE_TYPE"),
     username=os.getenv("USERNAME_DB"),
     password=os.getenv("PASSWORD"),
     host=os.getenv("HOST"),
+    port=os.getenv("PORT"),
     database=os.getenv("DATABASE_NAME"),
 )
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# this will overwrite the ini-file sqlalchemy.url path
+# with the path given in the config of the main code
+config.set_main_option("sqlalchemy.url", os.getenv("URL_DB"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", URL_OBJECT)
-
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [Base.metadata]
+from crm_app.user.models.base import Base
+import crm_app.user.models.users
+import crm_app.crm.models.customer
+import crm_app.crm.models.element_administratif
+
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

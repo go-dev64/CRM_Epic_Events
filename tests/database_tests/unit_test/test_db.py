@@ -1,20 +1,19 @@
 import pytest
-from sqlalchemy import inspect
-from controllers.db_controller import Database
-from models.base import Base
-import models.users
-import models.customer
-import models.element_administratif
+from sqlalchemy import text
+from crm_app.database.controller.db_controller import Database
+from crm_app.user.models.base import Base
+import crm_app.user.models.users
+import crm_app.crm.models.customer
+import crm_app.crm.models.element_administratif
+from tests.factory.user_factory import Manager, ManagerFactory
 
 db = Database()
 
 
 class TestDatabase:
-    def test_database_connection(self):
+    def test_database_connection(self, connection):
         # test try to connect to database
         try:
-            engine = db.database_engine()
-            connection = engine.connect()
             assert connection is not None
         except Exception as e:
             pytest.fail(f"Échec de la connexion à la base de données : {e}")
@@ -29,22 +28,24 @@ class TestDatabase:
             "address_table",
             "company_table",
             "customer_table",
+            "user_table",
         ]
         tables_meta = sorted(Base.metadata.tables.values(), key=lambda table: table.name)
+
         assert len(tables_models) == len(tables_meta)
         for t in tables_meta:
             assert t.name in tables_models
 
-    def test_create_manager(self):
-        pass
+    def test_check_add_user(self, mocked_session):
+        with mocked_session as session:
+            user = Manager(name="toto", email_address="toto@gmail.com", phone_number="+0335651", password="toto")
+            session.add_all([user])
 
-    def test_create_seller(self):
-        pass
+            assert session.query(Manager).one()
 
-    def test_create_supporter(self):
-        pass
+            session.rollback()
 
-    def test_create_table(self):
+    def test_create_table(self, mocked_session):
         tables_models = [
             "supporter_table",
             "manager_table",
@@ -54,11 +55,8 @@ class TestDatabase:
             "address_table",
             "company_table",
             "customer_table",
-            "alembic_version",
         ]
-        engine = db.database_engine()
-        inspector = inspect(engine)
-        tables_db = inspector.get_table_names()
-        assert len(tables_models) == len(tables_db)
-        for t in tables_db:
-            assert t in tables_models
+        for table in tables_models:
+            texte = text(f"SELECT * from {table};")
+            data = mocked_session.execute(texte).all()
+            assert data == []
