@@ -6,6 +6,7 @@ from crm_app.user.models.authentiction import Authentication
 
 class TestAuthentication:
     def _create_users(self, db_session, users):
+        # Create users for test.
         db_session.add_all(users)
         db_session.commit()
 
@@ -17,7 +18,8 @@ class TestAuthentication:
             ("supporter@gmail.com", "supporter", "password_supporter"),
         ],
     )
-    def test_login_with_right_email_and_password(self, db_session, users, email, user_name, password):
+    def test_login_with_right_data(self, db_session, users, email, user_name, password):
+        # Test login should return User connected.
         self._create_users(db_session, users)
         auth = Authentication(db_session)
         user = auth.login(email=email, password=password)
@@ -33,6 +35,7 @@ class TestAuthentication:
         ],
     )
     def test_login_with_wrong_email_and_good_password(self, db_session, users, email, user_name, password):
+        # Test should return None with wrong email.
         self._create_users(db_session, users)
         auth = Authentication(db_session)
         user = auth.login(email=email, password=password)
@@ -47,6 +50,7 @@ class TestAuthentication:
         ],
     )
     def test_login_with_wrong_password_and_good_email(self, db_session, users, email, user_name, password):
+        # Test should return None with wrong password.
         self._create_users(db_session, users)
         auth = Authentication(db_session)
         user = auth.login(email=email, password=password)
@@ -61,6 +65,7 @@ class TestAuthentication:
         ],
     )
     def test_login_with_wrong_data(self, db_session, users, email, user_name, password):
+        # Test should return None with wrong data.
         self._create_users(db_session, users)
         auth = Authentication(db_session)
         user = auth.login(email=email, password=password)
