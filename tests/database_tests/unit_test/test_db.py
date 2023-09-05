@@ -28,8 +28,10 @@ class TestDatabase:
             "address_table",
             "company_table",
             "customer_table",
+            "user_table",
         ]
         tables_meta = sorted(Base.metadata.tables.values(), key=lambda table: table.name)
+
         assert len(tables_models) == len(tables_meta)
         for t in tables_meta:
             assert t.name in tables_models
