@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import text
-from crm_app.database.models.db_controller import Database
+from crm_app.database.controller.db_controller import Database
 from crm_app.user.models.base import Base
 import crm_app.user.models.users
 import crm_app.crm.models.customer

@@ -15,11 +15,12 @@ class User(Base):
     email_address: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     phone_number: Mapped[Optional[str]] = mapped_column(String(10))
     created_date: Mapped[timestamp]
-    password: Mapped[str] = mapped_column()
+    password: Mapped[str]
+    department: Mapped[str]
 
     __mapper_args__ = {
         "polymorphic_identity": "user_table",
-        "polymorphic_on": "type",
+        "polymorphic_on": "department",
     }
 
     def authenticated(self, email, password):
@@ -32,8 +33,7 @@ class User(Base):
 class Supporter(User):
     __tablename__ = "supporter_table"
 
-    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"))
-    department = "Support"
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
 
     # listes des evenements gerer( one-to-many)
     events = relationship("Event", back_populates="supporter")
@@ -47,8 +47,7 @@ class Supporter(User):
 class Manager(User):
     __tablename__ = "manager_table"
 
-    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"))
-    department = "Manage"
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
@@ -74,8 +73,7 @@ class Manager(User):
 class Seller(User):
     __tablename__ = "seller_table"
 
-    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"))
-    department = "Sales"
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
 
     __mapper_args__ = {"polymorphic_identity": "seller_table"}
 
