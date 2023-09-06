@@ -16,6 +16,7 @@ pytest-sqlalchemy-mock = "*"
 alembic = "*"
 passlib = "*"
 argon2-cffi = "*"
+pyjwt = {extras = ["crypto"], version = "*"}
 
 [dev-packages]
 

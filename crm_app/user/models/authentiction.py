@@ -1,6 +1,14 @@
 import argon2
+import jwt
+from jwt.exceptions import InvalidSignatureError
+import os
+from dotenv import load_dotenv
 from sqlalchemy import and_, select
 from crm_app.user.models.users import User, Manager, Seller, Supporter
+
+load_dotenv()
+
+TOKEN_KEY = os.getenv("TOKEN_KEY")
 
 
 class Authentication:
@@ -47,3 +55,37 @@ class Authentication:
                 return False
             else:
                 return user
+
+    def get_token(self, user: [User]):
+        """
+        Function provide a token to user connected.
+
+        Args:
+            user ([User]): User connected after login.
+
+        Returns:
+            _type_ : User wiyhin token.
+        """
+        payload_data = {"sub": user.id, "name": user.name, "department": user.department}
+        token = jwt.encode(payload=payload_data, key=TOKEN_KEY)
+        user.token = token
+        return user
+
+    def decode_token(self, token: [str], token_key: [str] = TOKEN_KEY):
+        """
+        Function to decode token.
+        Return a dictionnaire within id, name and department of user.
+
+        Args:
+            token (str]): token
+
+        Returns:
+            {dict}: dictionnaire within id, name and department of user.
+        """
+        headres_token = jwt.get_unverified_header(token)
+        try:
+            token_decoded = jwt.decode(token, key=token_key, algorithms=[headres_token["alg"]])
+        except InvalidSignatureError:
+            return None
+        else:
+            return token_decoded
