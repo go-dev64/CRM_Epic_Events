@@ -34,16 +34,16 @@ class Authentication:
             input_password (str]): Password input by user.
 
         Returns:
-            User connected or None if Fails.
+            User connected or None if invalid email  and False if invalid pasword.
         """
-        with db_session as session:
-            user = self.get_user_with_email(session, email=email)
-            if user == None:
-                return None
+
+        user = self.get_user_with_email(db_session, email=email)
+        if user == None:
+            return None
+        else:
+            try:
+                self.ph.verify(user.password, input_password)
+            except argon2.exceptions.VerifyMismatchError:
+                return False
             else:
-                try:
-                    self.ph.verify(user.password, input_password)
-                except argon2.exceptions.VerifyMismatchError:
-                    return False
-                else:
-                    return user
+                return user
