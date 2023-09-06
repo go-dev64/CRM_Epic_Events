@@ -1,6 +1,13 @@
 import argon2
+import jwt
+import os
+from dotenv import load_dotenv
 from sqlalchemy import and_, select
 from crm_app.user.models.users import User, Manager, Seller, Supporter
+
+load_dotenv()
+
+TOKEN_KEY = os.getenv("TOKEN_KEY")
 
 
 class Authentication:
@@ -47,3 +54,9 @@ class Authentication:
                 return False
             else:
                 return user
+
+    def get_token(self, user):
+        payload_data = {"sub": user.id, "name": user.name, "department": user.department}
+        token = jwt.encode(payload=payload_data, key=TOKEN_KEY)
+        user.token = token
+        return user

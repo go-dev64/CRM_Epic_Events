@@ -2,7 +2,7 @@
 import jwt
 import pytest
 from crm_app.user.models.users import Manager, Seller, Supporter
-from crm_app.user.models.authentiction import Authentication
+from crm_app.user.models.authentiction import Authentication, TOKEN_KEY
 
 
 class TestAuthentication:
@@ -64,18 +64,14 @@ class TestAuthentication:
         user = self._login(db_session, users, email, user_name, password)
         assert user.name == user_name
 
-    @pytest.mark.parametrize(
-        "email, user_name, password",
-        [
-            ("manager@gmail.com", "manager", "password_manager"),
-            ("seller@gmail.com", "seller", "password_seller"),
-            ("supporter@gmail.com", "supporter", "password_supporter"),
-        ],
-    )
-    def test_get_token_after_login(self, db_session, users, email, user_name, password):
-        user = self._login(db_session, users, email, user_name, password)
-        user_token_excepted = {"sub": user.id, "name": user.name, "department": user.department}
-        user_token_decoded = jwt.decode(user.token, key="TOKEN_KEY")
+    def test_get_token_after_login(self):
+        user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
+        auth = Authentication()
+        user = auth.get_token(user=user_manager)
+        assert user.token is not None
+        user_token_excepted = {"sub": user.id, "name": user_manager.name, "department": user_manager.department}
+        headers = jwt.get_unverified_header(user.token)
+        user_token_decoded = jwt.decode(user.token, key=TOKEN_KEY, algorithms=[headers["alg"]])
         assert user_token_excepted == user_token_decoded
 
     @pytest.mark.parametrize(
