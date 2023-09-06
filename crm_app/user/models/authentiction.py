@@ -1,5 +1,6 @@
 import argon2
 import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidKeyError
 import os
 from dotenv import load_dotenv
 from sqlalchemy import and_, select
@@ -60,3 +61,12 @@ class Authentication:
         token = jwt.encode(payload=payload_data, key=TOKEN_KEY)
         user.token = token
         return user
+
+    def decode_token(self, token):
+        headres_token = jwt.get_unverified_header(token)
+        try:
+            token_decoded = jwt.decode(token, key=TOKEN_KEY, algorithms=[headres_token["alg"]])
+        except InvalidKeyError:
+            return None
+        else:
+            return token_decoded
