@@ -1,4 +1,5 @@
 # utiliser setup et towdnown
+import jwt
 import pytest
 from crm_app.user.models.users import Manager, Seller, Supporter
 from crm_app.user.models.authentiction import Authentication
@@ -62,6 +63,20 @@ class TestAuthentication:
         # Test login should return User connected.
         user = self._login(db_session, users, email, user_name, password)
         assert user.name == user_name
+
+    @pytest.mark.parametrize(
+        "email, user_name, password",
+        [
+            ("manager@gmail.com", "manager", "password_manager"),
+            ("seller@gmail.com", "seller", "password_seller"),
+            ("supporter@gmail.com", "supporter", "password_supporter"),
+        ],
+    )
+    def test_get_token_after_login(self, db_session, users, email, user_name, password):
+        user = self._login(db_session, users, email, user_name, password)
+        user_token_excepted = {"sub": user.id, "name": user.name, "department": user.department}
+        user_token_decoded = jwt.decode(user.token, key="TOKEN_KEY")
+        assert user_token_excepted == user_token_decoded
 
     @pytest.mark.parametrize(
         "email, user_name, password",
