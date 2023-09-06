@@ -27,6 +27,8 @@ bad_data_parametre = [
     ("supr@gmail.com", "supporter", "bad"),
 ]
 
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJtYW5hZ2VyIiwiZGVwYXJ0bWVudCI6Im1hbmFnZXJfdGFibGUifQ.QmrHhpbG59Tu4RmzG4q5ZkQ6RCqvxrHoIQZ4j5CMcWY"
+
 
 class TestAuthentication:
     def _create_users(self, session, users):
@@ -76,15 +78,19 @@ class TestAuthentication:
         headers = jwt.get_unverified_header(user.token)
         user_token_decoded = jwt.decode(user.token, key=TOKEN_KEY, algorithms=[headers["alg"]])
         assert user_token_excepted == user_token_decoded
-        print(user_token_decoded)
 
     def test_decode_token(self):
         # test valid info of token.
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJtYW5hZ2VyIiwiZGVwYXJ0bWVudCI6Im1hbmFnZXJfdGFibGUifQ.QmrHhpbG59Tu4RmzG4q5ZkQ6RCqvxrHoIQZ4j5CMcWY"
         auth = Authentication()
-        user_token_decoded = auth.decode_token(token)
+        user_token_decoded = auth.decode_token(TOKEN)
         user_data_excepted = {"sub": None, "name": "manager", "department": "manager_table"}
         assert user_data_excepted == user_token_decoded
+
+    def test_decode_token_with_bad_key(self):
+        # test should return None with wrong key.
+        auth = Authentication()
+        user_token_decoded = auth.decode_token(TOKEN, token_key="toto")
+        assert user_token_decoded == None
 
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_login_with_wrong_email_and_good_password(self, db_session, users, email, user_name, password):
