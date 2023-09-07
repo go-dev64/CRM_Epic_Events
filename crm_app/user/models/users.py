@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import ForeignKey, String, insert
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -51,8 +51,23 @@ class Manager(User):
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
-    def create_colaborator(self):
-        pass
+    def _create_new_user(self, session, info_user, *args, **kwargs):
+        try:
+            new_user = session.scalars(
+                insert(User).returning(User),
+                [
+                    {
+                        "name": info_user["name"],
+                        "email_address": info_user["email_address"],
+                        "phone_number": info_user["phone_number"],
+                        "password": info_user["password"],
+                    }
+                ],
+            )
+        except:
+            return None
+        else:
+            return new_user.one()
 
     def update_colaborator(self, colaborator):
         pass

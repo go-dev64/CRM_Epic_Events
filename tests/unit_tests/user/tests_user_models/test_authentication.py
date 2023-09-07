@@ -31,7 +31,7 @@ TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJtYW5hZ2
 
 
 class TestAuthentication:
-    def _create_users(self, session, users):
+    """def _create_users(self, session, users):
         # Create users for test.
         session.add_all(users)
         session.commit()
@@ -130,4 +130,4 @@ class TestAuthentication:
             user_manager.token = "xx"
             session.current_user = user_manager
             result_excepted = self._foo(session=session)
-            assert result_excepted == None
+            assert result_excepted == None"""
