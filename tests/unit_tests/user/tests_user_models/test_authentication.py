@@ -109,3 +109,16 @@ class TestAuthentication:
         # Test should return None with wrong data.
         user = self._login(db_session, users, email, user_name, password)
         assert user == None
+
+    @Authentication.is_authenticated
+    def _foo(self, *args, **kwargs):
+        return True
+
+    def test_decorator_is_authenticated(self, db_session):
+        with db_session as session:
+            user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
+            user_manager.token = TOKEN
+            current_user = user_manager
+            session.current_user = current_user
+            result_excepted = self._foo(session=session)
+            assert result_excepted == True
