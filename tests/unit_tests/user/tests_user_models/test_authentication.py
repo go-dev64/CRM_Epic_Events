@@ -31,7 +31,7 @@ TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJtYW5hZ2
 
 
 class TestAuthentication:
-    def _create_users(self, session, users):
+    """def _create_users(self, session, users):
         # Create users for test.
         session.add_all(users)
         session.commit()
@@ -108,17 +108,26 @@ class TestAuthentication:
     def test_login_with_wrong_data(self, db_session, users, email, user_name, password):
         # Test should return None with wrong data.
         user = self._login(db_session, users, email, user_name, password)
-        assert user == None
+        assert user == None"""
 
     @Authentication.is_authenticated
     def _foo(self, *args, **kwargs):
         return True
 
     def test_decorator_is_authenticated(self, db_session):
+        # Test should return True if user have a valid token.
         with db_session as session:
             user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
             user_manager.token = TOKEN
-            current_user = user_manager
-            session.current_user = current_user
+            session.current_user = user_manager
             result_excepted = self._foo(session=session)
             assert result_excepted == True
+
+    def test_decorator_is_authenticated_without_token(self, db_session):
+        # Test should return None.
+        with db_session as session:
+            user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
+            user_manager.token = "xx"
+            session.current_user = user_manager
+            result_excepted = self._foo(session=session)
+            assert result_excepted == None

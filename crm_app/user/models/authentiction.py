@@ -4,7 +4,6 @@ import os
 
 from dotenv import load_dotenv
 from functools import wraps
-from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 from sqlalchemy import and_, select
 
 from crm_app.user.models.users import User
@@ -86,12 +85,10 @@ class Authentication:
         Returns:
             {dict}: dictionnaire within id, name and department of user.
         """
-        headres_token = jwt.get_unverified_header(token)
         try:
+            headres_token = jwt.get_unverified_header(token)
             token_decoded = jwt.decode(token, key=token_key, algorithms=[headres_token["alg"]])
-        except InvalidSignatureError:
-            return None
-        except ExpiredSignatureError:
+        except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError):
             return None
         else:
             return token_decoded
@@ -118,5 +115,6 @@ class Authentication:
                 return value
             else:
                 print("Error token")
+                return None
 
         return validation_token
