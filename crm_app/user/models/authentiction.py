@@ -1,10 +1,12 @@
 import argon2
 import jwt
-from jwt.exceptions import InvalidSignatureError
 import os
+
 from dotenv import load_dotenv
+from functools import wraps
 from sqlalchemy import and_, select
-from crm_app.user.models.users import User, Manager, Seller, Supporter
+
+from crm_app.user.models.users import User
 
 load_dotenv()
 
@@ -71,7 +73,8 @@ class Authentication:
         user.token = token
         return user
 
-    def decode_token(self, token: [str], token_key: [str] = TOKEN_KEY):
+    @staticmethod
+    def decode_token(token: [str], token_key: [str] = TOKEN_KEY):
         """
         Function to decode token.
         Return a dictionnaire within id, name and department of user.
@@ -82,10 +85,36 @@ class Authentication:
         Returns:
             {dict}: dictionnaire within id, name and department of user.
         """
-        headres_token = jwt.get_unverified_header(token)
         try:
+            headres_token = jwt.get_unverified_header(token)
             token_decoded = jwt.decode(token, key=token_key, algorithms=[headres_token["alg"]])
-        except InvalidSignatureError:
+        except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError):
             return None
         else:
             return token_decoded
+
+    @staticmethod
+    def is_authenticated(func):
+        """
+        Function decorator that valides whatever current user is authenticed.
+
+        Args:
+            func (_type_): _description_
+
+        Returns:
+            _type_: function decorated.
+        """
+
+        @wraps(func)
+        def validation_token(*args, **kwargs):
+            user = kwargs["session"].current_user
+            print(user)
+            token_decoded = Authentication.decode_token(token=user.token)
+            if token_decoded is not None:
+                value = func(*args, **kwargs)
+                return value
+            else:
+                print("Error token")
+                return None
+
+        return validation_token
