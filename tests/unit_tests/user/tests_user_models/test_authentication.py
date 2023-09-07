@@ -31,7 +31,7 @@ TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJtYW5hZ2
 
 
 class TestAuthentication:
-    """def _create_users(self, session, users):
+    def _create_users(self, session, users):
         # Create users for test.
         session.add_all(users)
         session.commit()
@@ -108,7 +108,7 @@ class TestAuthentication:
     def test_login_with_wrong_data(self, db_session, users, email, user_name, password):
         # Test should return None with wrong data.
         user = self._login(db_session, users, email, user_name, password)
-        assert user == None"""
+        assert user == None
 
     @Authentication.is_authenticated
     def _foo(self, *args, **kwargs):
