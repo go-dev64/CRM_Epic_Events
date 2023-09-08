@@ -1,8 +1,11 @@
 # utiliser setup et towdnown
+import os
 import jwt
 import pytest
-from crm_app.user.models.users import Manager, Seller, Supporter
-from crm_app.user.models.authentiction import Authentication, TOKEN_KEY
+from dotenv import load_dotenv
+from crm_app.user.models.users import Authentication, Manager, Seller, Supporter
+
+load_dotenv()
 
 wright_parametre = [
     ("manager@gmail.com", "manager", "password_manager"),
@@ -76,7 +79,7 @@ class TestAuthentication:
         assert user.token is not None
         user_token_excepted = {"sub": user.id, "name": user_manager.name, "department": user_manager.department}
         headers = jwt.get_unverified_header(user.token)
-        user_token_decoded = jwt.decode(user.token, key=TOKEN_KEY, algorithms=[headers["alg"]])
+        user_token_decoded = jwt.decode(user.token, key=os.getenv("TOKEN_KEY"), algorithms=[headers["alg"]])
         assert user_token_excepted == user_token_decoded
 
     def test_decode_token(self):
