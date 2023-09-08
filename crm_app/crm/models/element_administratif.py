@@ -61,4 +61,3 @@ class Address(Base):
     note: Mapped[Optional[str]] = mapped_column(String(2048))
 
     event = relationship("Event", back_populates="address")
-    company = relationship("Company", back_populates="address")
