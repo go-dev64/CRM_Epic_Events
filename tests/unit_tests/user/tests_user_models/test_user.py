@@ -1,31 +1,23 @@
 import pytest
 from sqlalchemy import select
-from crm_app.user.models.users import Manager, Seller, Supporter, User
+from crm_app.user.models.users import Manager, Seller, Supporter, User, Authentication
 from crm_app.crm.models.customer import Customer
 
 client = Customer(name="client_1", email_address="clien_1@123.com", phone_number="123456", company="7eme_company")
 
 
-class TestUser:
-    def _create_users(self, session, users):
-        # Create users for test.
-        session.add_all(users)
-        session.commit()
+class TestUserRead:
+    def _user__current(self, session, user_type):
+        user = session.scalars(select(user_type)).first()
+        user = Authentication.get_token(user)
+        return user
 
-    def _create_clients(self, session, client):
-        session.add(client)
-        session.commit()
-
-    def _create_contracts(self, session, contracts):
-        session.add(contracts)
-        session.commit()
-
-    def test_get_all_clients(self, db_session, users):
+    @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
+    def test_get_all_clients(self, db_session, clients, type_user):
         with db_session as session:
-            self._create_users(session, users)
-            self._create_clients(session, client)
-            user = session.scalars(select(User)).first()
-            customers_list = user.get_all_customers(session=session)
-
+            clients
+            current_user = self._user__current(session, type_user)
+            session.current_user = current_user
+            customers_list = current_user.get_all_customers(session=session)
             customers_excepted = session.scalars(select(Customer)).all()
             assert customers_list == customers_excepted

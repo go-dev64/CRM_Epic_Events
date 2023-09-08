@@ -113,16 +113,17 @@ class Authentication:
         def validation_token(*args, **kwargs):
             try:
                 user = kwargs["session"].current_user
+
                 token_decoded = Authentication.decode_token(token=user.token)
             except AttributeError:
-                print("Error token")
+                print("attirubt error")
                 return None
             else:
                 if token_decoded is not None:
                     value = func(*args, **kwargs)
                     return value
                 else:
-                    print("Error token")
+                    print("token decode eror")
                     return None
 
         return validation_token
@@ -149,8 +150,8 @@ class User(Base):
 
     @Authentication.is_authenticated
     def get_all_customers(self, session):
-        customers_list = session.scalars(select(Customer)).all()
-        return customers_list
+        customers = session.scalars(select(Customer)).all()
+        return customers
 
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
