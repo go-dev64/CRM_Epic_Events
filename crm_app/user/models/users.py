@@ -111,14 +111,18 @@ class Authentication:
 
         @wraps(func)
         def validation_token(*args, **kwargs):
-            user = kwargs["session"].current_user
-            token_decoded = Authentication.decode_token(token=user.token)
-            if token_decoded is not None:
-                value = func(*args, **kwargs)
-                return value
-            else:
-                print("Error token")
+            try:
+                user = kwargs["session"].current_user
+                token_decoded = Authentication.decode_token(token=user.token)
+            except AttributeError:
                 return None
+            else:
+                if token_decoded is not None:
+                    value = func(*args, **kwargs)
+                    return value
+                else:
+                    print("Error token")
+                    return None
 
         return validation_token
 
