@@ -25,7 +25,7 @@ class TestUserRead:
 
     @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
     def test_get_all_contracts(self, db_session, contracts, type_user):
-        # test should return list of clients.
+        # test should return list of contracts.
         with db_session as session:
             contracts
             current_user = self._user__current(session, type_user)
@@ -36,7 +36,7 @@ class TestUserRead:
 
     @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
     def test_get_all_events(self, db_session, events, type_user):
-        # test should return list of clients.
+        # test should return list of events.
         with db_session as session:
             events
             current_user = self._user__current(session, type_user)
