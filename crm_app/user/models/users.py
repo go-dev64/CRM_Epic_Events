@@ -111,12 +111,6 @@ class Authentication:
 
         @wraps(func)
         def validation_token(*args, **kwargs):
-            """
-
-
-            Returns:
-                _type_: _description_
-            """
             try:
                 user = kwargs["session"].current_user
                 token_decoded = Authentication.decode_token(token=user.token)
