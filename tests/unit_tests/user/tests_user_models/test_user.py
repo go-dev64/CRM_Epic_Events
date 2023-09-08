@@ -22,3 +22,14 @@ class TestUserRead:
             customers_list = current_user.get_all_customers(session=session)
             result_excepted = 2
             assert len(customers_list) == result_excepted
+
+    @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
+    def test_get_all_contracts(self, db_session, clients, type_user):
+        # test should return list of clients.
+        with db_session as session:
+            clients
+            current_user = self._user__current(session, type_user)
+            session.current_user = current_user
+            customers_list = current_user.get_all_contracts(session=session)
+            result_excepted = 2
+            assert len(customers_list) == result_excepted
