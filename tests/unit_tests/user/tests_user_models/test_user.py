@@ -24,7 +24,8 @@ class TestUser:
         with db_session as session:
             self._create_users(session, users)
             self._create_clients(session, client)
-            customers_list = User.get_customers()
+            user = session.scalars(select(User)).first()
+            customers_list = user.get_all_customers(session=session)
 
             customers_excepted = session.scalars(select(Customer)).all()
             assert customers_list == customers_excepted
