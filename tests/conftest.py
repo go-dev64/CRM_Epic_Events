@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import pytest
 import functools
@@ -82,5 +83,34 @@ def contracts(db_session, users):
         total_amount=1000, remaining=5000, signed_contract=True, customer_id=1, seller_id=1
     )
     db_session.add_all([contract_1, contract_2])
+    db_session.commit()
+    yield
+
+
+@pytest.fixture(scope="function")
+def events(db_session, users):
+    users
+    event_1 = crm_app.user.models.users.Event(
+        name="Event_1",
+        date_start=datetime(2023, 9, 8, 15, 30),
+        date_end=datetime(2023, 9, 9, 15, 30),
+        attendees=10,
+        note="nn",
+        customer_id=1,
+        contract_id=1,
+        address_id=1,
+    )
+
+    event_2 = crm_app.user.models.users.Event(
+        name="Event_2",
+        date_start=datetime(2023, 9, 8, 15, 30),
+        date_end=datetime(2023, 9, 9, 15, 30),
+        attendees=10,
+        note="nn",
+        customer_id=1,
+        contract_id=1,
+        address_id=1,
+    )
+    db_session.add_all([event_1, event_2])
     db_session.commit()
     yield

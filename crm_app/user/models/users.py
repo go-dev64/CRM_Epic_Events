@@ -145,18 +145,23 @@ class User(Base):
         "polymorphic_on": "department",
     }
 
-    def authenticated(self, email, password):
-        pass
-
     @Authentication.is_authenticated
     def get_all_customers(self, session):
+        # Function return all Custumers.
         customers = session.scalars(select(Customer)).all()
         return customers
 
     @Authentication.is_authenticated
     def get_all_contracts(self, session):
+        # Function return all Contracts.
         contracts = session.scalars(select(Contract)).all()
         return contracts
+
+    @Authentication.is_authenticated
+    def get_all_events(self, session):
+        # Function return all Events.
+        events = session.scalars(select(Event)).all()
+        return events
 
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
