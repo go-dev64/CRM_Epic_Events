@@ -158,6 +158,11 @@ class User(Base):
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
+    @Authentication.is_authenticated
+    def get_all_events(self, session):
+        events = session.scalars(select(Event)).all()
+        return events
+
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
 
