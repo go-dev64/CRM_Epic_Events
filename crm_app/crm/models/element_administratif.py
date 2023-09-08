@@ -42,7 +42,7 @@ class Contract(Base):
     # relasionship
     event: Mapped["Event"] = relationship(uselist=False, back_populates="contract")
 
-    seller_id: Mapped[int] = mapped_column(ForeignKey("seller_table.id"))
+    seller_id: Mapped[Optional[int]] = mapped_column(ForeignKey("seller_table.id"))
     seller = relationship("Seller", back_populates="contracts")
 
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer_table.id"))
