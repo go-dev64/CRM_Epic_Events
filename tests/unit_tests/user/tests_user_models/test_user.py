@@ -1,7 +1,7 @@
 import pytest
 from crm_app.crm.models.customer import Customer
 
-client = ""
+client = Customer(name="client_1", email_address="clien_1@123.com", phone_number="123456", company="7eme_company")
 
 
 class TestUser:

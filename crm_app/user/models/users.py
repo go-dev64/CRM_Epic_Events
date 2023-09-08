@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from crm_app.user.models.base import Base, intpk, required_name, timestamp
+from crm_app.crm.models.customer import Customer, Event, Contract
 
 
 class User(Base):
@@ -36,7 +37,7 @@ class Supporter(User):
     id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
 
     # listes des evenements gerer( one-to-many)
-    events = relationship("Event", back_populates="supporter")
+    events: Mapped[list["Event"]] = relationship(back_populates="supporter")
 
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
 
@@ -79,9 +80,9 @@ class Seller(User):
 
     # relationship
     # listes des clients gerer( one-to-many)
-    customers = relationship("Customer", back_populates="seller_contact")
+    customers: Mapped[list["Customer"]] = relationship(back_populates="seller_contact")
     # listes des contrats gerer( one-to-many)
-    contracts = relationship("Contract", back_populates="seller")
+    contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
 
     def create_customer(self):
         pass
