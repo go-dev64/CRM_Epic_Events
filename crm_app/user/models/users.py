@@ -194,6 +194,11 @@ class Manager(User):
         users = session.scalars(select(User)).all()
         return users
 
+    @Authentication.is_authenticated
+    def get_all_event_without_support(self, session):
+        # Function return all evant without supporter.
+        pass
+
     def create_colaborator(self):
         pass
 
