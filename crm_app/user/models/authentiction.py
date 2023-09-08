@@ -108,7 +108,6 @@ class Authentication:
         @wraps(func)
         def validation_token(*args, **kwargs):
             user = kwargs["session"].current_user
-            print(user)
             token_decoded = Authentication.decode_token(token=user.token)
             if token_decoded is not None:
                 value = func(*args, **kwargs)
