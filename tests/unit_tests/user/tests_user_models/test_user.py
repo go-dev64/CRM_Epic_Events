@@ -121,7 +121,7 @@ class TestSupporter:
         session.current_user = user
 
     def test_get_event_of_supporter(self, db_session, events):
-        # test should return unsigned contracts list (1 contract for this test).
+        # test should return events list without supporter.
         with db_session as session:
             events
             self._user__current(session, Supporter)
