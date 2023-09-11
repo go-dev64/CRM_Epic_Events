@@ -94,3 +94,12 @@ class TestSeller:
             contracts_list = session.current_user.get_all_contracts_of_user(session=session)
             result_excepted = 1
             assert len(contracts_list) == result_excepted
+
+    def test_get_unsigned_contracts(self, db_session, contracts):
+        # test should return contracts list of user (1 customers for this test).
+        with db_session as session:
+            contracts
+            self._user__current(session, Seller)
+            contracts_list = session.current_user.get_all_contracts_of_user(session=session)
+            result_excepted = 1
+            assert len(contracts_list) == result_excepted

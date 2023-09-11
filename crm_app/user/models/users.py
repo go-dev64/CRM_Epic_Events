@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 from functools import wraps
-from sqlalchemy import ForeignKey, String, select
+from sqlalchemy import False_, ForeignKey, String, select
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -243,6 +243,12 @@ class Seller(User):
         # Function return all clients of user.
         contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
         return contracts_list
+
+    @Authentication.is_authenticated
+    def get_unsigned_contracts(self, session):
+        # Function return all clients of user.
+        unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
+        return unsigned_contracts_list
 
     def create_customer(self):
         pass

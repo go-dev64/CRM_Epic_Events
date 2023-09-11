@@ -84,7 +84,7 @@ def contracts(db_session, users):
         total_amount=1000, remaining=5000, signed_contract=True, customer_id=5, seller_id=2
     )
     contract_2 = crm_app.user.models.users.Contract(
-        total_amount=1000, remaining=5000, signed_contract=True, customer_id=1, seller_id=1
+        total_amount=1000, remaining=5000, signed_contract=False, customer_id=1, seller_id=1
     )
     db_session.add_all([contract_1, contract_2])
     db_session.commit()
