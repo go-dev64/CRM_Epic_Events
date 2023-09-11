@@ -100,6 +100,15 @@ class TestSeller:
         with db_session as session:
             contracts
             self._user__current(session, Seller)
-            contracts_list = session.current_user.get_all_contracts_of_user(session=session)
+            unsigned_contracts_list = session.current_user.get_all_contracts_of_user(session=session)
             result_excepted = 1
-            assert len(contracts_list) == result_excepted
+            assert len(unsigned_contracts_list) == result_excepted
+
+    def test_get_unpayed_contracts(self, db_session, contracts):
+        # test should return unsigned contracts list (1 contract for this test).
+        with db_session as session:
+            contracts
+            self._user__current(session, Seller)
+            unpayed_contracts_list = session.current_user.get_unpayed_contracts(session=session)
+            result_excepted = 1
+            assert len(unpayed_contracts_list) == result_excepted
