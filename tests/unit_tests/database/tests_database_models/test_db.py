@@ -26,7 +26,6 @@ class TestDatabase:
             "event_table",
             "contract_table",
             "address_table",
-            "company_table",
             "customer_table",
             "user_table",
         ]
@@ -53,7 +52,6 @@ class TestDatabase:
             "event_table",
             "contract_table",
             "address_table",
-            "company_table",
             "customer_table",
         ]
         for table in tables_models:
