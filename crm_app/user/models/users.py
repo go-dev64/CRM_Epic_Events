@@ -250,6 +250,12 @@ class Seller(User):
         unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
         return unsigned_contracts_list
 
+    @Authentication.is_authenticated
+    def get_unpayed_contracts(self, session):
+        # Function return all unpayed contracts.
+        unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
+        return unpayed_contracts_list
+
     def create_customer(self):
         pass
 
