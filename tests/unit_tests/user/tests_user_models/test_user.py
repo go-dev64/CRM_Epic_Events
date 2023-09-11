@@ -52,9 +52,6 @@ class TestManager:
         user = Authentication.get_token(user)
         session.current_user = user
 
-    def current_user(self, session, type_user):
-        pass
-
     def test_get_all_user(self, db_session, users):
         # test should return list of events.
         with db_session as session:
@@ -67,4 +64,8 @@ class TestManager:
     def test_get_all_event_without_support(self, db_session, events):
         with db_session as session:
             events
-            current_user = self._user__current(session, Manager)
+            self._user__current(session, Manager)
+            events_list = session.current_user.get_all_event_without_support(session=session)
+            result_excepted = 1
+            print(session.current_user.id)
+            assert result_excepted == len(events_list)

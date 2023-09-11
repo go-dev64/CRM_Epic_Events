@@ -197,7 +197,8 @@ class Manager(User):
     @Authentication.is_authenticated
     def get_all_event_without_support(self, session):
         # Function return all evant without supporter.
-        pass
+        event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
+        return event_without_supporter
 
     def create_colaborator(self):
         pass
