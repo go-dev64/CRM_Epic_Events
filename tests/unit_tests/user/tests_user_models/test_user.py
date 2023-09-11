@@ -44,3 +44,28 @@ class TestUserRead:
             events_list = current_user.get_all_events(session=session)
             result_excepted = 2
             assert len(events_list) == result_excepted
+
+
+class TestManager:
+    def _user__current(self, session, user_type):
+        user = session.scalars(select(user_type)).first()
+        user = Authentication.get_token(user)
+        session.current_user = user
+
+    def test_get_all_user(self, db_session, users):
+        # test should return list of events.
+        with db_session as session:
+            users
+            self._user__current(session, Manager)
+            users_list = session.current_user.get_all_users(session=session)
+            result_excepted = 3
+            assert len(users_list) == result_excepted
+
+    def test_get_all_event_without_support(self, db_session, events):
+        # test
+        with db_session as session:
+            events
+            self._user__current(session, Manager)
+            events_list = session.current_user.get_all_event_without_support(session=session)
+            result_excepted = 2
+            assert result_excepted == len(events_list)

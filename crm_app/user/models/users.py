@@ -188,6 +188,18 @@ class Manager(User):
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
+    @Authentication.is_authenticated
+    def get_all_users(self, session):
+        # Function return all User.
+        users = session.scalars(select(User)).all()
+        return users
+
+    @Authentication.is_authenticated
+    def get_all_event_without_support(self, session):
+        # Function return all evant without supporter.
+        event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
+        return event_without_supporter
+
     def create_colaborator(self):
         pass
 
