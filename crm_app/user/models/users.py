@@ -240,13 +240,13 @@ class Seller(User):
 
     @Authentication.is_authenticated
     def get_all_contracts_of_user(self, session):
-        # Function return all clients of user.
+        # Function return all contracts of user.
         contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
         return contracts_list
 
     @Authentication.is_authenticated
     def get_unsigned_contracts(self, session):
-        # Function return all clients of user.
+        # Function return all unsigned contracts.
         unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
         return unsigned_contracts_list
 

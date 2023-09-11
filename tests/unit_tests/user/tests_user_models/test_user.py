@@ -87,7 +87,7 @@ class TestSeller:
             assert len(clients_list) == result_excepted
 
     def test_get_all_contracts_of_user(self, db_session, contracts):
-        # test should return contracts list of user (1 customers for this test).
+        # test should return contracts list of user (1 contract for this test).
         with db_session as session:
             contracts
             self._user__current(session, Seller)
@@ -96,7 +96,7 @@ class TestSeller:
             assert len(contracts_list) == result_excepted
 
     def test_get_unsigned_contracts(self, db_session, contracts):
-        # test should return contracts list of user (1 customers for this test).
+        # test should return unsigned contracts list (1 contract for this test).
         with db_session as session:
             contracts
             self._user__current(session, Seller)
