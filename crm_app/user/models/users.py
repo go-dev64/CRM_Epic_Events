@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 from functools import wraps
-from sqlalchemy import ForeignKey, String, select
+from sqlalchemy import False_, ForeignKey, String, select
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -231,6 +231,30 @@ class Seller(User):
     customers: Mapped[list["Customer"]] = relationship(back_populates="seller_contact")
     # listes des contrats gerer( one-to-many)
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
+
+    @Authentication.is_authenticated
+    def get_all_clients_of_user(self, session):
+        # Function return all clients of user.
+        customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
+        return customers_list
+
+    @Authentication.is_authenticated
+    def get_all_contracts_of_user(self, session):
+        # Function return all contracts of user.
+        contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
+        return contracts_list
+
+    @Authentication.is_authenticated
+    def get_unsigned_contracts(self, session):
+        # Function return all unsigned contracts.
+        unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
+        return unsigned_contracts_list
+
+    @Authentication.is_authenticated
+    def get_unpayed_contracts(self, session):
+        # Function return all unpayed contracts.
+        unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
+        return unpayed_contracts_list
 
     def create_customer(self):
         pass

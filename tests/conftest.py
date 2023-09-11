@@ -63,7 +63,11 @@ def users(db_session):
 def clients(db_session, users):
     users
     client_1 = crm_app.user.models.users.Customer(
-        name="client_1", email_address="clien_1@123.com", phone_number="123456", company="7eme_company"
+        name="client_1",
+        email_address="clien_1@123.com",
+        phone_number="123456",
+        company="7eme_company",
+        seller_contact_id=2,
     )
     client_2 = crm_app.user.models.users.Customer(
         name="client_2", email_address="clien_2@123.com", phone_number="123456", company="7eme_company"
@@ -77,10 +81,10 @@ def clients(db_session, users):
 def contracts(db_session, users):
     users
     contract_1 = crm_app.user.models.users.Contract(
-        total_amount=1000, remaining=5000, signed_contract=True, customer_id=5, seller_id=1
+        total_amount=1000, remaining=0, signed_contract=True, customer_id=5, seller_id=2
     )
     contract_2 = crm_app.user.models.users.Contract(
-        total_amount=1000, remaining=5000, signed_contract=True, customer_id=1, seller_id=1
+        total_amount=1000, remaining=5000, signed_contract=False, customer_id=1, seller_id=1
     )
     db_session.add_all([contract_1, contract_2])
     db_session.commit()
