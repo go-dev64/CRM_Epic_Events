@@ -62,10 +62,10 @@ class TestManager:
             assert len(users_list) == result_excepted
 
     def test_get_all_event_without_support(self, db_session, events):
+        # test
         with db_session as session:
             events
             self._user__current(session, Manager)
             events_list = session.current_user.get_all_event_without_support(session=session)
-            result_excepted = 1
-            print(session.current_user.id)
+            result_excepted = 2
             assert result_excepted == len(events_list)

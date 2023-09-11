@@ -99,7 +99,6 @@ def events(db_session, users):
         customer_id=1,
         contract_id=1,
         address_id=1,
-        supporter_id=1,
     )
 
     event_2 = crm_app.user.models.users.Event(
