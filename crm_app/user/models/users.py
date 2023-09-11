@@ -238,6 +238,12 @@ class Seller(User):
         customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
         return customers_list
 
+    @Authentication.is_authenticated
+    def get_all_contracts_of_user(self, session):
+        # Function return all clients of user.
+        contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
+        return contracts_list
+
     def create_customer(self):
         pass
 

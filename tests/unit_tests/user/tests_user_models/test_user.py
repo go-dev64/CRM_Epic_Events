@@ -78,10 +78,19 @@ class TestSeller:
         session.current_user = user
 
     def test_get_all_clients_of_user(self, db_session, clients):
-        # test should return list of events.
+        # test should return customer list of user (1 customers for this test).
         with db_session as session:
             clients
             self._user__current(session, Seller)
             clients_list = session.current_user.get_all_clients_of_user(session=session)
             result_excepted = 1
             assert len(clients_list) == result_excepted
+
+    def test_get_all_contracts_of_user(self, db_session, contracts):
+        # test should return contracts list of user (1 customers for this test).
+        with db_session as session:
+            contracts
+            self._user__current(session, Seller)
+            contracts_list = session.current_user.get_all_contracts_of_user(session=session)
+            result_excepted = 1
+            assert len(contracts_list) == result_excepted
