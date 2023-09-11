@@ -69,3 +69,19 @@ class TestManager:
             events_list = session.current_user.get_all_event_without_support(session=session)
             result_excepted = 2
             assert result_excepted == len(events_list)
+
+
+class TestSeller:
+    def _user__current(self, session, user_type):
+        user = session.scalars(select(user_type)).first()
+        user = Authentication.get_token(user)
+        session.current_user = user
+
+    def test_get_all_clients_of_user(self, db_session, clients):
+        # test should return list of events.
+        with db_session as session:
+            clients
+            self._user__current(session, Seller)
+            clients_list = session.current_user.get_all_clients_of_user(session=session)
+            result_excepted = 1
+            assert len(clients_list) == result_excepted

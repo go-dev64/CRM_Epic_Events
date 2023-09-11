@@ -63,7 +63,11 @@ def users(db_session):
 def clients(db_session, users):
     users
     client_1 = crm_app.user.models.users.Customer(
-        name="client_1", email_address="clien_1@123.com", phone_number="123456", company="7eme_company"
+        name="client_1",
+        email_address="clien_1@123.com",
+        phone_number="123456",
+        company="7eme_company",
+        seller_contact_id=2,
     )
     client_2 = crm_app.user.models.users.Customer(
         name="client_2", email_address="clien_2@123.com", phone_number="123456", company="7eme_company"

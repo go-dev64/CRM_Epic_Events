@@ -232,6 +232,12 @@ class Seller(User):
     # listes des contrats gerer( one-to-many)
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
 
+    @Authentication.is_authenticated
+    def get_all_clients_of_user(self, session):
+        # Function return all clients of user.
+        customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
+        return customers_list
+
     def create_customer(self):
         pass
 
