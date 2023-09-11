@@ -177,6 +177,12 @@ class Supporter(User):
 
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
 
+    @Authentication.is_authenticated
+    def get_event_of_supporter(self, session):
+        # Function return all contracts of user.
+        contracts_list = session.scalars(select(Event).where(Event.supporter == session.current_user)).all()
+        return contracts_list
+
     def update_event(self, event):
         pass
 

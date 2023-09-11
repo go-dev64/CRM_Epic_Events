@@ -114,6 +114,7 @@ def events(db_session, users):
         customer_id=1,
         contract_id=1,
         address_id=1,
+        supporter_id=3,
     )
     db_session.add_all([event_1, event_2])
     db_session.commit()

@@ -67,7 +67,7 @@ class TestManager:
             events
             self._user__current(session, Manager)
             events_list = session.current_user.get_all_event_without_support(session=session)
-            result_excepted = 2
+            result_excepted = 1
             assert result_excepted == len(events_list)
 
 
@@ -112,3 +112,19 @@ class TestSeller:
             unpayed_contracts_list = session.current_user.get_unpayed_contracts(session=session)
             result_excepted = 1
             assert len(unpayed_contracts_list) == result_excepted
+
+
+class TestSupporter:
+    def _user__current(self, session, user_type):
+        user = session.scalars(select(user_type)).first()
+        user = Authentication.get_token(user)
+        session.current_user = user
+
+    def test_get_event_of_supporter(self, db_session, events):
+        # test should return events list without supporter.
+        with db_session as session:
+            events
+            self._user__current(session, Supporter)
+            event_list_of_user = session.current_user.get_event_of_supporter(session=session)
+            result_excepted = 1
+            assert len(event_list_of_user) == result_excepted
