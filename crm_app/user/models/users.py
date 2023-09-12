@@ -207,7 +207,17 @@ class Manager(User):
         return event_without_supporter
 
     @Authentication.is_authenticated
-    def create_new_user(self, session, user_info):
+    def create_new_user(self, session, user_info: dict):
+        """
+        Function add a new user to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+
+        Returns:
+            _type_: user instance.
+        """
         new_user = session.add(
             User(
                 name=user_info["name"],
