@@ -200,6 +200,24 @@ class TestSeller:
             result_excepted = 1
             assert len(unpayed_contracts_list) == result_excepted
 
+    # ------------- Test Create Functions ---------#
+
+    def test_create_new_customer(self, db_session, clients, current_user_is_seller):
+        # test should return a new customer in customers list.
+        with db_session as session:
+            clients
+            current_user = current_user_is_seller
+            customer_info = {
+                "name": "new_user",
+                "email_address": "nw_user@123.com",
+                "phone_number": "1235465",
+                "company": "the Company",
+            }
+            new_customer = current_user.create_new_customer(session=session, customer_info=customer_info)
+            customer_list = session.scalars(select(Customer)).all()
+            assert len(customer_list) == 3
+            assert new_customer.seller_contact == current_user
+
 
 class TestSupporter:
     def _user__current(self, session, user_type):
