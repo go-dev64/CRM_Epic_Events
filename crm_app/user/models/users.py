@@ -207,26 +207,73 @@ class Manager(User):
         return event_without_supporter
 
     @Authentication.is_authenticated
-    def create_new_user(self, session, user_info: dict):
+    def create_new_manager(self, session, user_info: dict) -> None:
         """
-        Function add a new user to database.
+        Function add a new Manager to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
-
-        Returns:
-            _type_: user instance.
         """
-        new_user = session.add(
-            User(
-                name=user_info["name"],
-                email_address=user_info["email_address"],
-                phone_number=user_info["phone_number"],
-                password=user_info["password"],
+        try:
+            session.add(
+                Manager(
+                    name=user_info["name"],
+                    email_address=user_info["email_address"],
+                    phone_number=user_info["phone_number"],
+                    password=user_info["password"],
+                )
             )
-        )
-        return new_user
+        except KeyError:
+            return None
+        else:
+            session.commit()
+
+    @Authentication.is_authenticated
+    def create_new_seller(self, session, user_info: dict) -> None:
+        """
+        Function add a new Seller to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        try:
+            session.add(
+                Seller(
+                    name=user_info["name"],
+                    email_address=user_info["email_address"],
+                    phone_number=user_info["phone_number"],
+                    password=user_info["password"],
+                )
+            )
+        except KeyError:
+            return None
+        else:
+            session.commit()
+
+    @Authentication.is_authenticated
+    def create_new_supporter(self, session, user_info: dict) -> None:
+        """
+        Function add a new Supporter to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        try:
+            session.add(
+                Supporter(
+                    name=user_info["name"],
+                    email_address=user_info["email_address"],
+                    phone_number=user_info["phone_number"],
+                    password=user_info["password"],
+                )
+            )
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
 
     def update_colaborator(self, colaborator):
         pass
