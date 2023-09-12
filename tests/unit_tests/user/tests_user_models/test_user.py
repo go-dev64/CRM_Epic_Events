@@ -91,6 +91,25 @@ class TestManager:
             assert len(list_user) == result_accepted
             assert len(list_manager) == 2
 
+    def test_add_new_seller(self, db_session, users, current_user_is_manager):
+        # Test should return a new user in list user(len = 4).
+        with db_session as session:
+            users
+            current_user = current_user_is_manager
+            result_accepted = 4
+            user_info = {
+                "name": "new_user",
+                "email_address": "nw_user@123.com",
+                "phone_number": "1235465",
+                "password": "password",
+            }
+            new_seller = current_user.create_new_seller(session=session, user_info=user_info)
+            list_user = session.scalars(select(User)).all()
+            list_manager = session.scalars(select(Seller)).all()
+
+            assert len(list_user) == result_accepted
+            assert len(list_manager) == 2
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
