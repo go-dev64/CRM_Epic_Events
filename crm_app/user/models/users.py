@@ -206,8 +206,27 @@ class Manager(User):
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
         return event_without_supporter
 
-    def create_colaborator(self):
-        pass
+    @Authentication.is_authenticated
+    def create_new_user(self, session, user_info: dict):
+        """
+        Function add a new user to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+
+        Returns:
+            _type_: user instance.
+        """
+        new_user = session.add(
+            User(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
+            )
+        )
+        return new_user
 
     def update_colaborator(self, colaborator):
         pass
