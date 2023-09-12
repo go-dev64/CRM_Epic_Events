@@ -218,6 +218,22 @@ class TestSeller:
             assert len(customer_list) == 3
             assert new_customer.seller_contact == current_user
 
+    """def test_create_new_customer_with_bad_data(self, db_session, clients, current_user_is_seller):
+        # test should return a new customer in customers list.
+        with db_session as session:
+            clients
+            current_user = current_user_is_seller
+            customer_info = {
+                "name": "new_user",
+                "email_address": None,
+                "phone_number": "1235465",
+                "company": "the Company",
+            }
+            new_customer = current_user.create_new_customer(session=session, customer_info=customer_info)
+            customer_list = session.scalars(select(Customer)).all()
+            assert len(customer_list) == 2
+            assert new_customer == None"""
+
 
 class TestSupporter:
     def _user__current(self, session, user_type):
