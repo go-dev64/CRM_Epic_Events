@@ -5,7 +5,7 @@ from crm_app.user.models.base import Base
 import crm_app.user.models.users
 import crm_app.crm.models.customer
 import crm_app.crm.models.element_administratif
-from tests.factory.user_factory import Manager, ManagerFactory
+from tests.factory.user_factory import Manager
 
 db = Database()
 
@@ -26,7 +26,6 @@ class TestDatabase:
             "event_table",
             "contract_table",
             "address_table",
-            "company_table",
             "customer_table",
             "user_table",
         ]
@@ -36,8 +35,8 @@ class TestDatabase:
         for t in tables_meta:
             assert t.name in tables_models
 
-    def test_check_add_user(self, mocked_session):
-        with mocked_session as session:
+    def test_check_add_user(self, db_session):
+        with db_session as session:
             user = Manager(name="toto", email_address="toto@gmail.com", phone_number="+0335651", password="toto")
             session.add_all([user])
 
@@ -45,7 +44,7 @@ class TestDatabase:
 
             session.rollback()
 
-    def test_create_table(self, mocked_session):
+    def test_create_table(self, db_session):
         tables_models = [
             "supporter_table",
             "manager_table",
@@ -53,10 +52,10 @@ class TestDatabase:
             "event_table",
             "contract_table",
             "address_table",
-            "company_table",
             "customer_table",
         ]
-        for table in tables_models:
-            texte = text(f"SELECT * from {table};")
-            data = mocked_session.execute(texte).all()
-            assert data == []
+        with db_session as session:
+            for table in tables_models:
+                texte = text(f"SELECT * from {table};")
+                data = session.execute(texte).all()
+                assert data == []
