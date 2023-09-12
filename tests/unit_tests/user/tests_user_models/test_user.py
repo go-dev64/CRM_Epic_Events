@@ -149,16 +149,18 @@ class TestManager:
             assert len(list_user) == result_accepted
             assert new_supporter == None
 
-    def test_create_new_contract(self, db_session, contracts, current_user_is_manager):
+    def test_create_new_contract(self, db_session, clients, current_user_is_manager):
         # Test should return a new user in list user(len = 4) and new seller in seller list.
         with db_session as session:
-            contracts
+            client = clients[0]
+            print(client.id)
             current_user = current_user_is_manager
-            result_accepted = 3
-            new_supporter = current_user.create_new_contract(session=session, user_info=user_info)
+            contract_info = {"total_amount": 1000, "remaining": 500, "signed_contract": True, "customer_id": client.id}
+            result_accepted = 1
+            contract = current_user.create_new_contract(session=session, contract_info=contract_info)
             list_user = session.scalars(select(Contract)).all()
-
             assert len(list_user) == result_accepted
+            print(contract, contract.id)
 
 
 class TestSeller:

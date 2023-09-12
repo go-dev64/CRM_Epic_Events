@@ -224,7 +224,7 @@ class Manager(User):
                     password=user_info["password"],
                 )
             )
-        except KeyError:
+        except (KeyError, ValueError):
             return None
         else:
             session.commit()
@@ -247,7 +247,7 @@ class Manager(User):
                     password=user_info["password"],
                 )
             )
-        except KeyError:
+        except (KeyError, ValueError):
             return None
         else:
             session.commit()
@@ -274,6 +274,30 @@ class Manager(User):
             return None
         else:
             session.commit()
+
+    @Authentication.is_authenticated
+    def create_new_contract(self, session, contract_info: dict) -> None:
+        """
+        Function add a new contract to database.
+
+        Args:
+            session (_type_): database session
+            contract (dict): contract info.
+        """
+        try:
+            contract = Contract(
+                total_amount=contract_info["total_amount"],
+                remaining=contract_info["remaining"],
+                signed_contract=contract_info["signed_contract"],
+                customer_id=contract_info["customer_id"],
+            )
+            session.add(contract)
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        else:
+            session.commit()
+            return contract
 
     def update_colaborator(self, colaborator):
         pass
