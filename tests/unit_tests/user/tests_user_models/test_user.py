@@ -154,11 +154,13 @@ class TestManager:
         with db_session as session:
             client = clients[0]
             current_user = current_user_is_manager
-            contract_info = {"total_amount": 1000, "remaining": 500, "signed_contract": True, "customer_id": client.id}
+            contract_info = {"total_amount": 1000, "remaining": 500, "signed_contract": True, "customer": client}
             result_accepted = 1
             contract = current_user.create_new_contract(session=session, contract_info=contract_info)
-            list_user = session.scalars(select(Contract)).all()
-            assert len(list_user) == result_accepted
+            contract_list = session.scalars(select(Contract)).all()
+
+            assert len(contract_list) == result_accepted
+            assert contract.seller == client.seller_contact
 
 
 class TestSeller:

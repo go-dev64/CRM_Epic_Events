@@ -290,9 +290,11 @@ class Manager(User):
                 total_amount=contract_info["total_amount"],
                 remaining=contract_info["remaining"],
                 signed_contract=contract_info["signed_contract"],
-                customer_id=contract_info["customer_id"],
+                customer=contract_info["customer"],
             )
             session.add(contract)
+            contract.seller = contract_info["customer"].seller_contact
+
         except (KeyError, ValueError) as exc:
             print(exc)
             return None
