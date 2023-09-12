@@ -124,12 +124,12 @@ class TestManager:
             users
             current_user = current_user_is_manager
             result_accepted = 4
-            new_seller = current_user.create_new_supporter(session=session, user_info=user_info)
+            new_supporter = current_user.create_new_supporter(session=session, user_info=user_info)
             list_user = session.scalars(select(User)).all()
-            list_seller = session.scalars(select(Seller)).all()
+            list_supporter = session.scalars(select(Supporter)).all()
 
             assert len(list_user) == result_accepted
-            assert len(list_seller) == 2
+            assert len(list_supporter) == 2
 
 
 class TestSeller:

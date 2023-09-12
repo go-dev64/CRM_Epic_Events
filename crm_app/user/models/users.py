@@ -244,6 +244,25 @@ class Manager(User):
         )
         session.commit()
 
+    @Authentication.is_authenticated
+    def create_new_supporter(self, session, user_info: dict) -> None:
+        """
+        Function add a new Supporter to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        session.add(
+            Supporter(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
+            )
+        )
+        session.commit()
+
     def update_colaborator(self, colaborator):
         pass
 
