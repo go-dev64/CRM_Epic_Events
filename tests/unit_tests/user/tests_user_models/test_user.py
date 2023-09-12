@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import pytest
 from sqlalchemy import select
 from crm_app.crm.models.element_administratif import Contract
@@ -235,10 +235,11 @@ class TestSeller:
             assert len(customer_list) == 2
             assert new_customer == None"""
 
-    def test_create_new_event(self, db_session, event, current_user_is_seller):
+    def test_create_new_event(self, db_session, contracts, address, current_user_is_seller):
         # test should return a new event in event list.
         with db_session as session:
-            event
+            contract = contracts[0]
+            address = address
             current_user = current_user_is_seller
             event_info = {
                 "name": "new_event",
@@ -246,15 +247,14 @@ class TestSeller:
                 "date_end": datetime.now(),
                 "attendees": 20,
                 "note": "queles notes",
-                "customer": "0",
-                "contract": "0",
-                "support": None,
-                "address": None,
+                "contract": contract,
+                "supporter": None,
+                "address": address,
             }
-            new_event = current_user.create_new_event(session=session, event_ino=event_info)
+            new_event = current_user.create_new_event(session=session, event_info=event_info)
             event_list = session.scalars(select(Event)).all()
-            assert len(event_list) == 3
-            assert new_event.seller_contact == current_user
+            assert len(event_list) == 1
+            assert new_event.customer == contract.customer
 
 
 class TestSupporter:

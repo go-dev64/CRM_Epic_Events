@@ -355,7 +355,8 @@ class Seller(User):
         unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
         return unpayed_contracts_list
 
-    def create_new_customer(self, session, customer_info):
+    @Authentication.is_authenticated
+    def create_new_customer(self, session, customer_info: dict) -> Customer:
         try:
             new_customer = Customer(
                 name=customer_info["name"],
@@ -374,11 +375,42 @@ class Seller(User):
             session.commit()
             return new_customer
 
+    def create_new_event(self, session, event_info: dict):
+        """
+        Function add a new eventto database.
+
+        Args:
+            session (_type_): _description_
+            event_info (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            # get customer of new event.
+            customer = event_info["contract"].customer
+            new_event = Event(
+                name=event_info["name"],
+                date_start=event_info["date_start"],
+                date_end=event_info["date_end"],
+                attendees=event_info["attendees"],
+                note=event_info["note"],
+                contract=event_info["contract"],
+                supporter=event_info["supporter"],
+                address=event_info["address"],
+            )
+            new_event.customer = customer
+            session.add(new_event)
+
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        else:
+            session.commit()
+            return new_event
+
     def update_customer(self, customer):
         pass
 
     def update_contract(self, contract):
-        pass
-
-    def create_event(self):
         pass
