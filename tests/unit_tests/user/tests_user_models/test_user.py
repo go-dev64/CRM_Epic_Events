@@ -52,26 +52,21 @@ class TestManager:
     READ test function
     """
 
-    def _user__current(self, session, user_type):
-        user = session.scalars(select(user_type)).first()
-        user = Authentication.get_token(user)
-        session.current_user = user
-
-    def test_get_all_user(self, db_session, users):
+    def test_get_all_user(self, db_session, users, current_user_is_manager):
         # test should return list of events.
         with db_session as session:
             users
-            self._user__current(session, Manager)
-            users_list = session.current_user.get_all_users(session=session)
+            current_user = current_user_is_manager
+            users_list = current_user.get_all_users(session=session)
             result_excepted = 3
             assert len(users_list) == result_excepted
 
-    def test_get_all_event_without_support(self, db_session, events):
+    def test_get_all_event_without_support(self, db_session, events, current_user_is_manager):
         # test
         with db_session as session:
             events
-            self._user__current(session, Manager)
-            events_list = session.current_user.get_all_event_without_support(session=session)
+            current_user = current_user_is_manager
+            events_list = current_user.get_all_event_without_support(session=session)
             result_excepted = 1
             assert result_excepted == len(events_list)
 
@@ -98,44 +93,39 @@ class TestManager:
 
 
 class TestSeller:
-    def _user__current(self, session, user_type):
-        user = session.scalars(select(user_type)).first()
-        user = Authentication.get_token(user)
-        session.current_user = user
-
-    def test_get_all_clients_of_user(self, db_session, clients):
+    def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
         # test should return customer list of user (1 customers for this test).
         with db_session as session:
             clients
-            self._user__current(session, Seller)
-            clients_list = session.current_user.get_all_clients_of_user(session=session)
+            current_user = current_user_is_seller
+            clients_list = current_user.get_all_clients_of_user(session=session)
             result_excepted = 2
             assert len(clients_list) == result_excepted
 
-    def test_get_all_contracts_of_user(self, db_session, contracts):
+    def test_get_all_contracts_of_user(self, db_session, contracts, current_user_is_seller):
         # test should return contracts list of user (1 contract for this test).
         with db_session as session:
             contracts
-            self._user__current(session, Seller)
-            contracts_list = session.current_user.get_all_contracts_of_user(session=session)
+            current_user = current_user_is_seller
+            contracts_list = current_user.get_all_contracts_of_user(session=session)
             result_excepted = 2
             assert len(contracts_list) == result_excepted
 
-    def test_get_unsigned_contracts(self, db_session, contracts):
+    def test_get_unsigned_contracts(self, db_session, contracts, current_user_is_seller):
         # test should return unsigned contracts list (1 contract for this test).
         with db_session as session:
             contracts
-            self._user__current(session, Seller)
-            unsigned_contracts_list = session.current_user.get_all_contracts_of_user(session=session)
+            current_user = current_user_is_seller
+            unsigned_contracts_list = current_user.get_all_contracts_of_user(session=session)
             result_excepted = 2
             assert len(unsigned_contracts_list) == result_excepted
 
-    def test_get_unpayed_contracts(self, db_session, contracts):
+    def test_get_unpayed_contracts(self, db_session, contracts, current_user_is_seller):
         # test should return unsigned contracts list (1 contract for this test).
         with db_session as session:
             contracts
-            self._user__current(session, Seller)
-            unpayed_contracts_list = session.current_user.get_unpayed_contracts(session=session)
+            current_user = current_user_is_seller
+            unpayed_contracts_list = current_user.get_unpayed_contracts(session=session)
             result_excepted = 1
             assert len(unpayed_contracts_list) == result_excepted
 
