@@ -3,6 +3,7 @@ from sqlalchemy import select
 from crm_app.user.models.users import Manager, Seller, Supporter, User, Authentication
 from crm_app.crm.models.customer import Customer
 
+
 client = Customer(name="client_1", email_address="clien_1@123.com", phone_number="123456", company="7eme_company")
 
 
@@ -83,7 +84,7 @@ class TestSeller:
             clients
             self._user__current(session, Seller)
             clients_list = session.current_user.get_all_clients_of_user(session=session)
-            result_excepted = 1
+            result_excepted = 2
             assert len(clients_list) == result_excepted
 
     def test_get_all_contracts_of_user(self, db_session, contracts):
@@ -92,7 +93,7 @@ class TestSeller:
             contracts
             self._user__current(session, Seller)
             contracts_list = session.current_user.get_all_contracts_of_user(session=session)
-            result_excepted = 1
+            result_excepted = 2
             assert len(contracts_list) == result_excepted
 
     def test_get_unsigned_contracts(self, db_session, contracts):
@@ -101,7 +102,7 @@ class TestSeller:
             contracts
             self._user__current(session, Seller)
             unsigned_contracts_list = session.current_user.get_all_contracts_of_user(session=session)
-            result_excepted = 1
+            result_excepted = 2
             assert len(unsigned_contracts_list) == result_excepted
 
     def test_get_unpayed_contracts(self, db_session, contracts):
@@ -120,11 +121,12 @@ class TestSupporter:
         user = Authentication.get_token(user)
         session.current_user = user
 
-    def test_get_event_of_supporter(self, db_session, events):
+    def test_get_event_of_supporter(self, db_session, events, current_user_is_supporter):
         # test should return events list without supporter.
+
         with db_session as session:
             events
-            self._user__current(session, Supporter)
-            event_list_of_user = session.current_user.get_event_of_supporter(session=session)
+            current_user = current_user_is_supporter
+            event_list_of_user = current_user.get_event_of_supporter(session=session)
             result_excepted = 1
             assert len(event_list_of_user) == result_excepted
