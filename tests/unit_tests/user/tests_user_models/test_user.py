@@ -131,6 +131,22 @@ class TestManager:
             assert len(list_user) == result_accepted
             assert len(list_supporter) == 2
 
+    def test_add_new_user_with_wrong_data(self, db_session, users, current_user_is_manager):
+        # Test should return a new user in list user(len = 4) and new seller in seller list.
+        with db_session as session:
+            users
+            current_user = current_user_is_manager
+            result_accepted = 3
+            bad_user_info = {
+                "name": "new_user",
+                "phone_number": "1235465",
+                "password": "password",
+            }
+            new_supporter = current_user.create_new_supporter(session=session, user_info=bad_user_info)
+            list_user = session.scalars(select(User)).all()
+
+            assert len(list_user) == result_accepted
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):

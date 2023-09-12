@@ -215,15 +215,19 @@ class Manager(User):
             session (_type_): database session
             user_info (dict): user info.
         """
-        session.add(
-            Manager(
-                name=user_info["name"],
-                email_address=user_info["email_address"],
-                phone_number=user_info["phone_number"],
-                password=user_info["password"],
+        try:
+            session.add(
+                Manager(
+                    name=user_info["name"],
+                    email_address=user_info["email_address"],
+                    phone_number=user_info["phone_number"],
+                    password=user_info["password"],
+                )
             )
-        )
-        session.commit()
+        except KeyError:
+            return None
+        else:
+            session.commit()
 
     @Authentication.is_authenticated
     def create_new_seller(self, session, user_info: dict) -> None:
@@ -234,15 +238,19 @@ class Manager(User):
             session (_type_): database session
             user_info (dict): user info.
         """
-        session.add(
-            Seller(
-                name=user_info["name"],
-                email_address=user_info["email_address"],
-                phone_number=user_info["phone_number"],
-                password=user_info["password"],
+        try:
+            session.add(
+                Seller(
+                    name=user_info["name"],
+                    email_address=user_info["email_address"],
+                    phone_number=user_info["phone_number"],
+                    password=user_info["password"],
+                )
             )
-        )
-        session.commit()
+        except KeyError:
+            return None
+        else:
+            session.commit()
 
     @Authentication.is_authenticated
     def create_new_supporter(self, session, user_info: dict) -> None:
@@ -253,15 +261,19 @@ class Manager(User):
             session (_type_): database session
             user_info (dict): user info.
         """
-        session.add(
-            Supporter(
-                name=user_info["name"],
-                email_address=user_info["email_address"],
-                phone_number=user_info["phone_number"],
-                password=user_info["password"],
+        try:
+            session.add(
+                Supporter(
+                    name=user_info["name"],
+                    email_address=user_info["email_address"],
+                    phone_number=user_info["phone_number"],
+                    password=user_info["password"],
+                )
             )
-        )
-        session.commit()
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
 
     def update_colaborator(self, colaborator):
         pass
