@@ -355,8 +355,24 @@ class Seller(User):
         unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
         return unpayed_contracts_list
 
-    def create_customer(self):
-        pass
+    def create_new_customer(self, session, customer_info):
+        try:
+            new_customer = Customer(
+                name=customer_info["name"],
+                email_address=customer_info["email_address"],
+                phone_number=customer_info["phone_number"],
+                company=customer_info["company"],
+                seller_contact=session.current_user,
+            )
+            session.add(new_customer)
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        except:
+            return None
+        else:
+            session.commit()
+            return new_customer
 
     def update_customer(self, customer):
         pass

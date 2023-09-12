@@ -48,6 +48,9 @@ class Contract(Base):
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer_table.id"))
     customer = relationship("Customer", back_populates="contracts")
 
+    def __repr__(self) -> str:
+        return f"Contrant N°:{self.id} - created: {self.created_date} - signed:{self.signed_contract}"
+
 
 class Address(Base):
     __tablename__ = "address_table"
