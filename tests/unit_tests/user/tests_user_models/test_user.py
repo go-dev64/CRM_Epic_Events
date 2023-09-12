@@ -73,7 +73,7 @@ class TestManager:
     # ------------- Test Create Functions ---------#
 
     def test_add_new_manager(self, db_session, users, current_user_is_manager):
-        # Test should return a new user in list user(len = 4).
+        # Test should return a new user in list user(len = 4) and new manager in manager list
         with db_session as session:
             users
             current_user = current_user_is_manager
@@ -92,7 +92,7 @@ class TestManager:
             assert len(list_manager) == 2
 
     def test_add_new_seller(self, db_session, users, current_user_is_manager):
-        # Test should return a new user in list user(len = 4).
+        # Test should return a new user in list user(len = 4) and new seller in seller list.
         with db_session as session:
             users
             current_user = current_user_is_manager
@@ -105,10 +105,10 @@ class TestManager:
             }
             new_seller = current_user.create_new_seller(session=session, user_info=user_info)
             list_user = session.scalars(select(User)).all()
-            list_manager = session.scalars(select(Seller)).all()
+            list_seller = session.scalars(select(Seller)).all()
 
             assert len(list_user) == result_accepted
-            assert len(list_manager) == 2
+            assert len(list_seller) == 2
 
 
 class TestSeller:
