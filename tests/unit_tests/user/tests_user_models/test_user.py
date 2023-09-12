@@ -6,6 +6,13 @@ from crm_app.crm.models.customer import Customer
 
 client = Customer(name="client_1", email_address="clien_1@123.com", phone_number="123456", company="7eme_company")
 
+user_info = {
+    "name": "new_user",
+    "email_address": "nw_user@123.com",
+    "phone_number": "1235465",
+    "password": "password",
+}
+
 
 class TestUserRead:
     def _user__current(self, session, user_type):
@@ -78,12 +85,6 @@ class TestManager:
             users
             current_user = current_user_is_manager
             result_accepted = 4
-            user_info = {
-                "name": "new_user",
-                "email_address": "nw_user@123.com",
-                "phone_number": "1235465",
-                "password": "password",
-            }
             new_manager = current_user.create_new_manager(session=session, user_info=user_info)
             list_user = session.scalars(select(User)).all()
             list_manager = session.scalars(select(Manager)).all()
@@ -97,13 +98,33 @@ class TestManager:
             users
             current_user = current_user_is_manager
             result_accepted = 4
-            user_info = {
-                "name": "new_user",
-                "email_address": "nw_user@123.com",
-                "phone_number": "1235465",
-                "password": "password",
-            }
             new_seller = current_user.create_new_seller(session=session, user_info=user_info)
+            list_user = session.scalars(select(User)).all()
+            list_seller = session.scalars(select(Seller)).all()
+
+            assert len(list_user) == result_accepted
+            assert len(list_seller) == 2
+
+    def test_add_new_seller(self, db_session, users, current_user_is_manager):
+        # Test should return a new user in list user(len = 4) and new seller in seller list.
+        with db_session as session:
+            users
+            current_user = current_user_is_manager
+            result_accepted = 4
+            new_seller = current_user.create_new_seller(session=session, user_info=user_info)
+            list_user = session.scalars(select(User)).all()
+            list_seller = session.scalars(select(Seller)).all()
+
+            assert len(list_user) == result_accepted
+            assert len(list_seller) == 2
+
+    def test_add_new_supporter(self, db_session, users, current_user_is_manager):
+        # Test should return a new user in list user(len = 4) and new seller in seller list.
+        with db_session as session:
+            users
+            current_user = current_user_is_manager
+            result_accepted = 4
+            new_seller = current_user.create_new_supporter(session=session, user_info=user_info)
             list_user = session.scalars(select(User)).all()
             list_seller = session.scalars(select(Seller)).all()
 
