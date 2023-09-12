@@ -308,9 +308,6 @@ class Manager(User):
     def delete_colaborator(self, colaborator):
         pass
 
-    def create_contract(self):
-        pass
-
     def update_contract(self, contract):
         pass
 
@@ -332,25 +329,35 @@ class Seller(User):
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
 
     @Authentication.is_authenticated
-    def get_all_clients_of_user(self, session):
+    def get_all_clients_of_user(self, session) -> list:
         # Function return all clients of user.
         customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
         return customers_list
 
     @Authentication.is_authenticated
-    def get_all_contracts_of_user(self, session):
+    def get_all_contracts_of_user(self, session) -> list:
         # Function return all contracts of user.
         contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
         return contracts_list
 
     @Authentication.is_authenticated
-    def get_unsigned_contracts(self, session):
+    def get_all_contracts_of_user_without_event(self, session) -> list:
+        # The function returns all contracts signed by the seller that are not linked to an event.
+        available_contracts_list = session.scalars(
+            select(Contract).where(Contract.seller == session.current_user)
+            & (Contract.signed_contract == True)
+            & (Contract.event == None)
+        ).all()
+        return available_contracts_list
+
+    @Authentication.is_authenticated
+    def get_unsigned_contracts(self, session) -> list:
         # Function return all unsigned contracts.
         unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
         return unsigned_contracts_list
 
     @Authentication.is_authenticated
-    def get_unpayed_contracts(self, session):
+    def get_unpayed_contracts(self, session) -> list:
         # Function return all unpayed contracts.
         unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
         return unpayed_contracts_list
@@ -375,7 +382,8 @@ class Seller(User):
             session.commit()
             return new_customer
 
-    def create_new_event(self, session, event_info: dict):
+    @Authentication.is_authenticated
+    def create_new_event(self, session, event_info: dict) -> Event:
         """
         Function add a new eventto database.
 

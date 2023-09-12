@@ -201,6 +201,10 @@ class TestSeller:
             result_excepted = 1
             assert len(unpayed_contracts_list) == result_excepted
 
+    def test_get_all_contract_available_for_event():
+        pass
+        ###### to do #####
+
     # ------------- Test Create Functions ---------#
 
     def test_create_new_customer(self, db_session, clients, current_user_is_seller):
