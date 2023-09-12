@@ -77,7 +77,7 @@ class TestManager:
 
     # ------------- Test Create Functions ---------#
 
-    def test_add_new_user(self, db_session, users, current_user_is_manager):
+    def test_add_new_manager(self, db_session, users, current_user_is_manager):
         # Test should return a new user in list user(len = 4).
         with db_session as session:
             users
@@ -89,9 +89,12 @@ class TestManager:
                 "phone_number": "1235465",
                 "password": "password",
             }
-            new_user = current_user.create_new_user(session=session, user_info=user_info)
+            new_manager = current_user.create_new_manager(session=session, user_info=user_info)
             list_user = session.scalars(select(User)).all()
+            list_manager = session.scalars(select(Manager)).all()
+
             assert len(list_user) == result_accepted
+            assert len(list_manager) == 2
 
 
 class TestSeller:

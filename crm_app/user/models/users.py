@@ -207,26 +207,23 @@ class Manager(User):
         return event_without_supporter
 
     @Authentication.is_authenticated
-    def create_new_user(self, session, user_info: dict):
+    def create_new_manager(self, session, user_info: dict) -> None:
         """
         Function add a new user to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
-
-        Returns:
-            _type_: user instance.
         """
-        new_user = session.add(
-            User(
+        session.add(
+            Manager(
                 name=user_info["name"],
                 email_address=user_info["email_address"],
                 phone_number=user_info["phone_number"],
                 password=user_info["password"],
             )
         )
-        return new_user
+        session.commit()
 
     def update_colaborator(self, colaborator):
         pass
