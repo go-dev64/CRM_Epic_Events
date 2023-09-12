@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy import select
+from crm_app.crm.models.element_administratif import Contract
 from crm_app.user.models.users import Manager, Seller, Supporter, User, Authentication
 from crm_app.crm.models.customer import Customer
 
@@ -146,6 +147,20 @@ class TestManager:
             list_user = session.scalars(select(User)).all()
 
             assert len(list_user) == result_accepted
+            assert new_supporter == None
+
+    def test_create_new_contract(self, db_session, clients, current_user_is_manager):
+        # Test should return a new contract in contracts list.
+        with db_session as session:
+            client = clients[0]
+            current_user = current_user_is_manager
+            contract_info = {"total_amount": 1000, "remaining": 500, "signed_contract": True, "customer": client}
+            result_accepted = 1
+            contract = current_user.create_new_contract(session=session, contract_info=contract_info)
+            contract_list = session.scalars(select(Contract)).all()
+
+            assert len(contract_list) == result_accepted
+            assert contract.seller == client.seller_contact
 
 
 class TestSeller:
