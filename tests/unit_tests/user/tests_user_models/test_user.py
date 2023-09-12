@@ -48,6 +48,10 @@ class TestUserRead:
 
 
 class TestManager:
+    """
+    READ test function
+    """
+
     def _user__current(self, session, user_type):
         user = session.scalars(select(user_type)).first()
         user = Authentication.get_token(user)
@@ -70,6 +74,24 @@ class TestManager:
             events_list = session.current_user.get_all_event_without_support(session=session)
             result_excepted = 1
             assert result_excepted == len(events_list)
+
+    # ------------- Test Create Functions ---------#
+
+    def test_add_new_user(self, db_session, users, current_user_is_manager):
+        # Test should return a new user in list user(len = 4).
+        with db_session as session:
+            users
+            current_user = current_user_is_manager
+            result_accepted = 4
+            user_info = {
+                "name": "new_user",
+                "email_address": "nw_user@123.com",
+                "phone_number": "1235465",
+                "password": "password",
+            }
+            new_user = current_user.add_new_user(session=session, user_info=user_info)
+            list_user = session.scalars(select(User)).all()
+            assert len(list_user) == result_accepted
 
 
 class TestSeller:
