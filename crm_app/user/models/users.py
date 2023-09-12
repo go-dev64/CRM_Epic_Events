@@ -209,7 +209,7 @@ class Manager(User):
     @Authentication.is_authenticated
     def create_new_manager(self, session, user_info: dict) -> None:
         """
-        Function add a new user to database.
+        Function add a new Manager to database.
 
         Args:
             session (_type_): database session
@@ -217,6 +217,25 @@ class Manager(User):
         """
         session.add(
             Manager(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
+            )
+        )
+        session.commit()
+
+    @Authentication.is_authenticated
+    def create_new_seller(self, session, user_info: dict) -> None:
+        """
+        Function add a new Seller to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        session.add(
+            Seller(
                 name=user_info["name"],
                 email_address=user_info["email_address"],
                 phone_number=user_info["phone_number"],
