@@ -89,7 +89,7 @@ class TestManager:
                 "phone_number": "1235465",
                 "password": "password",
             }
-            new_user = current_user.add_new_user(session=session, user_info=user_info)
+            new_user = current_user.create_new_user(session=session, user_info=user_info)
             list_user = session.scalars(select(User)).all()
             assert len(list_user) == result_accepted
 
