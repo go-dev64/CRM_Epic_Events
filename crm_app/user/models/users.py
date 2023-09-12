@@ -4,7 +4,8 @@ import os
 
 from dotenv import load_dotenv
 from functools import wraps
-from sqlalchemy import False_, ForeignKey, String, select
+from sqlalchemy import ForeignKey, String, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -216,18 +217,18 @@ class Manager(User):
             user_info (dict): user info.
         """
         try:
-            session.add(
-                Manager(
-                    name=user_info["name"],
-                    email_address=user_info["email_address"],
-                    phone_number=user_info["phone_number"],
-                    password=user_info["password"],
-                )
+            new_manager = Manager(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
             )
+            session.add(new_manager)
         except (KeyError, ValueError):
             return None
         else:
             session.commit()
+            return new_manager
 
     @Authentication.is_authenticated
     def create_new_seller(self, session, user_info: dict) -> None:
@@ -239,18 +240,18 @@ class Manager(User):
             user_info (dict): user info.
         """
         try:
-            session.add(
-                Seller(
-                    name=user_info["name"],
-                    email_address=user_info["email_address"],
-                    phone_number=user_info["phone_number"],
-                    password=user_info["password"],
-                )
+            new_seller = Seller(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
             )
+            session.add(new_seller)
         except (KeyError, ValueError):
             return None
         else:
             session.commit()
+            return new_seller
 
     @Authentication.is_authenticated
     def create_new_supporter(self, session, user_info: dict) -> None:
@@ -262,18 +263,18 @@ class Manager(User):
             user_info (dict): user info.
         """
         try:
-            session.add(
-                Supporter(
-                    name=user_info["name"],
-                    email_address=user_info["email_address"],
-                    phone_number=user_info["phone_number"],
-                    password=user_info["password"],
-                )
+            new_supporter = Supporter(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
             )
+            session.add(new_supporter)
         except (KeyError, ValueError):
             return None
         else:
             session.commit()
+            return new_supporter
 
     @Authentication.is_authenticated
     def create_new_contract(self, session, contract_info: dict) -> None:
