@@ -201,9 +201,16 @@ class TestSeller:
             result_excepted = 1
             assert len(unpayed_contracts_list) == result_excepted
 
-    def test_get_all_contract_available_for_event():
-        pass
-        ###### to do #####
+    def test_get_all_contract_available_for_event(self, db_session, contracts, current_user_is_seller):
+        # Test should return list of contract available for event .
+        # Contract should be signed and not linked with event.
+        # this contract should be manage by current user.
+        with db_session as session:
+            contracts
+            current_user = current_user_is_seller
+            contract_available = current_user.get_all_contracts_of_user_without_event(session=session)
+            result_excepted = 1
+            assert len(contract_available) == result_excepted
 
     # ------------- Test Create Functions ---------#
 

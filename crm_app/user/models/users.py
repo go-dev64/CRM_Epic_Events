@@ -344,9 +344,11 @@ class Seller(User):
     def get_all_contracts_of_user_without_event(self, session) -> list:
         # The function returns all contracts signed by the seller that are not linked to an event.
         available_contracts_list = session.scalars(
-            select(Contract).where(Contract.seller == session.current_user)
-            & (Contract.signed_contract == True)
-            & (Contract.event == None)
+            select(Contract).where(
+                (Contract.seller == session.current_user)
+                & (Contract.signed_contract == True)
+                & (Contract.event == None)
+            )
         ).all()
         return available_contracts_list
 
