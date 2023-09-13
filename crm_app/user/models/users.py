@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from typing import Optional
+from typing import Optional, Self
 
 from crm_app.user.models.base import Base, intpk, required_name, timestamp
 from crm_app.crm.models.customer import Customer, Event, Contract
@@ -179,7 +179,7 @@ class Supporter(User):
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
 
     @Authentication.is_authenticated
-    def get_event_of_supporter(self, session):
+    def get_event_of_supporter(self, session) -> list:
         # Function return all contracts of user.
         contracts_list = session.scalars(select(Event).where(Event.supporter == session.current_user)).all()
         return contracts_list
@@ -208,7 +208,7 @@ class Manager(User):
         return event_without_supporter
 
     @Authentication.is_authenticated
-    def create_new_manager(self, session, user_info: dict) -> None:
+    def create_new_manager(self, session, user_info: dict) -> Self:
         """
         Function add a new Manager to database.
 
@@ -231,7 +231,7 @@ class Manager(User):
             return new_manager
 
     @Authentication.is_authenticated
-    def create_new_seller(self, session, user_info: dict) -> None:
+    def create_new_seller(self, session, user_info: dict):
         """
         Function add a new Seller to database.
 
@@ -254,7 +254,7 @@ class Manager(User):
             return new_seller
 
     @Authentication.is_authenticated
-    def create_new_supporter(self, session, user_info: dict) -> None:
+    def create_new_supporter(self, session, user_info: dict) -> Supporter:
         """
         Function add a new Supporter to database.
 
@@ -277,7 +277,7 @@ class Manager(User):
             return new_supporter
 
     @Authentication.is_authenticated
-    def create_new_contract(self, session, contract_info: dict) -> None:
+    def create_new_contract(self, session, contract_info: dict) -> Contract:
         """
         Function add a new contract to database.
 
