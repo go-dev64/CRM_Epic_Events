@@ -185,7 +185,7 @@ class TestManager:
     # -------------- test of update --------------------- #
 
     def test_update_user(self, db_session, users, current_user_is_manager):
-        # Test should return a new contract in contracts list.
+        # Test should update a  attribut of user.
         with db_session as session:
             user = users[1]
             current_user = current_user_is_manager
@@ -196,6 +196,16 @@ class TestManager:
             )
             test = session.scalars(select(User).where(User.id == user.id)).all()
             assert test[0].name == new_value
+
+    def test_update_departement(self, db_session, users, current_user_is_manager):
+        # Test should change a user of department.
+        with db_session as session:
+            user = users[1]
+            current_user = current_user_is_manager
+            new_department = ""
+            current_user.move_user_department(session=session, colaborator=user, new_department=new_department)
+            test = session.scalars(select(User).where(User.id == user.id))
+            assert user is Manager
 
 
 class TestSeller:
