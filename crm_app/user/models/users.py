@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from typing import Optional
+from typing import Optional, Self
 
 from crm_app.user.models.base import Base, intpk, required_name, timestamp
 from crm_app.crm.models.customer import Customer, Event, Contract
@@ -179,7 +179,7 @@ class Supporter(User):
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
 
     @Authentication.is_authenticated
-    def get_event_of_supporter(self, session):
+    def get_event_of_supporter(self, session) -> list:
         # Function return all contracts of user.
         contracts_list = session.scalars(select(Event).where(Event.supporter == session.current_user)).all()
         return contracts_list
@@ -208,7 +208,7 @@ class Manager(User):
         return event_without_supporter
 
     @Authentication.is_authenticated
-    def create_new_manager(self, session, user_info: dict) -> None:
+    def create_new_manager(self, session, user_info: dict) -> Self:
         """
         Function add a new Manager to database.
 
@@ -231,7 +231,7 @@ class Manager(User):
             return new_manager
 
     @Authentication.is_authenticated
-    def create_new_seller(self, session, user_info: dict) -> None:
+    def create_new_seller(self, session, user_info: dict):
         """
         Function add a new Seller to database.
 
@@ -254,7 +254,7 @@ class Manager(User):
             return new_seller
 
     @Authentication.is_authenticated
-    def create_new_supporter(self, session, user_info: dict) -> None:
+    def create_new_supporter(self, session, user_info: dict) -> Supporter:
         """
         Function add a new Supporter to database.
 
@@ -277,7 +277,7 @@ class Manager(User):
             return new_supporter
 
     @Authentication.is_authenticated
-    def create_new_contract(self, session, contract_info: dict) -> None:
+    def create_new_contract(self, session, contract_info: dict) -> Contract:
         """
         Function add a new contract to database.
 
@@ -308,9 +308,6 @@ class Manager(User):
     def delete_colaborator(self, colaborator):
         pass
 
-    def create_contract(self):
-        pass
-
     def update_contract(self, contract):
         pass
 
@@ -332,30 +329,43 @@ class Seller(User):
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
 
     @Authentication.is_authenticated
-    def get_all_clients_of_user(self, session):
+    def get_all_clients_of_user(self, session) -> list:
         # Function return all clients of user.
         customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
         return customers_list
 
     @Authentication.is_authenticated
-    def get_all_contracts_of_user(self, session):
+    def get_all_contracts_of_user(self, session) -> list:
         # Function return all contracts of user.
         contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
         return contracts_list
 
     @Authentication.is_authenticated
-    def get_unsigned_contracts(self, session):
+    def get_all_contracts_of_user_without_event(self, session) -> list:
+        # The function returns all contracts signed by the seller that are not linked to an event.
+        available_contracts_list = session.scalars(
+            select(Contract).where(
+                (Contract.seller == session.current_user)
+                & (Contract.signed_contract == True)
+                & (Contract.event == None)
+            )
+        ).all()
+        return available_contracts_list
+
+    @Authentication.is_authenticated
+    def get_unsigned_contracts(self, session) -> list:
         # Function return all unsigned contracts.
         unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
         return unsigned_contracts_list
 
     @Authentication.is_authenticated
-    def get_unpayed_contracts(self, session):
+    def get_unpayed_contracts(self, session) -> list:
         # Function return all unpayed contracts.
         unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
         return unpayed_contracts_list
 
-    def create_new_customer(self, session, customer_info):
+    @Authentication.is_authenticated
+    def create_new_customer(self, session, customer_info: dict) -> Customer:
         try:
             new_customer = Customer(
                 name=customer_info["name"],
@@ -368,17 +378,47 @@ class Seller(User):
         except (KeyError, ValueError) as exc:
             print(exc)
             return None
-        except:
-            return None
         else:
             session.commit()
             return new_customer
+
+    @Authentication.is_authenticated
+    def create_new_event(self, session, event_info: dict) -> Event:
+        """
+        Function add a new eventto database.
+
+        Args:
+            session (_type_): _description_
+            event_info (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            # get customer of new event.
+            customer = event_info["contract"].customer
+            new_event = Event(
+                name=event_info["name"],
+                date_start=event_info["date_start"],
+                date_end=event_info["date_end"],
+                attendees=event_info["attendees"],
+                note=event_info["note"],
+                contract=event_info["contract"],
+                supporter=event_info["supporter"],
+                address=event_info["address"],
+            )
+            new_event.customer = customer
+            session.add(new_event)
+
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        else:
+            session.commit()
+            return new_event
 
     def update_customer(self, customer):
         pass
 
     def update_contract(self, contract):
-        pass
-
-    def create_event(self):
         pass

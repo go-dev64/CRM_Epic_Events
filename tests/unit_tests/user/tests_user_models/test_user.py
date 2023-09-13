@@ -1,7 +1,8 @@
+from datetime import datetime
 import pytest
 from sqlalchemy import select
 from crm_app.crm.models.element_administratif import Contract
-from crm_app.user.models.users import Manager, Seller, Supporter, User, Authentication
+from crm_app.user.models.users import Authentication, Event, Manager, Seller, Supporter, User
 from crm_app.crm.models.customer import Customer
 
 
@@ -200,6 +201,17 @@ class TestSeller:
             result_excepted = 1
             assert len(unpayed_contracts_list) == result_excepted
 
+    def test_get_all_contract_available_for_event(self, db_session, contracts, current_user_is_seller):
+        # Test should return list of contract available for event .
+        # Contract should be signed and not linked with event.
+        # this contract should be manage by current user.
+        with db_session as session:
+            contracts
+            current_user = current_user_is_seller
+            contract_available = current_user.get_all_contracts_of_user_without_event(session=session)
+            result_excepted = 1
+            assert len(contract_available) == result_excepted
+
     # ------------- Test Create Functions ---------#
 
     def test_create_new_customer(self, db_session, clients, current_user_is_seller):
@@ -233,6 +245,27 @@ class TestSeller:
             customer_list = session.scalars(select(Customer)).all()
             assert len(customer_list) == 2
             assert new_customer == None"""
+
+    def test_create_new_event(self, db_session, contracts, address, current_user_is_seller):
+        # test should return a new event in event list.
+        with db_session as session:
+            contract = contracts[0]
+            address = address
+            current_user = current_user_is_seller
+            event_info = {
+                "name": "new_event",
+                "date_start": datetime.now(),
+                "date_end": datetime.now(),
+                "attendees": 20,
+                "note": "queles notes",
+                "contract": contract,
+                "supporter": None,
+                "address": address,
+            }
+            new_event = current_user.create_new_event(session=session, event_info=event_info)
+            event_list = session.scalars(select(Event)).all()
+            assert len(event_list) == 1
+            assert new_event.customer == contract.customer
 
 
 class TestSupporter:
