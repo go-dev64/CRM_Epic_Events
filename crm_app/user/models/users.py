@@ -328,10 +328,17 @@ class Manager(User):
             session.commit()
             return contract
 
-    def update_colaborator(self, colaborator):
-        pass
+    @Authentication.is_authenticated
+    def update_user(self, session, colaborator, update_attribute, new_value):
+        if update_attribute == "password":
+            ph = argon2.PasswordHasher()
+            setattr(colaborator, "password", ph.hash(new_value))
+            session.commit()
+        else:
+            setattr(colaborator, update_attribute, new_value)
+            session.commit()
 
-    def delete_colaborator(self, colaborator):
+    def delete_colaborator(self, sessoin, colaborator):
         pass
 
     def update_contract(self, contract):

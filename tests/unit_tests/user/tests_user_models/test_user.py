@@ -182,6 +182,21 @@ class TestManager:
             assert len(contract_list) == result_accepted
             assert contract.seller == client.seller_contact
 
+    # -------------- test of update --------------------- #
+
+    def test_update_user(self, db_session, users, current_user_is_manager):
+        # Test should return a new contract in contracts list.
+        with db_session as session:
+            user = users[1]
+            current_user = current_user_is_manager
+            update_attribute = "name"
+            new_value = "toto"
+            current_user.update_user(
+                session=session, colaborator=user, update_attribute=update_attribute, new_value=new_value
+            )
+            test = session.scalars(select(User).where(User.id == user.id)).all()
+            assert test[0].name == new_value
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
