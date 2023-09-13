@@ -1,6 +1,6 @@
 from datetime import datetime
 import pytest
-from sqlalchemy import select
+from sqlalchemy import Identity, delete, select, update
 from crm_app.crm.models.element_administratif import Contract
 from crm_app.user.models.users import Authentication, Event, Manager, Seller, Supporter, User, Address
 from crm_app.crm.models.customer import Customer
@@ -201,11 +201,17 @@ class TestManager:
         # Test should change a user of department.
         with db_session as session:
             user = users[1]
+            id = user.id
             current_user = current_user_is_manager
-            new_department = ""
-            current_user.move_user_department(session=session, colaborator=user, new_department=new_department)
-            test = session.scalars(select(User).where(User.id == user.id))
-            assert user is Manager
+            new_user = current_user.change_user_department(
+                session=session, collaborator=user, new_department="manager"
+            )
+
+            list_manager = session.scalars(select(Manager)).all()
+            list_seller = session.scalars(select(Seller)).all()
+            # assert new_user.department == "manager_table"
+            assert len(list_manager) == 2
+            assert len(list_seller) == 0
 
 
 class TestSeller:
