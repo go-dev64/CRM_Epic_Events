@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 from functools import wraps
-from sqlalchemy import False_, ForeignKey, String, select
+from sqlalchemy import ForeignKey, String, select
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -12,6 +12,7 @@ from typing import Optional
 
 from crm_app.user.models.base import Base, intpk, required_name, timestamp
 from crm_app.crm.models.customer import Customer, Event, Contract
+from crm_app.crm.models.element_administratif import Address
 
 load_dotenv()
 
@@ -146,22 +147,48 @@ class User(Base):
     }
 
     @Authentication.is_authenticated
-    def get_all_customers(self, session):
+    def get_all_customers(self, session) -> list:
         # Function return all Custumers.
         customers = session.scalars(select(Customer)).all()
         return customers
 
     @Authentication.is_authenticated
-    def get_all_contracts(self, session):
+    def get_all_contracts(self, session) -> list:
         # Function return all Contracts.
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
     @Authentication.is_authenticated
-    def get_all_events(self, session):
+    def get_all_events(self, session) -> list:
         # Function return all Events.
         events = session.scalars(select(Event)).all()
         return events
+
+    @Authentication.is_authenticated
+    def create_new_address(self, session, address_info: dict):
+        """
+        Function add a new Address to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): Address info.
+        """
+        try:
+            new_address = Address(
+                number=address_info["number"],
+                street=address_info["street"],
+                city=address_info["city"],
+                postal_code=address_info["postal_code"],
+                country=address_info["country"],
+                note=address_info["note"],
+            )
+            session.add(new_address)
+
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
+            return new_address
 
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
@@ -178,7 +205,7 @@ class Supporter(User):
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
 
     @Authentication.is_authenticated
-    def get_event_of_supporter(self, session):
+    def get_event_of_supporter(self, session) -> list:
         # Function return all contracts of user.
         contracts_list = session.scalars(select(Event).where(Event.supporter == session.current_user)).all()
         return contracts_list
@@ -206,16 +233,105 @@ class Manager(User):
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
         return event_without_supporter
 
-    def create_colaborator(self):
-        pass
+    @Authentication.is_authenticated
+    def create_new_manager(self, session, user_info: dict):
+        """
+        Function add a new Manager to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        try:
+            new_manager = Manager(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
+            )
+            session.add(new_manager)
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
+            return new_manager
+
+    @Authentication.is_authenticated
+    def create_new_seller(self, session, user_info: dict):
+        """
+        Function add a new Seller to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        try:
+            new_seller = Seller(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
+            )
+            session.add(new_seller)
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
+            return new_seller
+
+    @Authentication.is_authenticated
+    def create_new_supporter(self, session, user_info: dict) -> Supporter:
+        """
+        Function add a new Supporter to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): user info.
+        """
+        try:
+            new_supporter = Supporter(
+                name=user_info["name"],
+                email_address=user_info["email_address"],
+                phone_number=user_info["phone_number"],
+                password=user_info["password"],
+            )
+            session.add(new_supporter)
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
+            return new_supporter
+
+    @Authentication.is_authenticated
+    def create_new_contract(self, session, contract_info: dict) -> Contract:
+        """
+        Function add a new contract to database.
+
+        Args:
+            session (_type_): database session
+            contract (dict): contract info.
+        """
+        try:
+            contract = Contract(
+                total_amount=contract_info["total_amount"],
+                remaining=contract_info["remaining"],
+                signed_contract=contract_info["signed_contract"],
+                customer=contract_info["customer"],
+            )
+            session.add(contract)
+            contract.seller = contract_info["customer"].seller_contact
+
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        else:
+            session.commit()
+            return contract
 
     def update_colaborator(self, colaborator):
         pass
 
     def delete_colaborator(self, colaborator):
-        pass
-
-    def create_contract(self):
         pass
 
     def update_contract(self, contract):
@@ -239,37 +355,96 @@ class Seller(User):
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
 
     @Authentication.is_authenticated
-    def get_all_clients_of_user(self, session):
+    def get_all_clients_of_user(self, session) -> list:
         # Function return all clients of user.
         customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
         return customers_list
 
     @Authentication.is_authenticated
-    def get_all_contracts_of_user(self, session):
+    def get_all_contracts_of_user(self, session) -> list:
         # Function return all contracts of user.
         contracts_list = session.scalars(select(Contract).where(Contract.seller == session.current_user)).all()
         return contracts_list
 
     @Authentication.is_authenticated
-    def get_unsigned_contracts(self, session):
+    def get_all_contracts_of_user_without_event(self, session) -> list:
+        # The function returns all contracts signed by the seller that are not linked to an event.
+        available_contracts_list = session.scalars(
+            select(Contract).where(
+                (Contract.seller == session.current_user)
+                & (Contract.signed_contract == True)
+                & (Contract.event == None)
+            )
+        ).all()
+        return available_contracts_list
+
+    @Authentication.is_authenticated
+    def get_unsigned_contracts(self, session) -> list:
         # Function return all unsigned contracts.
         unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
         return unsigned_contracts_list
 
     @Authentication.is_authenticated
-    def get_unpayed_contracts(self, session):
+    def get_unpayed_contracts(self, session) -> list:
         # Function return all unpayed contracts.
         unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
         return unpayed_contracts_list
 
-    def create_customer(self):
-        pass
+    @Authentication.is_authenticated
+    def create_new_customer(self, session, customer_info: dict) -> Customer:
+        try:
+            new_customer = Customer(
+                name=customer_info["name"],
+                email_address=customer_info["email_address"],
+                phone_number=customer_info["phone_number"],
+                company=customer_info["company"],
+                seller_contact=session.current_user,
+            )
+            session.add(new_customer)
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        else:
+            session.commit()
+            return new_customer
+
+    @Authentication.is_authenticated
+    def create_new_event(self, session, event_info: dict) -> Event:
+        """
+        Function add a new eventto database.
+
+        Args:
+            session (_type_): _description_
+            event_info (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            # get customer of new event.
+            customer = event_info["contract"].customer
+            new_event = Event(
+                name=event_info["name"],
+                date_start=event_info["date_start"],
+                date_end=event_info["date_end"],
+                attendees=event_info["attendees"],
+                note=event_info["note"],
+                contract=event_info["contract"],
+                supporter=event_info["supporter"],
+                address=event_info["address"],
+            )
+            new_event.customer = customer
+            session.add(new_event)
+
+        except (KeyError, ValueError) as exc:
+            print(exc)
+            return None
+        else:
+            session.commit()
+            return new_event
 
     def update_customer(self, customer):
         pass
 
     def update_contract(self, contract):
-        pass
-
-    def create_event(self):
         pass
