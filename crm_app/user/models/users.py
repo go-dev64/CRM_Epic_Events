@@ -378,8 +378,6 @@ class Seller(User):
         except (KeyError, ValueError) as exc:
             print(exc)
             return None
-        except:
-            return None
         else:
             session.commit()
             return new_customer
