@@ -5,14 +5,14 @@ import os
 from dotenv import load_dotenv
 from functools import wraps
 from sqlalchemy import ForeignKey, String, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from typing import Optional, Self
+from typing import Optional
 
 from crm_app.user.models.base import Base, intpk, required_name, timestamp
 from crm_app.crm.models.customer import Customer, Event, Contract
+from crm_app.crm.models.element_administratif import Address
 
 load_dotenv()
 
@@ -147,22 +147,48 @@ class User(Base):
     }
 
     @Authentication.is_authenticated
-    def get_all_customers(self, session):
+    def get_all_customers(self, session) -> list:
         # Function return all Custumers.
         customers = session.scalars(select(Customer)).all()
         return customers
 
     @Authentication.is_authenticated
-    def get_all_contracts(self, session):
+    def get_all_contracts(self, session) -> list:
         # Function return all Contracts.
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
     @Authentication.is_authenticated
-    def get_all_events(self, session):
+    def get_all_events(self, session) -> list:
         # Function return all Events.
         events = session.scalars(select(Event)).all()
         return events
+
+    @Authentication.is_authenticated
+    def create_new_address(self, session, address_info: dict):
+        """
+        Function add a new Address to database.
+
+        Args:
+            session (_type_): database session
+            user_info (dict): Address info.
+        """
+        try:
+            new_address = Address(
+                number=address_info["number"],
+                street=address_info["street"],
+                city=address_info["city"],
+                postal_code=address_info["postal_code"],
+                country=address_info["country"],
+                note=address_info["note"],
+            )
+            session.add(new_address)
+
+        except (KeyError, ValueError):
+            return None
+        else:
+            session.commit()
+            return new_address
 
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
@@ -208,7 +234,7 @@ class Manager(User):
         return event_without_supporter
 
     @Authentication.is_authenticated
-    def create_new_manager(self, session, user_info: dict) -> Self:
+    def create_new_manager(self, session, user_info: dict):
         """
         Function add a new Manager to database.
 

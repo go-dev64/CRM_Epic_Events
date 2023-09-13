@@ -2,7 +2,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy import select
 from crm_app.crm.models.element_administratif import Contract
-from crm_app.user.models.users import Authentication, Event, Manager, Seller, Supporter, User
+from crm_app.user.models.users import Authentication, Event, Manager, Seller, Supporter, User, Address
 from crm_app.crm.models.customer import Customer
 
 
@@ -54,6 +54,25 @@ class TestUserRead:
             events_list = current_user.get_all_events(session=session)
             result_excepted = 2
             assert len(events_list) == result_excepted
+
+    def test_create_new_address(self, db_session, users, address, current_user_is_user):
+        # test should return a new address in address list.
+        with db_session as session:
+            users
+            address = address
+            current_user = current_user_is_user
+            address_info = {
+                "number": 12,
+                "street": "street",
+                "city": "city",
+                "postal_code": 45398,
+                "country": "france",
+                "note": "une note",
+            }
+            new_address = current_user.create_new_address(session=session, address_info=address_info)
+            address_list = session.scalars(select(Address)).all()
+            result_excepted = 2
+            assert len(address_list) == result_excepted
 
 
 class TestManager:
