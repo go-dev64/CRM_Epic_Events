@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 from functools import wraps
-from sqlalchemy import ForeignKey, String, select
+from sqlalchemy import ForeignKey, String, delete, insert, select
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -197,7 +197,7 @@ class User(Base):
 class Supporter(User):
     __tablename__ = "supporter_table"
 
-    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id", ondelete="CASCADE"), primary_key=True)
 
     # listes des evenements gerer( one-to-many)
     events: Mapped[list["Event"]] = relationship(back_populates="supporter")
@@ -217,7 +217,7 @@ class Supporter(User):
 class Manager(User):
     __tablename__ = "manager_table"
 
-    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id", ondelete="CASCADE"), primary_key=True)
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
@@ -328,11 +328,49 @@ class Manager(User):
             session.commit()
             return contract
 
-    def update_colaborator(self, colaborator):
-        pass
+    @Authentication.is_authenticated
+    def update_user(self, session, collaborator, update_attribute: str, new_value) -> None:
+        """
+        This function update a attribut user.
 
-    def delete_colaborator(self, colaborator):
-        pass
+        Args:
+            session (_type_): _description_
+            colablorator (_type_): a user , Manager, Seller or Supporter.
+            update_attribute (str): This attribut should be name or emmail_address or phone_number or password.
+            new_value (_type_): new value of update attribute.
+        """
+        setattr(collaborator, update_attribute, new_value)
+        session.commit()
+
+    @Authentication.is_authenticated
+    def change_user_department(self, session, collaborator, new_department: str):
+        """
+        This function switch user of department.
+        First, it obtaints informations about the user, then deletes the user, and creates a new user,
+        with the recovered informations, in the new department.
+
+        Args:
+            session (_type_): _description_
+            collaborator (_type_): User to move of department.
+            new_department (str / lowercase): new_department : manager, seller or supporter.
+
+        Returns:
+            _type_: a user with a class of new department.
+        """
+        user_info = {
+            "name": collaborator.name,
+            "email_address": collaborator.email_address,
+            "phone_number": collaborator.phone_number,
+            "password": collaborator.password,
+        }
+        self.delete_collaborator(session=session, collaborator=collaborator)
+        match new_department:
+            case "manager":
+                return self.create_new_manager(session=session, user_info=user_info)
+            case "seller":
+                return self.create_new_seller(session=session, user_info=user_info)
+            case "supporter":
+                return self.create_new_supporter(session=session, user_info=user_info)
 
     def update_contract(self, contract):
         pass
@@ -340,11 +378,15 @@ class Manager(User):
     def update_event(self, event):
         pass
 
+    def delete_collaborator(self, session, collaborator) -> None:
+        session.execute(delete(User).where(User.id == collaborator.id))
+        session.commit()
+
 
 class Seller(User):
     __tablename__ = "seller_table"
 
-    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
+    id: Mapped[intpk] = mapped_column(ForeignKey("user_table.id", ondelete="CASCADE"), primary_key=True)
 
     __mapper_args__ = {"polymorphic_identity": "seller_table"}
 
