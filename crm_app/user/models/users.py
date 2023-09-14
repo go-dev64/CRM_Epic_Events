@@ -372,6 +372,7 @@ class Manager(User):
             case "supporter":
                 return self.create_new_supporter(session=session, user_info=user_info)
 
+    @Authentication.is_authenticated
     def update_contract(self, session, contract, attribute_update: str, new_value) -> None:
         """
         Function update a attribute of contract.
