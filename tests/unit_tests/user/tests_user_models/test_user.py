@@ -204,7 +204,9 @@ class TestManager:
     def test_update_departement(
         self, db_session, users, current_user_is_manager, new_department, new_class_department, old_department
     ):
-        # Test should change a user of department.
+        # Test should change a user of department. Nomber user is same.
+        # The number of user per department changes = 2.
+
         with db_session as session:
             user = users[old_department]
             id = user.id
