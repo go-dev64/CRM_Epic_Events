@@ -392,8 +392,9 @@ class Manager(User):
         setattr(contract, attribute_update, new_value)
         session.commit()
 
-    def update_event(self, event):
-        pass
+    def update_event_supporter(self, session, event, new_supporter) -> None:
+        setattr(event, "supporter", new_supporter)
+        session.commit()
 
     def delete_collaborator(self, session, collaborator) -> None:
         session.execute(delete(User).where(User.id == collaborator.id))

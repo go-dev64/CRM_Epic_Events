@@ -250,6 +250,16 @@ class TestManager:
             )
             assert getattr(contract, attribute_update) == new_value
 
+    def test_update_event_supporter(self, db_session, events, current_user_is_manager):
+        # Test should return a event with a new supporter.
+        with db_session as session:
+            event = events[0]
+            supporter = session.scalars(select(Supporter)).first()
+            assert event.supporter == None
+            current_user = current_user_is_manager
+            current_user.update_event_supporter(session=session, event=event, new_supporter=supporter)
+            assert getattr(event, "supporter") == supporter
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
