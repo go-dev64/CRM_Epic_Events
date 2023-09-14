@@ -372,8 +372,24 @@ class Manager(User):
             case "supporter":
                 return self.create_new_supporter(session=session, user_info=user_info)
 
-    def update_contract(self, contract):
-        pass
+    def update_contract(self, session, contract, attribute_update: str, new_value) -> None:
+        """
+        Function update a attribute of contract.
+        If attribute_uptade  is "customer",  the contract's seller attribut will be updated
+        to match the customer's seller.
+
+        Args:
+            session (_type_): _description_
+            contract (_type_): Contract to be updated.
+            attribute_update (str): Attribute to be updated.
+            new_value (_type_): New value of attribute to be updated.
+        """
+        if attribute_update == "customer":
+            seller = new_value.seller_contact
+            setattr(contract, "seller", seller)
+
+        setattr(contract, attribute_update, new_value)
+        session.commit()
 
     def update_event(self, event):
         pass
