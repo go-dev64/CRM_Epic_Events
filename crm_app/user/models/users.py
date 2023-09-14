@@ -329,12 +329,34 @@ class Manager(User):
             return contract
 
     @Authentication.is_authenticated
-    def update_user(self, session, colaborator, update_attribute, new_value):
-        setattr(colaborator, update_attribute, new_value)
+    def update_user(self, session, collaborator, update_attribute: str, new_value) -> None:
+        """
+        This function update a attribut user.
+
+        Args:
+            session (_type_): _description_
+            colablorator (_type_): a user , Manager, Seller or Supporter.
+            update_attribute (str): This attribut should be name or emmail_address or phone_number or password.
+            new_value (_type_): new value of update attribute.
+        """
+        setattr(collaborator, update_attribute, new_value)
         session.commit()
 
     @Authentication.is_authenticated
-    def change_user_department(self, session, collaborator, new_department):
+    def change_user_department(self, session, collaborator, new_department: str):
+        """
+        This function switch user of department.
+        First, it obtaints informations about the user, then deletes the user, and creates a new user,
+        with the recovered informations, in the new department.
+
+        Args:
+            session (_type_): _description_
+            collaborator (_type_): User to move of department.
+            new_department (str / lowercase): new_department : manager, seller or supporter.
+
+        Returns:
+            _type_: a user with a class of new department.
+        """
         user_info = {
             "name": collaborator.name,
             "email_address": collaborator.email_address,

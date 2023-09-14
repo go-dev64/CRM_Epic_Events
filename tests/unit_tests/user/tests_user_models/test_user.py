@@ -192,26 +192,33 @@ class TestManager:
             update_attribute = "name"
             new_value = "toto"
             current_user.update_user(
-                session=session, colaborator=user, update_attribute=update_attribute, new_value=new_value
+                session=session, collaborator=user, update_attribute=update_attribute, new_value=new_value
             )
             test = session.scalars(select(User).where(User.id == user.id)).all()
             assert test[0].name == new_value
 
-    def test_update_departement(self, db_session, users, current_user_is_manager):
+    @pytest.mark.parametrize(
+        "new_department, new_class_department, old_department",
+        [("manager", Manager, 1), ("seller", Seller, 2), ("supporter", Supporter, 0)],
+    )
+    def test_update_departement(
+        self, db_session, users, current_user_is_manager, new_department, new_class_department, old_department
+    ):
         # Test should change a user of department.
         with db_session as session:
-            user = users[1]
+            user = users[old_department]
             id = user.id
             current_user = current_user_is_manager
+
             new_user = current_user.change_user_department(
-                session=session, collaborator=user, new_department="manager"
+                session=session, collaborator=user, new_department=new_department
             )
 
-            list_manager = session.scalars(select(Manager)).all()
-            list_seller = session.scalars(select(Seller)).all()
-            # assert new_user.department == "manager_table"
-            assert len(list_manager) == 2
-            assert len(list_seller) == 0
+            list_of_department = session.scalars(select(new_class_department)).all()
+            list_user = session.scalars(select(User)).all()
+
+            assert len(list_of_department) == 2
+            assert len(list_user) == 3
 
 
 class TestSeller:
