@@ -222,6 +222,23 @@ class TestManager:
             assert len(list_of_department) == 2
             assert len(list_user) == 3
 
+    def test_update_contract(self, db_session, contracts, current_user_is_manager):
+        # Test should return a updated contract.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_manager
+            attibute_contract = {
+                "total_amount": int,
+                "remaining": int,
+                "signed_contract": bool,
+                "event": "relation",
+                "seller/seller_id": "seller.customer",
+                "customer": "customer",
+            }
+            updated_contract = current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
