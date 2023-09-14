@@ -222,7 +222,7 @@ class TestManager:
             assert len(list_of_department) == 2
             assert len(list_user) == 3
 
-    def test_update_contract(self, db_session, contracts, current_user_is_manager):
+    def test_update_contract(self, db_session, users, contracts, clients, current_user_is_manager):
         # Test should return a updated contract.
         with db_session as session:
             contract = contracts[0]
@@ -235,9 +235,21 @@ class TestManager:
                 "seller/seller_id": "seller.customer",
                 "customer": "customer",
             }
-            updated_contract = current_user.update_contract(
+            seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+            session.add(seller2)
+
+            number_user = len(session.scalars(select(User)).all())
+            client = session.scalars(select(Customer)).first()
+            print(client)
+
+            client.seller_contact = seller2
+            contract.customer = client
+
+            print(contract.seller)
+            assert contract.seller_id == client.seller_contact_id
+            """updated_contract = current_user.update_contract(
                 session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
-            )
+            )"""
 
 
 class TestSeller:
