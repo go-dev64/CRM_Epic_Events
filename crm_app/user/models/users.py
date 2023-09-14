@@ -373,7 +373,7 @@ class Manager(User):
                 return self.create_new_supporter(session=session, user_info=user_info)
 
     @Authentication.is_authenticated
-    def update_contract(self, session, contract, attribute_update: str, new_value) -> None:
+    def update_contract(self, session, contract: Contract, attribute_update: str, new_value) -> None:
         """
         Function update a attribute of contract.
         If attribute_uptade  is "customer",  the contract's seller attribut will be updated
@@ -392,10 +392,19 @@ class Manager(User):
         setattr(contract, attribute_update, new_value)
         session.commit()
 
-    def update_event(self, event):
-        pass
+    def update_event_supporter(self, session, event: Event, new_supporter: Supporter) -> None:
+        """
+        Function updates a event supporter.
 
-    def delete_collaborator(self, session, collaborator) -> None:
+        Args:
+            session (_type_): _description_
+            event (class Event): Event to be updated.
+            new_supporter (class Supporter): New Supporter od event
+        """
+        setattr(event, "supporter", new_supporter)
+        session.commit()
+
+    def delete_collaborator(self, session, collaborator: User) -> None:
         session.execute(delete(User).where(User.id == collaborator.id))
         session.commit()
 

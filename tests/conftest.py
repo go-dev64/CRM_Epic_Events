@@ -129,6 +129,7 @@ def events(db_session, contracts, users, clients, address):
     )
     db_session.add_all([event_1, event_2])
     db_session.commit()
+    return event_1, event_2
 
 
 @pytest.fixture(scope="function")
