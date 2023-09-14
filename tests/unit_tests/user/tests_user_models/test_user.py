@@ -222,6 +222,34 @@ class TestManager:
             assert len(list_of_department) == 2
             assert len(list_user) == 3
 
+    def test_update_contract_with_change_customer(self, db_session, contracts, clients, current_user_is_manager):
+        # Test should return a updated contract with a same seller for customer and contract.
+        with db_session as session:
+            contract = contracts[0]
+            client = clients[0]
+            current_user = current_user_is_manager
+            seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+            session.add(seller2)
+            client.seller_contact = seller2
+            contract.customer = client
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update="customer", new_value=client
+            )
+            assert contract.seller_id == contract.customer.seller_contact_id
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value", [("total_amont", 500000), ("remaining", 100), ("signed_contract", True)]
+    )
+    def test_update_contract(self, db_session, contracts, current_user_is_manager, attribute_update, new_value):
+        # Test should return a updated contract.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_manager
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) == new_value
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):

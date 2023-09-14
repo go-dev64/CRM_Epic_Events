@@ -25,3 +25,6 @@ class Customer(Base):
 
     seller_contact_id = mapped_column(ForeignKey("seller_table.id"))
     seller_contact = relationship("Seller", back_populates="customers")
+
+    def __repr__(self) -> str:
+        return f"Client: {self.name} - company: {self.company} - contact Epic Event: {self.seller_contact}"
