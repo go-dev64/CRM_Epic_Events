@@ -56,6 +56,7 @@ def users(db_session):
 @pytest.fixture(scope="function")
 def clients(db_session, users):
     users = users
+    db_session.commit()
     client_1 = Customer(
         name="client_1",
         email_address="clien_1@123.com",
