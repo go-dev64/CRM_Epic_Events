@@ -270,9 +270,7 @@ class TestManager:
             session.add(seller2)
             current_user.update_seller_contact_of_customer(session=session, customer=client, new_seller=seller2)
             assert client.seller_contact == seller2
-
-            print(contract.customer)
-            print(contract.seller)
+            assert contract.seller == client.seller_contact
 
 
 class TestSeller:

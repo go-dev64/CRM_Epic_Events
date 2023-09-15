@@ -391,9 +391,11 @@ class Manager(User):
 
         setattr(contract, attribute_update, new_value)
         session.commit()
-        
-    def  update_seller_contact_of_customer(self, session, customer, new_seller):
+
+    def update_seller_contact_of_customer(self, session, customer, new_seller):
         setattr(customer, "seller_contact", new_seller)
+        for contract in customer.contracts:
+            setattr(contract, "seller", customer.seller_contact)
         session.commit()
 
     def update_event_supporter(self, session, event: Event, new_supporter: Supporter) -> None:
