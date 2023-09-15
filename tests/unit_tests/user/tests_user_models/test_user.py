@@ -413,10 +413,33 @@ class TestSeller:
         with db_session as session:
             contract = contracts[0]
             current_user = current_user_is_seller
-            current_user.update_customer(
+            current_user.update_contract(
                 session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
             )
             assert getattr(contract, attribute_update) == new_value
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [
+            ("created_date", "toto"),
+            ("seller", "234"),
+            ("seller_id", "1616686"),
+            ("event", "the company"),
+            ("customer", "the company"),
+            ("customer_id", "the company"),
+        ],
+    )
+    def test_update_contract_with_forbidenn_attribute(
+        self, db_session, contracts, current_user_is_seller, attribute_update, new_value
+    ):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_seller
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) != new_value
 
 
 class TestSupporter:

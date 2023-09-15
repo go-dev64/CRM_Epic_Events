@@ -542,7 +542,7 @@ class Seller(User):
             attribute_update (str):  Attribute of Instance to be updated.
             new_value (_type_): New value of attribute to be updated.
         """
-        forbidden_attribut = ["created_date", "seller", "seller_id", "events", "customer", "customer_id"]
+        forbidden_attribut = ["created_date", "seller", "seller_id", "event", "customer", "customer_id"]
         if attribute_update not in forbidden_attribut:
             setattr(contract, attribute_update, new_value)
             session.commit()
