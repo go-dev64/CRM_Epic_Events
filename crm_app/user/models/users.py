@@ -511,8 +511,11 @@ class Seller(User):
             session.commit()
             return new_event
 
-    def update_customer(self, customer):
-        pass
+    def update_customer(self, session, customer: Customer, attribute_update: str, new_value) -> None:
+        # Function update customer attribute.
+        setattr(customer, attribute_update, new_value)
+        customer.set_updated_date()
+        session.commit()
 
     def update_contract(self, contract):
         pass
