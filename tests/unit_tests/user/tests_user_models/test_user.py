@@ -364,6 +364,18 @@ class TestSeller:
             assert len(event_list) == 1
             assert new_event.customer == contract.customer
 
+    # ------------- test update-------------- #
+
+    def test_update_customers(self, db_session, clients, current_user_is_seller):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            customer = clients[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(customer, attribute_update) == new_value
+
 
 class TestSupporter:
     def _user__current(self, session, user_type):
