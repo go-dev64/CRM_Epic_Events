@@ -364,6 +364,83 @@ class TestSeller:
             assert len(event_list) == 1
             assert new_event.customer == contract.customer
 
+    # ------------- test update-------------- #
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [("name", "toto"), ("email_address", "234"), ("phone_number", "1616686"), ("company", "the company")],
+    )
+    def test_update_customers(self, db_session, clients, current_user_is_seller, attribute_update, new_value):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            customer = clients[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(customer, attribute_update) == new_value
+            assert customer.updated_date != None
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [
+            ("created_date", "toto"),
+            ("seller_contact", "234"),
+            ("seller_contact_id", "1616686"),
+            ("events", "the company"),
+            ("contracts", "the company"),
+        ],
+    )
+    def test_update_customer_with_bad_attribute(
+        self, db_session, clients, current_user_is_seller, attribute_update, new_value
+    ):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            customer = clients[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(customer, attribute_update) != new_value
+            assert customer.updated_date == None
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [("total_amount", 11111111), ("remaining", 0), ("signed_contract", True)],
+    )
+    def test_update_contract(self, db_session, contracts, current_user_is_seller, attribute_update, new_value):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_seller
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) == new_value
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [
+            ("created_date", "toto"),
+            ("seller", "234"),
+            ("seller_id", "1616686"),
+            ("event", "the company"),
+            ("customer", "the company"),
+            ("customer_id", "the company"),
+        ],
+    )
+    def test_update_contract_with_forbidenn_attribute(
+        self, db_session, contracts, current_user_is_seller, attribute_update, new_value
+    ):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_seller
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) != new_value
+
 
 class TestSupporter:
     def _user__current(self, session, user_type):

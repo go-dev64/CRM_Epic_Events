@@ -511,8 +511,40 @@ class Seller(User):
             session.commit()
             return new_event
 
-    def update_customer(self, customer):
-        pass
+    def update_customer(self, session, customer: Customer, attribute_update: str, new_value) -> None:
+        """
+        Function updates an attribute of Customer.
+        If attribute update is in the forbidden attribut, the function pass and customer will be bot updated.
+        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
 
-    def update_contract(self, contract):
-        pass
+        Args:
+            session (_type_): _description_
+            customer (Customer): Instance of Customer class to be updated.
+            attribute_update (str): Attribute of Instance to be updated.
+            new_value (_type_): New value of attribute to be updated.
+        """
+        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
+        if attribute_update not in forbidden_attribut:
+            setattr(customer, attribute_update, new_value)
+            customer.set_updated_date()
+            session.commit()
+        else:
+            pass
+
+    def update_contract(self, session, contract: Contract, attribute_update: str, new_value) -> None:
+        """
+        Function update an attribut of contract.
+        If attribute update is in the forbidden attribut, the function pass and customer will be bot updated.
+        forbidden_attribut= ["created_date", "seller", "seller_id", "events", "customer", "customer_id"]
+        Args:
+            session (_type_): _description_
+            contract (Contract): Instance of Contract class to be updated.
+            attribute_update (str):  Attribute of Instance to be updated.
+            new_value (_type_): New value of attribute to be updated.
+        """
+        forbidden_attribut = ["created_date", "seller", "seller_id", "event", "customer", "customer_id"]
+        if attribute_update not in forbidden_attribut:
+            setattr(contract, attribute_update, new_value)
+            session.commit()
+        else:
+            pass
