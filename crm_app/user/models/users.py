@@ -392,7 +392,17 @@ class Manager(User):
         setattr(contract, attribute_update, new_value)
         session.commit()
 
-    def update_seller_contact_of_customer(self, session, customer, new_seller):
+    def update_seller_contact_of_customer(self, session, customer: Customer, new_seller):
+        """
+        Function update a seller_contact attribute.
+        the function will also update the seller attribute of all the customer's contracts.
+
+        Args:
+            session (_type_): _description_
+            customer (Customer): Instance Customer class to be updated.
+            new_seller (_type_): New seller of Instance Customer class.
+        """
+
         setattr(customer, "seller_contact", new_seller)
         for contract in customer.contracts:
             setattr(contract, "seller", customer.seller_contact)
