@@ -404,6 +404,20 @@ class TestSeller:
             assert getattr(customer, attribute_update) != new_value
             assert customer.updated_date == None
 
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [("total_amount", 11111111), ("remaining", 0), ("signed_contract", True)],
+    )
+    def test_update_contract(self, db_session, contracts, current_user_is_seller, attribute_update, new_value):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) == new_value
+
 
 class TestSupporter:
     def _user__current(self, session, user_type):
