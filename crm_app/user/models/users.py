@@ -513,9 +513,12 @@ class Seller(User):
 
     def update_customer(self, session, customer: Customer, attribute_update: str, new_value) -> None:
         # Function update customer attribute.
-        setattr(customer, attribute_update, new_value)
-        customer.set_updated_date()
-        session.commit()
+        if attribute_update not in ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]:
+            setattr(customer, attribute_update, new_value)
+            customer.set_updated_date()
+            session.commit()
+        else:
+            pass
 
     def update_contract(self, contract):
         pass

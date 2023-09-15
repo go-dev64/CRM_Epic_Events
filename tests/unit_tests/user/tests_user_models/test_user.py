@@ -375,13 +375,34 @@ class TestSeller:
         with db_session as session:
             customer = clients[0]
             current_user = current_user_is_seller
-            updated_date_before = customer.updated_date
             current_user.update_customer(
                 session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
             )
             assert getattr(customer, attribute_update) == new_value
             assert customer.updated_date != None
-            print(customer.updated_date)
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [
+            ("created_date", "toto"),
+            ("seller_contact", "234"),
+            ("seller_contact_id", "1616686"),
+            ("events", "the company"),
+            ("contracts", "the company"),
+        ],
+    )
+    def test_update_customer_with_bad_attribute(
+        self, db_session, clients, current_user_is_seller, attribute_update, new_value
+    ):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            customer = clients[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(customer, attribute_update) != new_value
+            assert customer.updated_date == None
 
 
 class TestSupporter:
