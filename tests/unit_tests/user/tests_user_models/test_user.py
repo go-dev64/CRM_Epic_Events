@@ -260,6 +260,18 @@ class TestManager:
             current_user.update_event_supporter(session=session, event=event, new_supporter=supporter)
             assert getattr(event, "supporter") == supporter
 
+    def test_update_seller_contact_of_customer(
+        self, db_session, clients, current_user_is_manager, attribute_update, new_value
+    ):
+        # Test should return a updated contract.
+        with db_session as session:
+            client = clients[0]
+            current_user = current_user_is_manager
+            seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+            session.add(seller2)
+            current_user.update_seller_contact_of_customer(session=session, customer=client, new_seller=new_seller)
+            assert client.seller_contact == seller2
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
