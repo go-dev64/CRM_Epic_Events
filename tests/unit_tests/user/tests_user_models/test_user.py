@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 import pytest
-from sqlalchemy import select
+from sqlalchemy import Identity, delete, select, update
 from crm_app.crm.models.element_administratif import Contract
 from crm_app.user.models.users import Authentication, Event, Manager, Seller, Supporter, User, Address
 from crm_app.crm.models.customer import Customer
@@ -182,6 +182,96 @@ class TestManager:
             assert len(contract_list) == result_accepted
             assert contract.seller == client.seller_contact
 
+    # -------------- test of update --------------------- #
+
+    def test_update_user(self, db_session, users, current_user_is_manager):
+        # Test should update a  attribut of user.
+        with db_session as session:
+            user = users[1]
+            current_user = current_user_is_manager
+            update_attribute = "name"
+            new_value = "toto"
+            current_user.update_user(
+                session=session, collaborator=user, update_attribute=update_attribute, new_value=new_value
+            )
+            test = session.scalars(select(User).where(User.id == user.id)).all()
+            assert test[0].name == new_value
+
+    @pytest.mark.parametrize(
+        "new_department, new_class_department, old_department",
+        [("manager", Manager, 1), ("seller", Seller, 2), ("supporter", Supporter, 0)],
+    )
+    def test_update_departement(
+        self, db_session, users, current_user_is_manager, new_department, new_class_department, old_department
+    ):
+        # Test should change a user of department. Nomber user is same.
+        # The number of user per department changes = 2.
+
+        with db_session as session:
+            user = users[old_department]
+            id = user.id
+            current_user = current_user_is_manager
+
+            new_user = current_user.change_user_department(
+                session=session, collaborator=user, new_department=new_department
+            )
+
+            list_of_department = session.scalars(select(new_class_department)).all()
+            list_user = session.scalars(select(User)).all()
+
+            assert len(list_of_department) == 2
+            assert len(list_user) == 3
+
+    def test_update_contract_with_change_customer(self, db_session, contracts, clients, current_user_is_manager):
+        # Test should return a updated contract with a same seller for customer and contract.
+        with db_session as session:
+            contract = contracts[0]
+            client = clients[0]
+            current_user = current_user_is_manager
+            seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+            session.add(seller2)
+            client.seller_contact = seller2
+            contract.customer = client
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update="customer", new_value=client
+            )
+            assert contract.seller_id == contract.customer.seller_contact_id
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value", [("total_amont", 500000), ("remaining", 100), ("signed_contract", True)]
+    )
+    def test_update_contract(self, db_session, contracts, current_user_is_manager, attribute_update, new_value):
+        # Test should return a updated contract.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_manager
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) == new_value
+
+    def test_change_supporter_of_event(self, db_session, events, current_user_is_manager):
+        # Test should return a event with a new supporter.
+        with db_session as session:
+            event = events[0]
+            supporter = session.scalars(select(Supporter)).first()
+            assert event.supporter == None
+            current_user = current_user_is_manager
+            current_user.change_supporter_of_event(session=session, event=event, new_supporter=supporter)
+            assert getattr(event, "supporter") == supporter
+
+    def test_update_seller_contact_of_customer(self, db_session, clients, contracts, current_user_is_manager):
+        # Test should return a updated contract.
+        with db_session as session:
+            client = clients[0]
+            contract = contracts[0]
+            current_user = current_user_is_manager
+            seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+            session.add(seller2)
+            current_user.update_seller_contact_of_customer(session=session, customer=client, new_seller=seller2)
+            assert client.seller_contact == seller2
+            assert contract.seller == client.seller_contact
+
 
 class TestSeller:
     def test_get_all_clients_of_user(self, db_session, clients, current_user_is_seller):
@@ -286,6 +376,83 @@ class TestSeller:
             assert len(event_list) == 1
             assert new_event.customer == contract.customer
 
+    # ------------- test update-------------- #
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [("name", "toto"), ("email_address", "234"), ("phone_number", "1616686"), ("company", "the company")],
+    )
+    def test_update_customers(self, db_session, clients, current_user_is_seller, attribute_update, new_value):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            customer = clients[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(customer, attribute_update) == new_value
+            assert customer.updated_date != None
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [
+            ("created_date", "toto"),
+            ("seller_contact", "234"),
+            ("seller_contact_id", "1616686"),
+            ("events", "the company"),
+            ("contracts", "the company"),
+        ],
+    )
+    def test_update_customer_with_bad_attribute(
+        self, db_session, clients, current_user_is_seller, attribute_update, new_value
+    ):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            customer = clients[0]
+            current_user = current_user_is_seller
+            current_user.update_customer(
+                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(customer, attribute_update) != new_value
+            assert customer.updated_date == None
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [("total_amount", 11111111), ("remaining", 0), ("signed_contract", True)],
+    )
+    def test_update_contract(self, db_session, contracts, current_user_is_seller, attribute_update, new_value):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_seller
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) == new_value
+
+    @pytest.mark.parametrize(
+        "attribute_update, new_value",
+        [
+            ("created_date", "toto"),
+            ("seller", "234"),
+            ("seller_id", "1616686"),
+            ("event", "the company"),
+            ("customer", "the company"),
+            ("customer_id", "the company"),
+        ],
+    )
+    def test_update_contract_with_forbidenn_attribute(
+        self, db_session, contracts, current_user_is_seller, attribute_update, new_value
+    ):
+        # Test dhould return a customer updated.
+        with db_session as session:
+            contract = contracts[0]
+            current_user = current_user_is_seller
+            current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
+            )
+            assert getattr(contract, attribute_update) != new_value
+
 
 class TestSupporter:
     def _user__current(self, session, user_type):
@@ -302,3 +469,55 @@ class TestSupporter:
             event_list_of_user = current_user.get_event_of_supporter(session=session)
             result_excepted = 1
             assert len(event_list_of_user) == result_excepted
+
+    @pytest.mark.parametrize(
+        "attribute_updated, new_value",
+        [
+            ("name", "toto"),
+            ("date_start", datetime.now()),
+            ("date_end", datetime.now()),
+            ("attendees", 50),
+            ("notes", "un notes"),
+        ],
+    )
+    def test_update_event(self, db_session, events, current_user_is_supporter, attribute_updated, new_value):
+        # Test should return the updated event.
+        with db_session as session:
+            event = events[0]
+            current_user = current_user_is_supporter
+            current_user.update_event(
+                session=session, event=event, attribute_updated=attribute_updated, new_value=new_value
+            )
+            assert getattr(event, attribute_updated) == new_value
+
+    def test_update_address_event(self, db_session, events, current_user_is_supporter, address):
+        # Test should return the updated event.
+        with db_session as session:
+            event = events[0]
+            address = address
+            current_user = current_user_is_supporter
+            current_user.update_event(session=session, event=event, attribute_updated="address", new_value=address)
+            assert getattr(event, "address") == address
+
+    @pytest.mark.parametrize(
+        "attribute_updated, new_value",
+        [
+            ("customer_id", 1),
+            ("customer", "datetime.now()"),
+            ("contract_id", datetime.now()),
+            ("contract", 50),
+            ("supporter_id", "un notes"),
+            ("supporter", "un notes"),
+        ],
+    )
+    def test_update_event_with_forbidden_attribute(
+        self, db_session, events, current_user_is_supporter, attribute_updated, new_value
+    ):
+        # Test should return the updated event.
+        with db_session as session:
+            event = events[0]
+            current_user = current_user_is_supporter
+            current_user.update_event(
+                session=session, event=event, attribute_updated=attribute_updated, new_value=new_value
+            )
+            assert getattr(event, attribute_updated) != new_value
