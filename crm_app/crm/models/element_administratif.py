@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, ForeignKeyConstraint, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -47,6 +47,9 @@ class Contract(Base):
 
     customer_id: Mapped[int] = mapped_column(ForeignKey("customer_table.id"))
     customer = relationship("Customer", back_populates="contracts")
+
+    def __repr__(self) -> str:
+        return f"Contrant N°:{self.id} -Client: {self.customer.name} - created: {self.created_date} - signed:{self.signed_contract}"
 
 
 class Address(Base):

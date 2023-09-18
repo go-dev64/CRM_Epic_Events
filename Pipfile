@@ -12,11 +12,11 @@ python-dotenv = "*"
 factory-boy = "*"
 pytest-mock = "*"
 pytest-sqlalchemy = "*"
-pytest-sqlalchemy-mock = "*"
 alembic = "*"
 passlib = "*"
 argon2-cffi = "*"
 pyjwt = {extras = ["crypto"], version = "*"}
+mypy = "*"
 
 [dev-packages]
 
