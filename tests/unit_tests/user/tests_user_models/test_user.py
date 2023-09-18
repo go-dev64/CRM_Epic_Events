@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 import pytest
 from sqlalchemy import Identity, delete, select, update
 from crm_app.crm.models.element_administratif import Contract
@@ -250,14 +250,14 @@ class TestManager:
             )
             assert getattr(contract, attribute_update) == new_value
 
-    def test_update_event_supporter(self, db_session, events, current_user_is_manager):
+    def test_change_supporter_of_event(self, db_session, events, current_user_is_manager):
         # Test should return a event with a new supporter.
         with db_session as session:
             event = events[0]
             supporter = session.scalars(select(Supporter)).first()
             assert event.supporter == None
             current_user = current_user_is_manager
-            current_user.update_event_supporter(session=session, event=event, new_supporter=supporter)
+            current_user.change_supporter_of_event(session=session, event=event, new_supporter=supporter)
             assert getattr(event, "supporter") == supporter
 
     def test_update_seller_contact_of_customer(self, db_session, clients, contracts, current_user_is_manager):
@@ -469,12 +469,55 @@ class TestSupporter:
             event_list_of_user = current_user.get_event_of_supporter(session=session)
             result_excepted = 1
             assert len(event_list_of_user) == result_excepted
-            
-    def test_update_event(self, db_session, events, current_user_is_supporter):
+
+    @pytest.mark.parametrize(
+        "attribute_updated, new_value",
+        [
+            ("name", "toto"),
+            ("date_start", datetime.now()),
+            ("date_end", datetime.now()),
+            ("attendees", 50),
+            ("notes", "un notes"),
+        ],
+    )
+    def test_update_event(self, db_session, events, current_user_is_supporter, attribute_updated, new_value):
         # Test should return the updated event.
         with db_session as session:
-            event = events
+            event = events[0]
             current_user = current_user_is_supporter
-            current_user.update_event(session =session, event= event, attribute_updated= attribute_updated, new_value=new_value):
+            current_user.update_event(
+                session=session, event=event, attribute_updated=attribute_updated, new_value=new_value
+            )
             assert getattr(event, attribute_updated) == new_value
-        
+
+    def test_update_address_event(self, db_session, events, current_user_is_supporter, address):
+        # Test should return the updated event.
+        with db_session as session:
+            event = events[0]
+            address = address
+            current_user = current_user_is_supporter
+            current_user.update_event(session=session, event=event, attribute_updated="address", new_value=address)
+            assert getattr(event, "address") == address
+
+    @pytest.mark.parametrize(
+        "attribute_updated, new_value",
+        [
+            ("customer_id", 1),
+            ("customer", "datetime.now()"),
+            ("contract_id", datetime.now()),
+            ("contract", 50),
+            ("supporter_id", "un notes"),
+            ("supporter", "un notes"),
+        ],
+    )
+    def test_update_event_with_forbidden_attribute(
+        self, db_session, events, current_user_is_supporter, attribute_updated, new_value
+    ):
+        # Test should return the updated event.
+        with db_session as session:
+            event = events[0]
+            current_user = current_user_is_supporter
+            current_user.update_event(
+                session=session, event=event, attribute_updated=attribute_updated, new_value=new_value
+            )
+            assert getattr(event, attribute_updated) != new_value

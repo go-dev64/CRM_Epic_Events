@@ -210,8 +210,28 @@ class Supporter(User):
         contracts_list = session.scalars(select(Event).where(Event.supporter == session.current_user)).all()
         return contracts_list
 
-    def update_event(self, event):
-        pass
+    def update_event(self, session, event: Event, attribute_updated: str, new_value) -> None:
+        """
+        Function updates event.
+        If Attribute to be updated in forbidden attribute , the function pass.
+
+        Args:
+            session (_type_): _description_
+            event (Event class): Instance Event class to be updated.
+            attribute_updated (str): Attribute to be updated.
+            new_value (_type_): New value of attribute to be updated.
+        """
+        forbidden_attribute = [
+            "customer_id",
+            "customer",
+            "contract_id",
+            "contract",
+            "supporter_id",
+            "supporter",
+        ]
+        if attribute_updated not in forbidden_attribute:
+            setattr(event, attribute_updated, new_value)
+            session.commit()
 
 
 class Manager(User):
@@ -408,7 +428,7 @@ class Manager(User):
             setattr(contract, "seller", customer.seller_contact)
         session.commit()
 
-    def update_event_supporter(self, session, event: Event, new_supporter: Supporter) -> None:
+    def change_supporter_of_event(self, session, event: Event, new_supporter: Supporter) -> None:
         """
         Function updates a event supporter.
 
