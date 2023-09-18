@@ -3,7 +3,7 @@ import os
 import jwt
 import pytest
 from dotenv import load_dotenv
-from crm_app.user.models.users import Authentication, Manager, Seller, Supporter
+from crm.models.users import Authentication, Manager
 
 load_dotenv()
 

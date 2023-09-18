@@ -1,5 +1,5 @@
-from crm_app.user.models.authentiction import Authentication
-from crm_app.user.view.login_view import LoginView
+from crm.models.users import Authentication
+from crm.view.login_view import LoginView
 
 
 class UserController:

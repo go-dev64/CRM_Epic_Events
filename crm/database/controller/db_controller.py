@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker
 
-from crm_app.user.models.base import Base
-import crm_app.user.models.users
-import crm_app.crm.models.customer
-import crm_app.crm.models.element_administratif
+from crm.models.base import Base
+import crm.models.users
+import crm.models.customer
+import crm.models.element_administratif
 
 
 load_dotenv()

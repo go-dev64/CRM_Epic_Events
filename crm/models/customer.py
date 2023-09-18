@@ -4,8 +4,8 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from crm_app.crm.models.element_administratif import Event, Contract
-from crm_app.user.models.base import Base, intpk, required_name, timestamp
+from crm.models.element_administratif import Event, Contract
+from crm.models.base import Base, intpk, required_name, timestamp
 
 
 class Customer(Base):

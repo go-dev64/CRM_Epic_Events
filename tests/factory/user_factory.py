@@ -2,7 +2,7 @@ import factory
 from datetime import datetime
 
 import sqlalchemy
-from crm_app.user.models.users import Manager, Seller, Supporter, User
+from crm.models.users import Manager, Seller, Supporter, User
 import tests.conftest
 
 

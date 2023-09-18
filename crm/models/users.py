@@ -10,9 +10,9 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from typing import Optional
 
-from crm_app.user.models.base import Base, intpk, required_name, timestamp
-from crm_app.crm.models.customer import Customer, Event, Contract
-from crm_app.crm.models.element_administratif import Address
+from crm.models.base import Base, intpk, required_name, timestamp
+from crm.models.customer import Customer, Event, Contract
+from crm.models.element_administratif import Address
 
 load_dotenv()
 
