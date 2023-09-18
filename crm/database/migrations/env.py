@@ -36,10 +36,10 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from crm_app.user.models.base import Base
-import crm_app.user.models.users
-import crm_app.crm.models.customer
-import crm_app.crm.models.element_administratif
+from crm.models.base import Base
+import crm.models.users
+import crm.models.customer
+import crm.models.element_administratif
 
 target_metadata = Base.metadata
 
