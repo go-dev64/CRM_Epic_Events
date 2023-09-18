@@ -469,3 +469,12 @@ class TestSupporter:
             event_list_of_user = current_user.get_event_of_supporter(session=session)
             result_excepted = 1
             assert len(event_list_of_user) == result_excepted
+            
+    def test_update_event(self, db_session, events, current_user_is_supporter):
+        # Test should return the updated event.
+        with db_session as session:
+            event = events
+            current_user = current_user_is_supporter
+            current_user.update_event(session =session, event= event, attribute_updated= attribute_updated, new_value=new_value):
+            assert getattr(event, attribute_updated) == new_value
+        
