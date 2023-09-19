@@ -5,7 +5,7 @@ class ManagerController:
     auth = Authentication()
 
     def __init__(self) -> None:
-        self.manager_view = ViewManager()
+        pass
 
     @auth.is_authenticated
     def create_element(self, session):
