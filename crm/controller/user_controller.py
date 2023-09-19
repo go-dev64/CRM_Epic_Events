@@ -1,23 +1,76 @@
 from crm.models.users import Authentication
-from crm.view.login_view import LoginView
+from crm.controller.manager_controller import ManagerController
+from crm.controller.seller_controller import SellerController
+from crm.controller.supporter_manager import SupporterController
 
 
 class UserController:
-    def __init__(self, session) -> None:
-        self.session = session
-        self.auth = Authentication(self.session)
-        self.login_view = LoginView()
+    auth = Authentication()
 
-    def user_login(self):
+    def __init__(self) -> None:
+        self.manager_controller = ManagerController()
+        self.seller_controller = SellerController()
+        self.supporter_controller = SupporterController()
+
+    @auth.is_authenticated
+    def home_page(self, session):
         while True:
-            try:
-                msg = ""
-                email, password = self.login_view.get_user_email_and_password(msg=msg)
-                user = self.auth.login(email, password)
-                if user is None:
-                    raise Exception
-            except Exception:
-                msg = "Invalid Email or Password"
+            print("homepage")
+            print("input slect choise")
+            choice = "viewselect_choice"
+            match choice:
+                case 0:
+                    self.user_choice_is_creating(session=session)
+                case 1:
+                    self.user_choice_is_reading(session=session)
+                case 2:
+                    self.user_choice_is_updaiting(session=session)
+                case 3:
+                    self.user_choice_is_deleting(session=session)
+                case 4:
+                    break
 
-            else:
-                return user
+    @auth.is_authenticated
+    def user_choice_is_creating(self, session):
+        user_type = type(session.current_user).__name__
+        match user_type:
+            case "Manager":
+                self.manager_controller.create()
+            case "Seller":
+                self.seller_controller.create()
+            case "Supporter":
+                self.supporter_controller.create()
+
+    @auth.is_authenticated
+    def user_choice_is_updaiting(self, session):
+        pass
+
+    @auth.is_authenticated
+    def user_choice_is_reading(self, session):
+        user_type = type(session.current_user).__name__
+        match user_type:
+            case "Manager":
+                self.manager_controller.create()
+            case "Seller":
+                self.seller_controller.create()
+            case "Supporter":
+                self.supporter_controller.create()
+
+    @auth.is_authenticated
+    def user_choice_is_deleting(self, session):
+        pass
+
+    @auth.is_authenticated
+    def get_customer_list(self, session):
+        customer_list = session.current_user.get_all_customers(session=session)
+        print(customer_list)
+
+    @auth.is_authenticated
+    def get_contract_list(self, session):
+        contract_list = session.current_user.get_all_contracts(session=session)
+        print(contract_list)
+
+    @auth.is_authenticated
+    def get_events_list(self, session):
+        event_list = session.current_user.get_all_events(session=session)
+        print(event_list)
