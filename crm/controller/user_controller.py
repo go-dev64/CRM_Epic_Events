@@ -35,11 +35,11 @@ class UserController:
         user_type = type(session.current_user).__name__
         match user_type:
             case "Manager":
-                self.manager_controller.create()
+                self.manager_controller.create(session=session)
             case "Seller":
-                self.seller_controller.create()
+                self.seller_controller.create(session=session)
             case "Supporter":
-                self.supporter_controller.create()
+                self.supporter_controller.create(session=session)
 
     @auth.is_authenticated
     def user_choice_is_updaiting(self, session):
