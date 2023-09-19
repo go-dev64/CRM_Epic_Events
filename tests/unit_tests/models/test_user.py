@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytest
 from sqlalchemy import select
-from crm.models.users import Authentication, Manager, Seller, Supporter, Address
+from crm.models.users import Manager, Seller, Supporter, Address
 from crm.models.customer import Customer
 
 
@@ -9,39 +9,31 @@ client = Customer(name="client_1", email_address="clien_1@123.com", phone_number
 
 
 class TestUser:
-    def _user__current(self, session, user_type):
-        user = session.scalars(select(user_type)).first()
-        user = Authentication.get_token(user)
-        return user
-
-    @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
-    def test_get_all_clients(self, db_session, clients, type_user):
+    def test_get_all_clients(self, db_session, clients, current_user_is_user):
         # test should return list of clients.
         with db_session as session:
             clients
-            current_user = self._user__current(session, type_user)
+            current_user = current_user_is_user
             session.current_user = current_user
             customers_list = current_user.get_all_customers(session=session)
             result_excepted = 2
             assert len(customers_list) == result_excepted
 
-    @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
-    def test_get_all_contracts(self, db_session, contracts, type_user):
+    def test_get_all_contracts(self, db_session, contracts, current_user_is_user):
         # test should return list of contracts.
         with db_session as session:
             contracts
-            current_user = self._user__current(session, type_user)
+            current_user = current_user_is_user
             session.current_user = current_user
             contract_list = current_user.get_all_contracts(session=session)
             result_excepted = 2
             assert len(contract_list) == result_excepted
 
-    @pytest.mark.parametrize("type_user", [(Manager), (Seller), (Supporter)])
-    def test_get_all_events(self, db_session, events, type_user):
+    def test_get_all_events(self, db_session, events, current_user_is_user):
         # test should return list of events.
         with db_session as session:
             events
-            current_user = self._user__current(session, type_user)
+            current_user = current_user_is_user
             session.current_user = current_user
             events_list = current_user.get_all_events(session=session)
             result_excepted = 2

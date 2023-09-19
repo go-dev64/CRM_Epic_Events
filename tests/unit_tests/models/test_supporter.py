@@ -1,15 +1,8 @@
 from datetime import datetime
 import pytest
-from sqlalchemy import select
-from crm.models.users import Authentication
 
 
 class TestSupporter:
-    def _user__current(self, session, user_type):
-        user = session.scalars(select(user_type)).first()
-        user = Authentication.get_token(user)
-        session.current_user = user
-
     def test_get_event_of_supporter(self, db_session, events, current_user_is_supporter):
         # test should return events list without supporter.
 
