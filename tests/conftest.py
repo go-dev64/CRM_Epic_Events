@@ -6,7 +6,8 @@ from argon2 import PasswordHasher
 from sqlalchemy import URL, create_engine, select
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-from crm.models.users import Authentication, Contract, Customer, Event, Manager, Seller, Supporter, User
+from crm.models.users import Contract, Customer, Event, Manager, Seller, Supporter, User
+from crm.models.authentication import Authentication
 from crm.models.element_administratif import Address
 
 load_dotenv()
