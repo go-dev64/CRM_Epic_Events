@@ -207,3 +207,16 @@ class TestManager:
             current_user.update_seller_contact_of_customer(session=session, customer=client, new_seller=seller2)
             assert client.seller_contact == seller2
             assert contract.seller == client.seller_contact
+
+    # --------------- delete test ------------- #
+
+    @pytest.mark.parametrize("user_has_delete", [(0), (1), (2)])
+    def test_delete_collaborator(self, db_session, users, events, current_user_is_manager, user_has_delete):
+        # test should delete 1 user.
+        with db_session as session:
+            user = users[user_has_delete]
+            events
+            current_user = current_user_is_manager
+            current_user.delete_collaborator(session=session, collaborator_has_delete=user)
+            list_user = session.scalars(select(User)).all()
+            assert len(list_user) == 2

@@ -383,7 +383,7 @@ class Manager(User):
             "phone_number": collaborator.phone_number,
             "password": collaborator.password,
         }
-        self.delete_collaborator(session=session, collaborator=collaborator)
+        self.delete_collaborator(session=session, collaborator_has_delete=collaborator)
         match new_department:
             case "manager":
                 return self.create_new_manager(session=session, user_info=user_info)
@@ -440,8 +440,8 @@ class Manager(User):
         setattr(event, "supporter", new_supporter)
         session.commit()
 
-    def delete_collaborator(self, session, collaborator: User) -> None:
-        session.execute(delete(User).where(User.id == collaborator.id))
+    def delete_collaborator(self, session, collaborator_has_delete: User) -> None:
+        session.delete(collaborator_has_delete)
         session.commit()
 
 
