@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
 from crm.view.user_view import UserView
@@ -14,9 +15,20 @@ class UserController:
         self.seller_controller = SellerController()
         # self.supporter_controller = SupporterController()
         self.user_view = UserView()
+        self.utils = Utils()
 
     @auth.is_authenticated
     def home_page(self, session):
+        """
+        Function redirect to Create element,Read element,
+        Update element or Delete element according to the user's choice.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: function choosen.
+        """
         while True:
             choice = self.user_view.view_select_choice()
             match choice:
@@ -33,14 +45,14 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_creating(self, session):
-        user_type = type(session.current_user).__name__
+        user_type = self.utils.get_type_of_user(session.current_user)
         match user_type:
             case "Manager":
-                return self.manager_controller.create_new_user(session=session)
+                return self.manager_controller.create_new_element(session=session)
             case "Seller":
-                return self.seller_controller.create(session=session)
+                return self.seller_controller.create_new_element(session=session)
             case "Supporter":
-                return self.supporter_controller.create(session=session)
+                pass
 
     @auth.is_authenticated
     def user_choice_is_updating(self, session):

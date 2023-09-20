@@ -24,9 +24,11 @@ class TestUserController:
             elif choice == 3:
                 assert user_ctr.home_page(session=None) == user_ctr.user_choice_is_deleting(session=None)
 
-    def test_user_choice_is_creating(self, db_session, users, current_user_is_manager):
+    def test_user_choice_is_creating_with_manager(self, db_session, users, current_user_is_manager):
         with db_session as session:
             users
             current_user_is_manager
             user_ctr = UserController()
             assert user_ctr.user_choice_is_creating(session=None) == ManagerController().create_new_user(session=None)
+
+    def 
