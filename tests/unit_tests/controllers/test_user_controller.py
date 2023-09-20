@@ -29,4 +29,4 @@ class TestUserController:
             users
             current_user_is_manager
             user_ctr = UserController()
-            assert user_ctr.user_choice_is_creating(session=None) == ManagerController().create(session=None)
+            assert user_ctr.user_choice_is_creating(session=None) == ManagerController().create_new_user(session=None)

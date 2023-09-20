@@ -36,7 +36,7 @@ class UserController:
         user_type = type(session.current_user).__name__
         match user_type:
             case "Manager":
-                return self.manager_controller.create(session=session)
+                return self.manager_controller.create_new_user(session=session)
             case "Seller":
                 return self.seller_controller.create(session=session)
             case "Supporter":
