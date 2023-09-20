@@ -1,7 +1,9 @@
-from crm.models.users import Authentication
+from crm.models.authentication import Authentication
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
-from crm.controller.supporter_manager import SupporterController
+from crm.view.user_view import UserView
+
+# from crm.controller.supporter_controller import SupporterController
 
 
 class UserController:
@@ -10,23 +12,22 @@ class UserController:
     def __init__(self) -> None:
         self.manager_controller = ManagerController()
         self.seller_controller = SellerController()
-        self.supporter_controller = SupporterController()
+        # self.supporter_controller = SupporterController()
+        self.user_view = UserView()
 
     @auth.is_authenticated
     def home_page(self, session):
         while True:
-            print("homepage")
-            print("input slect choise")
-            choice = "viewselect_choice"
+            choice = self.user_view.view_select_choice()
             match choice:
                 case 0:
-                    self.user_choice_is_creating(session=session)
+                    return self.user_choice_is_creating(session=session)
                 case 1:
-                    self.user_choice_is_reading(session=session)
+                    return self.user_choice_is_reading(session=session)
                 case 2:
-                    self.user_choice_is_updaiting(session=session)
+                    return self.user_choice_is_updating(session=session)
                 case 3:
-                    self.user_choice_is_deleting(session=session)
+                    return self.user_choice_is_deleting(session=session)
                 case 4:
                     break
 
@@ -35,26 +36,19 @@ class UserController:
         user_type = type(session.current_user).__name__
         match user_type:
             case "Manager":
-                self.manager_controller.create(session=session)
+                return self.manager_controller.create(session=session)
             case "Seller":
-                self.seller_controller.create(session=session)
+                return self.seller_controller.create(session=session)
             case "Supporter":
-                self.supporter_controller.create(session=session)
+                return self.supporter_controller.create(session=session)
 
     @auth.is_authenticated
-    def user_choice_is_updaiting(self, session):
+    def user_choice_is_updating(self, session):
         pass
 
     @auth.is_authenticated
     def user_choice_is_reading(self, session):
-        user_type = type(session.current_user).__name__
-        match user_type:
-            case "Manager":
-                self.manager_controller.create()
-            case "Seller":
-                self.seller_controller.create()
-            case "Supporter":
-                self.supporter_controller.create()
+        pass
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
