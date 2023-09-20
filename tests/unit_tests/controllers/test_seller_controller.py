@@ -20,8 +20,8 @@ class TestSellerController:
                 return_value="create_new_event",
             )
             if choice == 1:
-                assert seller_ctrl.create_new_customer(session=session) == "create_new_customer"
+                assert seller_ctrl.create_new_element(session=session) == "create_new_customer"
             elif choice == 2:
-                assert seller_ctrl.create_new_event(session=session) == "create_new_event"
+                assert seller_ctrl.create_new_element(session=session) == "create_new_event"
             else:
                 pass
