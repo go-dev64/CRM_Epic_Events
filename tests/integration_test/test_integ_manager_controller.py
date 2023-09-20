@@ -8,6 +8,7 @@ from crm.models.users import Manager, Seller, Supporter, User
 class TestManagerController:
     @pytest.mark.parametrize("department", [(1), (2), (3)])
     def test_create_new_user(self, db_session, users, current_user_is_manager, mocker, department):
+        # test should return a new user.
         with db_session as session:
             users
             current_user_is_manager
@@ -42,6 +43,7 @@ class TestManagerController:
                 assert len(list_user) == 4
 
     def test_create_new_contract(self, db_session, users, clients, contracts, current_user_is_manager, mocker):
+        # test should return a new contract.
         with db_session as session:
             contracts
             current_user_is_manager
