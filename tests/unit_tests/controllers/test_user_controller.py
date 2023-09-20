@@ -1,9 +1,5 @@
 import pytest
-from crm.controller.seller_controller import SellerController
 from crm.controller.user_controller import UserController
-from crm.controller.manager_controller import ManagerController
-import crm.controller.user_controller
-from crm.view.user_view import UserView
 
 
 class TestUserController:
@@ -52,12 +48,15 @@ class TestUserController:
                 "crm.controller.manager_controller.ManagerController.create_new_element",
                 return_value="create_new_element_Manager",
             )
-            # mocker.patch("crm.controller.seller_controller.SellerController.create_new_element", return_value="create_new_element_Seller")
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.create_new_element",
+                return_value="create_new_element_Seller",
+            )
 
             if user == "Manager":
                 assert user_ctr.user_choice_is_creating(session=session) == "create_new_element_Manager"
             elif user == "Seller":
-                # assert user_ctr.user_choice_is_creating(session=session) == SellerController().create_new_user(session=session)
-                pass
+                assert user_ctr.user_choice_is_creating(session=session) == "create_new_element_Seller"
+
             elif user == "Supporter":
                 pass

@@ -30,6 +30,6 @@ class SellerController:
     @auth.is_authenticated
     def create_new_event(self, session):
         print("get info customer")
-        customer_info = "input"
-        new_customer = session.current_user.create_new_customer(session=session, customer_info=customer_info)
+        event_info = "input"
+        new_customer = session.current_user.create_new_event(session=session, event_info=event_info)
         return new_customer

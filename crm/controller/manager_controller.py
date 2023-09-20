@@ -1,5 +1,7 @@
 from crm.models.authentication import Authentication
+from crm.view.contract_view import ContractView
 from crm.view.generic_view import GenericView
+from crm.view.user_view import UserView
 
 
 class ManagerController:
@@ -7,6 +9,8 @@ class ManagerController:
 
     def __init__(self) -> None:
         self.generic_view = GenericView()
+        self.user_view = UserView()
+        self.contract_view = ContractView()
 
     @auth.is_authenticated
     def create_new_element(self, session):
@@ -23,7 +27,7 @@ class ManagerController:
     @auth.is_authenticated
     def create_new_user(self, session):
         print("get info user")
-        user_info = "input"
+        user_info = self.user_view.get_user_info_view()
         print("select department")
         department = self.generic_view.select_element_view()
         match department:
@@ -38,8 +42,8 @@ class ManagerController:
                 return new_user
 
     @auth.is_authenticated
-    def create_new_contract(session):
+    def create_new_contract(self, session):
         print("get info user")
-        contract_info = "input"
+        contract_info = self.contract_view.get_info_contract()
         new_user = session.current_user.create_new_contract(session=session, contract_info=contract_info)
         return new_user

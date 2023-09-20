@@ -1,4 +1,4 @@
 class UserView:
-    def view_select_choice(self):
-        choice = 1
-        return choice
+    def get_user_info_view(self):
+        user_info = {}
+        return user_info
