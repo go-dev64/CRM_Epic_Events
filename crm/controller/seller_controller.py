@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.view.customer_view import CustomerView
 from crm.view.generic_view import GenericView
 
 
@@ -7,6 +8,7 @@ class SellerController:
 
     def __init__(self) -> None:
         self.generic_view = GenericView()
+        self.customer_view = CustomerView()
 
     @auth.is_authenticated
     def create_new_element(self, session):
@@ -22,8 +24,7 @@ class SellerController:
 
     @auth.is_authenticated
     def create_new_customer(self, session):
-        print("get info customer")
-        customer_info = "input"
+        customer_info = self.customer_view.get_info_customer()
         new_customer = session.current_user.create_new_customer(session=session, customer_info=customer_info)
         return new_customer
 
