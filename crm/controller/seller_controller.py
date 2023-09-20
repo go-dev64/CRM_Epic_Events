@@ -1,5 +1,6 @@
 from crm.models.authentication import Authentication
 from crm.view.customer_view import CustomerView
+from crm.view.event_view import EventView
 from crm.view.generic_view import GenericView
 
 
@@ -9,6 +10,7 @@ class SellerController:
     def __init__(self) -> None:
         self.generic_view = GenericView()
         self.customer_view = CustomerView()
+        self.event_view = EventView()
 
     @auth.is_authenticated
     def create_new_element(self, session):
@@ -30,7 +32,6 @@ class SellerController:
 
     @auth.is_authenticated
     def create_new_event(self, session):
-        print("get info customer")
-        event_info = "input"
-        new_customer = session.current_user.create_new_event(session=session, event_info=event_info)
-        return new_customer
+        event_info = self.event_view.get_event_info()
+        new_event = session.current_user.create_new_event(session=session, event_info=event_info)
+        return new_event
