@@ -14,7 +14,7 @@ class TestUserController:
             current_user_is_user
             user_ctr = UserController()
 
-            mocker.patch("crm.view.user_view.UserView.view_select_choice", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
             mocker.patch(
                 "crm.controller.user_controller.UserController.user_choice_is_creating",
                 return_value="user_choice_is_creating",

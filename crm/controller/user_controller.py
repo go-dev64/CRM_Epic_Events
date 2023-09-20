@@ -2,7 +2,7 @@ from crm.models.authentication import Authentication
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
-from crm.view.user_view import UserView
+from crm.view.generic_view import GenericView
 
 # from crm.controller.supporter_controller import SupporterController
 
@@ -14,7 +14,7 @@ class UserController:
         self.manager_controller = ManagerController()
         self.seller_controller = SellerController()
         # self.supporter_controller = SupporterController()
-        self.user_view = UserView()
+        self.generic_view = GenericView()
         self.utils = Utils()
 
     @auth.is_authenticated
@@ -30,7 +30,7 @@ class UserController:
             _type_: function choosen.
         """
         while True:
-            choice = self.user_view.view_select_choice()
+            choice = self.generic_view.select_element_view()
             match choice:
                 case 0:
                     return self.user_choice_is_creating(session=session)
