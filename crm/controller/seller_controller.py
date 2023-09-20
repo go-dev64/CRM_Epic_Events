@@ -22,21 +22,14 @@ class SellerController:
 
     @auth.is_authenticated
     def create_new_customer(self, session):
-        print("get info user")
-        user_info = "input"
-        print("select department")
-        department = self.generic_view.select_element_view()
-        match department:
-            case 1:
-                new_user = session.current_user.create_new_manager(session=session, user_info=user_info)
-                return new_user
-            case 2:
-                new_user = session.current_user.create_new_seller(session=session, user_info=user_info)
-                return new_user
-            case 3:
-                new_user = session.current_user.create_new_supporter(session=session, user_info=user_info)
-                return new_user
+        print("get info customer")
+        customer_info = "input"
+        new_customer = session.current_user.create_new_customer(session=session, customer_info=customer_info)
+        return new_customer
 
     @auth.is_authenticated
     def create_new_event(self, session):
-        pass
+        print("get info customer")
+        customer_info = "input"
+        new_customer = session.current_user.create_new_customer(session=session, customer_info=customer_info)
+        return new_customer
