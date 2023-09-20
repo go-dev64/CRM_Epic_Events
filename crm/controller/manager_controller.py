@@ -8,7 +8,7 @@ class ManagerController:
         pass
 
     @auth.is_authenticated
-    def create_element(self, session):
+    def create_new_element(self, session):
         while True:
             print("type element à crer")
             choice = "input"
