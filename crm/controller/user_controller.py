@@ -53,7 +53,7 @@ class UserController:
             case "Seller":
                 return self.seller_controller.create_new_element(session=session)
             case "Supporter":
-                return self.create_new_address(session=session)
+                return self.utils.create_new_address(session=session)
 
     @auth.is_authenticated
     def user_choice_is_reading(self, session):
@@ -103,9 +103,3 @@ class UserController:
             return self.generic_view.display_element(event_list)
         else:
             return self.supporter_controller.display_event_of_user(session=session)
-
-    @auth.is_authenticated
-    def create_new_address(self, session):
-        address_info = self.generic_view.get_info()
-        new_address = session.current_user.create_new_address(session=session, address_info=address_info)
-        return new_address

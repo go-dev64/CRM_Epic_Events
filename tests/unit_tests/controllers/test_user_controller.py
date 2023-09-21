@@ -53,7 +53,7 @@ class TestUserController:
                 return_value="create_new_element_Seller",
             )
             mocker.patch(
-                "crm.controller.supporter_controller.SupporterController.create_new_address",
+                "crm.models.utils.Utils.create_new_address",
                 return_value="create_new_address",
             )
 

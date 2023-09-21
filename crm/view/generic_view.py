@@ -12,3 +12,6 @@ class GenericView:
         self.display_element_list(list_element=list_element)
         element_chosen = input
         return element_chosen
+
+    def get_address_info(self):
+        pass

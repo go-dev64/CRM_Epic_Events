@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.utils import Utils
 from crm.view.customer_view import CustomerView
 from crm.view.event_view import EventView
 from crm.view.generic_view import GenericView
@@ -11,6 +12,7 @@ class SellerController:
         self.generic_view = GenericView()
         self.customer_view = CustomerView()
         self.event_view = EventView()
+        self.utils = Utils()
 
     @auth.is_authenticated
     def create_new_element(self, session):
@@ -31,6 +33,8 @@ class SellerController:
                 case 2:
                     return self.create_new_event(session=session)
                 case 3:
+                    return self.utils.create_new_address(session=session)
+                case 4:
                     break
 
     @auth.is_authenticated
