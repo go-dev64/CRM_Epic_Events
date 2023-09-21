@@ -56,7 +56,17 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_reading(self, session):
-        pass
+        while True:
+            choice = self.generic_view.select_element_view()
+            match choice:
+                case 0:
+                    return self.get_customer_list(session=session)
+                case 1:
+                    return self.get_contract_list(session=session)
+                case 2:
+                    return self.get_events_list(session=session)
+                case 3:
+                    break
 
     @auth.is_authenticated
     def user_choice_is_updating(self, session):
