@@ -52,14 +52,17 @@ class TestUserController:
                 "crm.controller.seller_controller.SellerController.create_new_element",
                 return_value="create_new_element_Seller",
             )
+            mocker.patch(
+                "crm.controller.supporter_controller.SupporterController.create_new_address",
+                return_value="create_new_address",
+            )
 
             if user == "Manager":
                 assert user_ctr.user_choice_is_creating(session=session) == "create_new_element_Manager"
             elif user == "Seller":
                 assert user_ctr.user_choice_is_creating(session=session) == "create_new_element_Seller"
-
             elif user == "Supporter":
-                pass
+                assert user_ctr.user_choice_is_creating(session=session) == "create_new_address"
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test_user_choice_is_reading(self, db_session, users, current_user_is_user, mocker, choice):
