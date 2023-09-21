@@ -2,6 +2,7 @@ from crm.models.authentication import Authentication
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
+from crm.controller.supporter_controller import SupporterController
 from crm.view.generic_view import GenericView
 
 # from crm.controller.supporter_controller import SupporterController
@@ -13,7 +14,7 @@ class UserController:
     def __init__(self) -> None:
         self.manager_controller = ManagerController()
         self.seller_controller = SellerController()
-        # self.supporter_controller = SupporterController()
+        self.supporter_controller = SupporterController()
         self.generic_view = GenericView()
         self.utils = Utils()
 
@@ -52,14 +53,24 @@ class UserController:
             case "Seller":
                 return self.seller_controller.create_new_element(session=session)
             case "Supporter":
-                pass
-
-    @auth.is_authenticated
-    def user_choice_is_updating(self, session):
-        pass
+                return self.utils.create_new_address(session=session)
 
     @auth.is_authenticated
     def user_choice_is_reading(self, session):
+        while True:
+            choice = self.generic_view.select_element_view()
+            match choice:
+                case 0:
+                    return self.get_customer_list(session=session)
+                case 1:
+                    return self.get_contract_list(session=session)
+                case 2:
+                    return self.get_events_list(session=session)
+                case 3:
+                    break
+
+    @auth.is_authenticated
+    def user_choice_is_updating(self, session):
         pass
 
     @auth.is_authenticated
@@ -68,15 +79,27 @@ class UserController:
 
     @auth.is_authenticated
     def get_customer_list(self, session):
-        customer_list = session.current_user.get_all_customers(session=session)
-        print(customer_list)
+        user_type = self.utils.get_type_of_user(session.current_user)
+        if user_type != "Seller":
+            customer_list = session.current_user.get_all_customers(session=session)
+            return self.generic_view.display_element(customer_list)
+        else:
+            return self.seller_controller.select_customer_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_contract_list(self, session):
-        contract_list = session.current_user.get_all_contracts(session=session)
-        print(contract_list)
+        user_type = self.utils.get_type_of_user(session.current_user)
+        if user_type != "Seller":
+            contract_list = session.current_user.get_all_contracts(session=session)
+            return self.generic_view.display_element(contract_list)
+        else:
+            return self.seller_controller.select_contract_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_events_list(self, session):
-        event_list = session.current_user.get_all_events(session=session)
-        print(event_list)
+        user_type = self.utils.get_type_of_user(session.current_user)
+        if user_type != "Supporter":
+            event_list = session.current_user.get_all_events(session=session)
+            return self.generic_view.display_element(event_list)
+        else:
+            return self.supporter_controller.display_event_of_user(session=session)
