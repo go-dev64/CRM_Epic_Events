@@ -55,11 +55,11 @@ class UserController:
                 pass
 
     @auth.is_authenticated
-    def user_choice_is_updating(self, session):
+    def user_choice_is_reading(self, session):
         pass
 
     @auth.is_authenticated
-    def user_choice_is_reading(self, session):
+    def user_choice_is_updating(self, session):
         pass
 
     @auth.is_authenticated

@@ -60,3 +60,29 @@ class TestUserController:
 
             elif user == "Supporter":
                 pass
+
+    @pytest.mark.parametrize("choice", [(0), (1), (2)])
+    def test_user_choice_is_reading(self, db_session, users, current_user_is_user, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_user
+            user_ctr = UserController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch(
+                "crm.controller.user_controller.UserController.get_customer_list",
+                return_value="get_customer_list",
+            )
+            mocker.patch(
+                "crm.controller.user_controller.UserController.get_contract_list",
+                return_value="get_contract_list",
+            )
+            mocker.patch(
+                "crm.controller.user_controller.UserController.get_events_list",
+                return_value="get_events_list",
+            )
+            if choice == 0:
+                assert user_ctr.user_choice_is_reading(session=session) == "get_customer_list"
+            elif choice == 1:
+                assert user_ctr.user_choice_is_reading(session=session) == "get_contract_list"
+            elif choice == 2:
+                assert user_ctr.user_choice_is_reading(session=session) == "get_events_list"
