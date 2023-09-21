@@ -105,3 +105,22 @@ class TestUserController:
                 assert user_ctr.get_customer_list(session=session) == "Seller"
             elif user == "Supporter":
                 assert user_ctr.get_customer_list(session=session) == "Supporter"
+
+    @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
+    def test_get_contract_list(self, db_session, users, current_user_is_user, mocker, user):
+        with db_session as session:
+            users
+            current_user_is_user
+            user_ctr = UserController()
+            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=user)
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.select_contract_type_to_display",
+                return_value="Seller",
+            )
+            if user == "Manager":
+                assert user_ctr.get_contract_list(session=session) == "Manager"
+            elif user == "Seller":
+                assert user_ctr.get_contract_list(session=session) == "Seller"
+            elif user == "Supporter":
+                assert user_ctr.get_customer_list(session=session) == "Supporter"

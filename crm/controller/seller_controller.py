@@ -66,18 +66,69 @@ class SellerController:
 
     @auth.is_authenticated
     def select_customer_type_to_display(self, session):
+        """
+        Function redirect to other function according to current user's choice:
+        - Display all customers .
+        - Display customers handling by current user.
+
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: elment selected. (customer)
+        """
         choice_list = ["Select all customers", "Select yours customers"]
         choice = self.generic_view.select_element_view(list_element=choice_list)
         match choice:
             case 0:
                 customer_list = session.current_user.get_all_customers(session=session)
-                element_selected = self.generic_view.display_element_list(list_element=customer_list)
-                self.generic_view.display_element(element=element_selected)
+                return self.generic_view.display_element(customer_list)
             case 1:
                 yours_customers_list = session.current_user.get_all_clients_of_user(session)
-                element_selected = self.generic_view.display_element_list(list_element=yours_customers_list)
-                self.generic_view.display_element(element=element_selected)
+                return self.generic_view.display_element(yours_customers_list)
 
     @auth.is_authenticated
-    def select_unpayed_contract(self, session):
-        unpayed_contract_list = session.current_user
+    def select_contract_type_to_display(self, session):
+        """
+        Function redirect to other function according tu current user's choice:
+        - Get all contracts and display the one selected by user.
+        - Get all contracts hanlding by user and display the one selected by user.
+        - Get all unpayed contracts hanlding by user and display the one selected by user.
+        - Get all signed contracts hanlding by user and display the one selected by user.
+        - Get all  contracts without event hanlding by user and display the one selected by user.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        choice_list = [
+            "Display all contracts",
+            "Display your contract",
+            "Display your unpayed contracts",
+            "Display your unsigned contract",
+            "Display your contract signed without Event",
+        ]
+        while True:
+            choice = self.generic_view.select_element_view(list_element=choice_list)
+
+            match choice:
+                case 0:
+                    contract_list = session.current_user.get_all_contracts(session=session)
+                    return self.generic_view.display_element(contract_list)
+                case 1:
+                    yours_contract_list = session.current_user.get_all_contracts_of_user(session)
+                    return self.generic_view.display_element(yours_contract_list)
+                case 2:
+                    unpayed_contracts_list = session.current_user.get_unpayed_contracts(session)
+                    return self.generic_view.display_element(unpayed_contracts_list)
+                case 3:
+                    unsigned_contracts_list = session.current_user.get_unsigned_contracts(session)
+                    return self.generic_view.display_element(unsigned_contracts_list)
+                case 4:
+                    element_list = session.current_user.get_all_contracts_of_user_without_event(session)
+                    return self.generic_view.display_element(element_list)
+                case 5:
+                    break

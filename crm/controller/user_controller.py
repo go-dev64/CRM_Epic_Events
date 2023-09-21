@@ -89,10 +89,22 @@ class UserController:
 
     @auth.is_authenticated
     def get_contract_list(self, session):
-        contract_list = session.current_user.get_all_contracts(session=session)
-        print(contract_list)
+        user_type = self.utils.get_type_of_user(session.current_user)
+        if user_type != "Seller":
+            contract_list = session.current_user.get_all_contracts(session=session)
+            element_selected = self.generic_view.select_element_view(list_element=contract_list)
+            self.generic_view.display_element(element=element_selected)
+            return element_selected
+        else:
+            return self.seller_controller.select_contract_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_events_list(self, session):
-        event_list = session.current_user.get_all_events(session=session)
-        print(event_list)
+        user_type = self.utils.get_type_of_user(session.current_user)
+        if user_type != "Supporter":
+            contract_list = session.current_user.get_all_events(session=session)
+            element_selected = self.generic_view.select_element_view(list_element=contract_list)
+            self.generic_view.display_element(element=element_selected)
+            return element_selected
+        else:
+            return self.supporter_controller.select_contract_type_to_display(session=session)
