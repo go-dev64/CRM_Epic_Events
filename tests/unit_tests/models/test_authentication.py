@@ -44,7 +44,7 @@ class TestAuthentication:
     def _login(self, session, users, email, password):
         users
         auth = Authentication()
-        user = auth.login(db_session=session, email=email, input_password=password)
+        user = auth.login(session=session, email=email, input_password=password)
         return user
 
     @pytest.mark.parametrize("email, user_name, password", wright_parametre)

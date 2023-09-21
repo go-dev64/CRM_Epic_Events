@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import text
-from crm.database.controller.db_controller import Database
+from crm.controller.db_controller import Database
 from crm.models.base import Base
 import crm.models.users
 import crm.models.customer
@@ -11,10 +11,10 @@ db = Database()
 
 
 class TestDatabase:
-    def test_database_connection(self, connection):
+    def test_database_connection(self, db_session):
         # test try to connect to database
         try:
-            assert connection is not None
+            assert db_session is not None
         except Exception as e:
             pytest.fail(f"Échec de la connexion à la base de données : {e}")
 
