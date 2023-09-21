@@ -2,6 +2,7 @@ from crm.models.authentication import Authentication
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
+from crm.controller.supporter_controller import SupporterController
 from crm.view.generic_view import GenericView
 
 # from crm.controller.supporter_controller import SupporterController
@@ -13,7 +14,7 @@ class UserController:
     def __init__(self) -> None:
         self.manager_controller = ManagerController()
         self.seller_controller = SellerController()
-        # self.supporter_controller = SupporterController()
+        self.supporter_controller = SupporterController()
         self.generic_view = GenericView()
         self.utils = Utils()
 
@@ -81,9 +82,7 @@ class UserController:
         user_type = self.utils.get_type_of_user(session.current_user)
         if user_type != "Seller":
             customer_list = session.current_user.get_all_customers(session=session)
-            element_selected = self.generic_view.select_element_view(list_element=customer_list)
-            self.generic_view.display_element(element=element_selected)
-            return element_selected
+            return self.generic_view.display_element(customer_list)
         else:
             return self.seller_controller.select_customer_type_to_display(session=session)
 
@@ -92,9 +91,7 @@ class UserController:
         user_type = self.utils.get_type_of_user(session.current_user)
         if user_type != "Seller":
             contract_list = session.current_user.get_all_contracts(session=session)
-            element_selected = self.generic_view.select_element_view(list_element=contract_list)
-            self.generic_view.display_element(element=element_selected)
-            return element_selected
+            return self.generic_view.display_element(contract_list)
         else:
             return self.seller_controller.select_contract_type_to_display(session=session)
 
@@ -102,9 +99,7 @@ class UserController:
     def get_events_list(self, session):
         user_type = self.utils.get_type_of_user(session.current_user)
         if user_type != "Supporter":
-            contract_list = session.current_user.get_all_events(session=session)
-            element_selected = self.generic_view.select_element_view(list_element=contract_list)
-            self.generic_view.display_element(element=element_selected)
-            return element_selected
+            event_list = session.current_user.get_all_events(session=session)
+            return self.generic_view.display_element(event_list)
         else:
-            return self.supporter_controller.select_contract_type_to_display(session=session)
+            return self.supporter_controller.display_event_of_user(session=session)

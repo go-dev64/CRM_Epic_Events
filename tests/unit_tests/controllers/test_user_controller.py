@@ -94,7 +94,7 @@ class TestUserController:
             current_user_is_user
             user_ctr = UserController()
             mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_customer_type_to_display",
                 return_value="Seller",
@@ -113,7 +113,7 @@ class TestUserController:
             current_user_is_user
             user_ctr = UserController()
             mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_contract_type_to_display",
                 return_value="Seller",
@@ -123,4 +123,23 @@ class TestUserController:
             elif user == "Seller":
                 assert user_ctr.get_contract_list(session=session) == "Seller"
             elif user == "Supporter":
-                assert user_ctr.get_customer_list(session=session) == "Supporter"
+                assert user_ctr.get_contract_list(session=session) == "Supporter"
+
+    @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
+    def test_get_event_list(self, db_session, users, current_user_is_user, mocker, user):
+        with db_session as session:
+            users
+            current_user_is_user
+            user_ctr = UserController()
+            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch(
+                "crm.controller.supporter_controller.SupporterController.display_event_of_user",
+                return_value="Supporter!",
+            )
+            if user == "Manager":
+                assert user_ctr.get_events_list(session=session) == user
+            elif user == "Seller":
+                assert user_ctr.get_events_list(session=session) == user
+            elif user == "Supporter":
+                assert user_ctr.get_events_list(session=session) == "Supporter!"
