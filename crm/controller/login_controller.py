@@ -1,5 +1,6 @@
 from crm.controller.manager_controller import ManagerController
 from crm.models.authentication import Authentication
+from crm.models.exceptions import EmailError, PasswordError
 from crm.view.login_view import LoginView
 
 
@@ -21,20 +22,10 @@ class LoginController:
                     raise EmailError()
                 elif user is False:
                     raise PasswordError()
-            except EmailError:
-                msg = "Invalid Email!"
-            except PasswordError:
-                msg = "Invalid Password!"
+            except EmailError as error_mesage:
+                msg = error_mesage
+            except PasswordError as error_mesage:
+                msg = error_mesage
 
             else:
                 return self.auth.get_token(user)
-
-    @auth.is_authenticated
-    def redirect_user_home_page(self, session):
-        match type(session.current_user).__name__:
-            case "Manager":
-                self.manager_home_page(session=session)
-            case "Seller":
-                seller_home_page(session=session)
-            case "Supporter":
-                supporter_home_page(session=session)

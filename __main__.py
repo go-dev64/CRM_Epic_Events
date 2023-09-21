@@ -1,5 +1,6 @@
 from crm.controller.db_controller import Database
 from crm.controller.login_controller import LoginController
+from crm.controller.user_controller import UserController
 
 
 def main():
@@ -10,7 +11,7 @@ def main():
         while True:
             user = LoginController().user_login(session=session)
             session.current_user = user
-            LoginController().redirect_user_home_page(session=session)
+            UserController().home_page(session=session)
 
 
 if __name__ == "__main__":
