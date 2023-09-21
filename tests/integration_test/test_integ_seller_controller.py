@@ -50,8 +50,8 @@ class TestSellerController:
             list_event = session.scalars(select(Event)).all()
             assert len(list_event) == 1
             assert new_event.name == event_info["name"]
-            assert new_event.date_start == datetime
-            assert new_event.date_end == datetime
+            assert isinstance(new_event.date_start, datetime)
+            assert isinstance(new_event.date_end, datetime)
             assert new_event.attendees == event_info["attendees"]
             assert new_event.note == event_info["note"]
             assert new_event.address == address
