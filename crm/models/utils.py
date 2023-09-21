@@ -26,3 +26,7 @@ class Utils:
         address_info = self.generic_view.get_address_info()
         new_address = session.current_user.create_new_address(session=session, address_info=address_info)
         return new_address
+
+    @auth.is_authenticated
+    def update_address(self, session):
+        pass
