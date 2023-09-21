@@ -146,3 +146,30 @@ class TestUserController:
                 assert user_ctr.get_events_list(session=session) == user
             elif user == "Supporter":
                 assert user_ctr.get_events_list(session=session) == "Supporter!"
+
+    @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
+    def test_user_choice_is_updating(self, db_session, users, current_user_is_user, mocker, user):
+        with db_session as session:
+            users
+            current_user_is_user
+            user_ctr = UserController()
+            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.update_element",
+                return_value="update_element_Manager",
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.update_element",
+                return_value="update_element_Seller",
+            )
+            mocker.patch(
+                "crm.controller.supporter_controller.SupporterController.update_element",
+                return_value="update_element_Supporter",
+            )
+
+            if user == "Manager":
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Manager"
+            elif user == "Seller":
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Seller"
+            elif user == "Supporter":
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Supporter"

@@ -71,7 +71,14 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_updating(self, session):
-        pass
+        user_type = self.utils.get_type_of_user(session.current_user)
+        match user_type:
+            case "Manager":
+                return self.manager_controller.update_element(session=session)
+            case "Seller":
+                return self.seller_controller.update_element(session=session)
+            case "Supporter":
+                return self.supporter_controller.update_element(session=session)
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
