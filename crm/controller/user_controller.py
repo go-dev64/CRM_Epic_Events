@@ -78,8 +78,14 @@ class UserController:
 
     @auth.is_authenticated
     def get_customer_list(self, session):
-        customer_list = session.current_user.get_all_customers(session=session)
-        print(customer_list)
+        user_type = self.utils.get_type_of_user(session.current_user)
+        if user_type != "Seller":
+            customer_list = session.current_user.get_all_customers(session=session)
+            element_selected = self.generic_view.select_element_view(list_element=customer_list)
+            self.generic_view.display_element(element=element_selected)
+            return element_selected
+        else:
+            return self.seller_controller.select_customer_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_contract_list(self, session):

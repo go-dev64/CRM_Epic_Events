@@ -73,3 +73,27 @@ class ManagerController:
         contract_info = self.contract_view.get_info_contract()
         new_contract = session.current_user.create_new_contract(session=session, contract_info=contract_info)
         return new_contract
+
+    @auth.is_authenticated
+    def select_collaborator_in_list(self, session):
+        """
+        Function displays a collaborator according to user's choise in collaborators list.
+
+        Args:
+            session (_type_): Display collaborator information.
+        """
+        collaborator_list = session.current_user.get_all_users(session=session)
+        collaborator_selected = self.generic_view.select_element_view(list_element=collaborator_list)
+        self.generic_view.display_element(element=collaborator_selected)
+
+    @auth.is_authenticated
+    def display_event_without_supporter(self, session):
+        """
+        Function displays a event without supporter according to user's choise in collaborators list.
+
+        Args:
+            session (_type_): Display event information.
+        """
+        event_list = session.current_user.get_all_event_without_support(session=session)
+        event_selected = self.generic_view.select_element_view(list_element=event_list)
+        self.generic_view.display_element(element=event_selected)
