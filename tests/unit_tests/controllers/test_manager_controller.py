@@ -8,7 +8,7 @@ class TestManagerController:
         with db_session as session:
             users
             current_user_is_manager
-            manager_ctrl = ManagerController()
+            manager = ManagerController()
 
             mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
             mocker.patch(
@@ -20,9 +20,9 @@ class TestManagerController:
                 return_value="create_new_contract",
             )
             if choice == 1:
-                assert manager_ctrl.create_new_element(session=session) == "create_new_user"
+                assert manager.create_new_element(session=session) == "create_new_user"
             elif choice == 2:
-                assert manager_ctrl.create_new_element(session=session) == "create_new_contract"
+                assert manager.create_new_element(session=session) == "create_new_contract"
             else:
                 pass
 
@@ -31,7 +31,7 @@ class TestManagerController:
         with db_session as session:
             users
             current_user_is_manager
-            manager_ctrl = ManagerController()
+            manager = ManagerController()
 
             mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=department)
             mocker.patch("crm.models.users.Manager.create_new_manager", return_value="new_manager")
@@ -39,18 +39,38 @@ class TestManagerController:
             mocker.patch("crm.models.users.Manager.create_new_supporter", return_value="new_supporter")
 
             if department == 1:
-                assert manager_ctrl.create_new_user(session=session) == "new_manager"
+                assert manager.create_new_user(session=session) == "new_manager"
             elif department == 2:
-                assert manager_ctrl.create_new_user(session=session) == "new_seller"
+                assert manager.create_new_user(session=session) == "new_seller"
             elif department == 3:
-                assert manager_ctrl.create_new_user(session=session) == "new_supporter"
+                assert manager.create_new_user(session=session) == "new_supporter"
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_display_event(self, db_session, users, current_user_is_manager, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_event_to_display",
+                return_value="Display all Events",
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_event_without_supporter_to_display",
+                return_value="Display all Events without Supporter",
+            )
+            if choice == 0:
+                assert manager.display_event(session=session) == "Display all Events"
+            elif choice == 1:
+                assert manager.display_event(session=session) == "Display all Events without Supporter"
 
     @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
     def test_update_element(self, db_session, users, current_user_is_manager, mocker, choice):
         with db_session as session:
             users
             current_user_is_manager
-            manager_ctrl = ManagerController()
+            manager = ManagerController()
 
             mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
             mocker.patch(
@@ -66,13 +86,13 @@ class TestManagerController:
             mocker.patch("crm.models.utils.Utils.update_address", return_value="update_address")
 
             if choice == 0:
-                assert manager_ctrl.update_element(session=session) == "update_collaborator"
+                assert manager.update_element(session=session) == "update_collaborator"
             elif choice == 1:
-                assert manager_ctrl.update_element(session=session) == "update_contract"
+                assert manager.update_element(session=session) == "update_contract"
             elif choice == 2:
-                assert manager_ctrl.update_element(session=session) == "update_event"
+                assert manager.update_element(session=session) == "update_event"
             elif choice == 3:
-                assert manager_ctrl.update_element(session=session) == "update_address"
+                assert manager.update_element(session=session) == "update_address"
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__select_colaborator(self, db_session, users, current_user_is_manager, mocker, choice):

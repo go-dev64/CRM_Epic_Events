@@ -134,8 +134,10 @@ class UserController:
     @auth.is_authenticated
     def get_events_list(self, session):
         user_type = self.utils.get_type_of_user(session.current_user)
-        if user_type != "Supporter":
+        if user_type == "Seller":
             event_list = session.current_user.get_all_events(session=session)
             return self.generic_view.display_element(event_list)
+        elif user_type == "Manager":
+            return self.manager_controller.display_events(session=session)
         else:
             return self.supporter_controller.display_event_of_user(session=session)

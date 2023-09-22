@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.element_administratif import Event
 from crm.models.utils import Utils
 from crm.view.contract_view import ContractView
 from crm.view.generic_view import GenericView
@@ -81,26 +82,27 @@ class ManagerController:
         return new_contract
 
     @auth.is_authenticated
-    def select_collaborator_in_list(self, session):
-        """
-        Function displays a collaborator according to user's choise in collaborators list.
-
-        Args:
-            session (_type_): Display collaborator information.
-        """
-        collaborator_list = session.current_user.get_all_users(session=session)
-        return self.generic_view.display_element(collaborator_list)
+    def select_event_to_display(self, session) -> Event:
+        events_list = session.current_user.get_all_events(session=session)
+        return self.generic_view.display_element(events_list)
 
     @auth.is_authenticated
-    def display_event_without_supporter(self, session):
-        """
-        Function displays a event without supporter according to user's choise in collaborators list.
-
-        Args:
-            session (_type_): Display event information.
-        """
+    def select_event_without_supporter_to_display(self, session):
         event_list = session.current_user.get_all_event_without_support(session=session)
         return self.generic_view.display_element(event_list)
+
+    @auth.is_authenticated
+    def display_event(self, session):
+        while True:
+            choice_list = ["Display all Events", "Display all Events without Supporter", "Back"]
+            choice = self.generic_view.select_element_view(choice_list)
+            match choice:
+                case 0:
+                    return self.select_event_to_display(session=session)
+                case 1:
+                    return self.select_event_without_supporter_to_display(session=session)
+                case 2:
+                    break
 
     @auth.is_authenticated
     def update_element(self, session):
