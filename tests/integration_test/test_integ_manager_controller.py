@@ -130,3 +130,19 @@ class TestManagerController:
                 assert manager._select_contract(session=session) == contract[0]
             elif choice == 1:
                 assert manager._select_contract(session=session) == contract[1]
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_new_customer_for_contract(
+        self, db_session, users, clients, current_user_is_manager, mocker, choice
+    ):
+        # test should return the good element of list according to user's choice.
+        with db_session as session:
+            users
+            clients
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            if choice == 0:
+                assert manager._select_new_customer_for_contract(session=session) == clients[0]
+            elif choice == 1:
+                assert manager._select_new_customer_for_contract(session=session) == clients[1]
