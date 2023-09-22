@@ -4,7 +4,6 @@ from crm.controller.manager_controller import ManagerController
 from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
-from tests.conftest import contracts
 
 
 class TestManagerController:
@@ -146,3 +145,69 @@ class TestManagerController:
                 assert manager._select_new_customer_for_contract(session=session) == clients[0]
             elif choice == 1:
                 assert manager._select_new_customer_for_contract(session=session) == clients[1]
+
+    @pytest.mark.parametrize(
+        "old_attribute, new_value",
+        [("total_amount", 123), ("remaining", 12), ("signed_contract", True)],
+    )
+    def test_get_new_value_of_contract_attribute(self, users, db_session, mocker, contracts, old_attribute, new_value):
+        with db_session as session:
+            users
+            contract = contracts[0]
+            manager = ManagerController()
+            mocker.patch(
+                "crm.view.manager_view.ManagerView.get_new_value_of_contract_attribute", return_value=new_value
+            )
+            assert (
+                manager._get_new_value_of_contract_attribute(attribute_to_updated=old_attribute, contract=contract)
+                == new_value
+            )
+
+    @pytest.mark.parametrize(
+        "old_attribute, new_value",
+        [("total_amount", 123), ("remaining", 12), ("signed_contract", True)],
+    )
+    def test_update_contract(
+        self, db_session, users, current_user_is_manager, contracts, clients, mocker, old_attribute, new_value
+    ):
+        with db_session as session:
+            users
+            current_user_is_manager
+            contract = contracts[0]
+            manager = ManagerController()
+            mocker.patch("crm.controller.manager_controller.ManagerController._select_contract", return_value=contract)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_contract_attribute_to_be_updated",
+                return_value=old_attribute,
+            )
+            mocker.patch(
+                "crm.view.manager_view.ManagerView.get_new_value_of_contract_attribute", return_value=new_value
+            )
+            manager.update_contract(session=session)
+            if old_attribute == "total_amount":
+                assert getattr(contract, old_attribute) == new_value
+            elif old_attribute == "remaining":
+                assert getattr(contract, old_attribute) == new_value
+            elif old_attribute == "signed_contract":
+                assert getattr(contract, old_attribute) == new_value
+
+    def test_update_contract_to_customer_attribute(
+        self, db_session, users, current_user_is_manager, contracts, clients, mocker
+    ):
+        with db_session as session:
+            users
+            current_user_is_manager
+            client = clients[1]
+            contract = contracts[0]
+            manager = ManagerController()
+            mocker.patch("crm.controller.manager_controller.ManagerController._select_contract", return_value=contract)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_contract_attribute_to_be_updated",
+                return_value="customer",
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_new_customer_for_contract",
+                return_value=client,
+            )
+            manager.update_contract(session=session)
+            assert contract.customer == client

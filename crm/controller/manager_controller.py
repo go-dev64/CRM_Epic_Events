@@ -288,7 +288,7 @@ class ManagerController:
 
     def _select_contract_attribute_to_be_updated(self, contract):
         """
-        Function used to select the cattribute, in list, for the selected contract.
+        Function used to select the attribute, in list, for the selected contract.
 
         Returns:
             _type_: Attribute of contract to be updated.
@@ -298,20 +298,37 @@ class ManagerController:
         return available_attribute_contract[choice]
 
     def _select_new_customer_for_contract(self, session):
+        """
+        Function used to select the customer, in list, for the selected contract.
+
+        Returns:
+            _type_: instance of customer.
+        """
         customer_list = session.current_user.get_all_customers(session=session)
         choice = self.generic_view.select_element_view(customer_list)
         return customer_list[choice]
 
-    @auth.is_authenticated
-    def update_contract(self):
-        # select contract to updated => ok
-        # select attribute to update => ok
-        # if attibute is attribute is customer :
-        #   - selected a new customer: -> ok
-        # get a new value of attribute
-        # contract updated
+    def _get_new_value_of_contract_attribute(self, contract, attribute_to_updated):
+        restriction = contract.availables_attribue_list()[attribute_to_updated]
+        new_value = self.manager_view.get_new_value_of_contract_attribute(restriction=restriction)
+        return new_value
 
-        pass
+    @auth.is_authenticated
+    def update_contract(self, session):
+        contract = self._select_contract(session=session)
+        attribute_selected = self._select_contract_attribute_to_be_updated(contract=contract)
+        if attribute_selected == "customer":
+            new_customer = self._select_new_customer_for_contract(session=session)
+            session.current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_selected, new_value=new_customer
+            )
+        else:
+            new_value = self._get_new_value_of_contract_attribute(
+                contract=contract, attribute_to_updated=attribute_selected
+            )
+            session.current_user.update_contract(
+                session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
+            )
 
     @auth.is_authenticated
     def update_event(self):
