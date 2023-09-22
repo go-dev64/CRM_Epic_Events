@@ -127,11 +127,13 @@ class ManagerController:
 
     def _select_collaborator(self, session):
         collaborator_list = session.current_user.get_all_users(session=session)
-        return self.generic_view.select_element_view(collaborator_list)
+        user_choice = self.generic_view.select_element_view(collaborator_list)
+        return collaborator_list[user_choice]
 
     def _select_attribute_collaborator(self):
-        updatable_attrubute_list: ["name", "email_address", "phone_number", "password", "department"]
-        return self.generic_view.select_element_view(updatable_attrubute_list)
+        updatable_attribute_list = ["name", "email_address", "phone_number", "password", "department"]
+        user_choice = self.generic_view.select_element_view(updatable_attribute_list)
+        return updatable_attribute_list[user_choice]
 
     def _get_department_list(self, collaborator):
         department_list = ["Manager", "Seller", "Supporter"]
@@ -141,7 +143,8 @@ class ManagerController:
 
     def _select_new_department(self, collaborator):
         department_list = self._get_department_list(collaborator=collaborator)
-        return self.generic_view.select_element_view(department_list)
+        user_choice = self.generic_view.select_element_view(department_list)
+        return department_list[user_choice]
 
     def _get_new_collaborator_attribute(self, old_attribute):
         attribute = {
@@ -153,6 +156,8 @@ class ManagerController:
         restriction = attribute[old_attribute]
         new_value = self.manager_view.get_attribute(restriction=restriction)
         return new_value
+
+    ### TO DO =Create manager_view.get_attribute(restriction=restriction) + test
 
     @auth.is_authenticated
     def update_collaborator(self, session):

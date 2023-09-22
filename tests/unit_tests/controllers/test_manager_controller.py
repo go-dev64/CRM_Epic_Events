@@ -74,9 +74,67 @@ class TestManagerController:
             elif choice == 3:
                 assert manager_ctrl.update_element(session=session) == "update_address"
 
-    def test_update_collaborator(self, db_session, users, current_user_is_manager, mocker, choice):
-        # commet
+    @pytest.mark.parametrize("choice", [(0), (1), (2)])
+    def test__select_colaborator(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return the good element of list according to usre's choice.
         with db_session as session:
             users
             current_user_is_manager
+            manager = ManagerController()
+            returned_list = ["A", "B", "C"]
             mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.models.users.Manager.get_all_users", return_value=returned_list)
+            if choice == 0:
+                assert manager._select_collaborator(session=session) == "A"
+            elif choice == 1:
+                assert manager._select_collaborator(session=session) == "B"
+            elif choice == 2:
+                assert manager._select_collaborator(session=session) == "C"
+
+    @pytest.mark.parametrize("choice", [(0), (1), (2), (3), (4)])
+    def test__select_attribute_collaborator(self, db_session, users, current_user_is_manager, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            if choice == 0:
+                assert manager._select_attribute_collaborator() == "name"
+            elif choice == 1:
+                assert manager._select_attribute_collaborator() == "email_address"
+            elif choice == 2:
+                assert manager._select_attribute_collaborator() == "phone_number"
+            elif choice == 3:
+                assert manager._select_attribute_collaborator() == "password"
+            elif choice == 4:
+                assert manager._select_attribute_collaborator() == "department"
+
+    @pytest.mark.parametrize("collaborator", [("Manager"), ("Seller"), ("Supporter")])
+    def test__get_departement_list(self, db_session, users, current_user_is_manager, mocker, collaborator):
+        with db_session as session:
+            user = users[0]
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=collaborator)
+            if user == "Manager":
+                assert manager._get_department_list(user) == ["Seller", "Supporter"]
+            elif user == "Seller":
+                assert manager._get_department_list(user) == ["Manager", "Supporter"]
+            elif user == "Supporter":
+                assert manager._get_department_list(user) == ["Manager", "Seller"]
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test__select_new_department(self, db_session, users, current_user_is_manager, mocker, choice):
+        with db_session as session:
+            user = users[0]
+            manager = ManagerController()
+            returned_list = ["A", "B"]
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._get_department_list",
+                return_value=returned_list,
+            )
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            if choice == 0:
+                assert manager._select_new_department(user) == "A"
+            elif choice == 1:
+                assert manager._select_new_department(user) == "B"
