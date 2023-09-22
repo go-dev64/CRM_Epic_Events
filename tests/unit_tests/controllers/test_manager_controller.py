@@ -1,10 +1,13 @@
 import pytest
+from sqlalchemy import select
 from crm.controller.manager_controller import ManagerController
+from crm.models.users import Supporter, User
 
 
 class TestManagerController:
     @pytest.mark.parametrize("choice", [(1), (2)])
     def test_create_new_element(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return a good function to according user's choice.
         with db_session as session:
             users
             current_user_is_manager
@@ -28,6 +31,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("department", [(1), (2), (3)])
     def test_create_new_user(self, db_session, users, current_user_is_manager, mocker, department):
+        # test should return a good function of creating user according to user's choice..
         with db_session as session:
             users
             current_user_is_manager
@@ -47,6 +51,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_display_event(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return a good element to display according to user 's choice.
         with db_session as session:
             users
             current_user_is_manager
@@ -67,6 +72,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
     def test_update_element(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should a return a good function according to user's choice.
         with db_session as session:
             users
             current_user_is_manager
@@ -113,6 +119,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("choice", [(0), (1), (2), (3), (4)])
     def test__select_attribute_collaborator(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should retrun a good user attribure according a user's choice.
         with db_session as session:
             users
             current_user_is_manager
@@ -131,6 +138,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("collaborator", [("Manager"), ("Seller"), ("Supporter")])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, mocker, collaborator):
+        # test should return available department list for change user's department.
         with db_session as session:
             user = users[0]
             current_user_is_manager
@@ -145,6 +153,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test__select_new_department(self, db_session, users, mocker, choice):
+        # test should return a good element list according to user's choice.
         with db_session as session:
             user = users[0]
             manager = ManagerController()
@@ -159,7 +168,7 @@ class TestManagerController:
             elif choice == 1:
                 assert manager._select_new_department(user) == "B"
 
-    """@pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         "choice, new_value",
         [
             ("name", "toto"),
@@ -169,6 +178,7 @@ class TestManagerController:
         ],
     )
     def test_update_collaborator(self, db_session, users, current_user_is_manager, mocker, choice, new_value):
+        # test should return a updated attribute of user selected.
         with db_session as session:
             user = users[1]
             current_user_is_manager
@@ -197,9 +207,10 @@ class TestManagerController:
                 assert user.phone_number == new_value
             elif choice == "paassword":
                 manager.update_collaborator(session=session)
-                assert user.password == new_value"""
+                assert user.password == new_value
 
     def test_change_user_departement(self, db_session, users, current_user_is_manager, mocker):
+        # Test should change user of department. the number of User is the same.
         with db_session as session:
             user = users[1]
             current_user_is_manager
@@ -217,5 +228,8 @@ class TestManagerController:
                 return_value="supporter",
             )
             new_user = manager.update_collaborator(session=session)
-
+            list_user = session.scalars(select(User)).all()
+            list_supporter = session.scalars(select(Supporter)).all()
             assert new_user.department == "supporter_table"
+            assert len(list_user) == 3
+            assert len(list_supporter) == 2

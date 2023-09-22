@@ -85,16 +85,45 @@ class ManagerController:
 
     @auth.is_authenticated
     def select_event_to_display(self, session) -> Event:
+        """
+        Function display a element selecting by current user from list of all events.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            Event: Instance of Events.
+        """
         events_list = session.current_user.get_all_events(session=session)
         return self.generic_view.display_element(events_list)
 
     @auth.is_authenticated
     def select_event_without_supporter_to_display(self, session) -> Event:
+        """
+        Function display a element selecting by current user,
+        from list of all events without support department contact.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            Event: Instance of Events.
+        """
         event_list = session.current_user.get_all_event_without_support(session=session)
         return self.generic_view.display_element(event_list)
 
     @auth.is_authenticated
     def display_event(self, session):
+        """
+        Function enabling the user to select an action between display all events,
+        all events without supporter , and back.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: Return the function executing the action chosen by user.
+        """
         while True:
             choice_list = ["Display all Events", "Display all Events without Supporter", "Back"]
             choice = self.generic_view.select_element_view(choice_list)
@@ -108,6 +137,20 @@ class ManagerController:
 
     @auth.is_authenticated
     def update_element(self, session):
+        """
+        Function enabling the user to select an action between:
+        "Update Collaborator",
+        "Update Contract",
+        "Update Event",
+        "Update Address",
+        "back to previous menu".
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: Return the function executing the action chosen by user.
+        """
         list_of_choice = [
             "Update Collaborator",
             "Update Contract",
@@ -116,7 +159,7 @@ class ManagerController:
             "back to previous menu",
         ]
         while True:
-            element = self.generic_view.select_element_view()
+            element = self.generic_view.select_element_view(list_of_choice)
             match element:
                 case 0:
                     return self.update_collaborator(session=session)
@@ -130,27 +173,70 @@ class ManagerController:
                     break
 
     def _select_collaborator(self, session):
+        """
+        Function enabling the current user to select a collaborator in list:
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: Return colaborator chosen.
+        """
         collaborator_list = session.current_user.get_all_users(session=session)
         user_choice = self.generic_view.select_element_view(collaborator_list)
         return collaborator_list[user_choice]
 
     def _select_attribute_collaborator(self):
+        """
+        Function used to select the attribute to be updated, in list, for the selected employee.
+
+        Returns:
+            _type_: Return a attribute to be updated.
+        """
         updatable_attribute_list = ["name", "email_address", "phone_number", "password", "department"]
         user_choice = self.generic_view.select_element_view(updatable_attribute_list)
         return updatable_attribute_list[user_choice]
 
     def _get_department_list(self, collaborator):
+        """
+        Function defines the departments available for a user to change department.
+
+        Args:
+            collaborator (_type_): _description_
+
+        Returns:
+            _type_: available department list.
+        """
         department_list = ["manager", "seller", "supporter"]
         user_type = self.utils.get_type_of_user(collaborator)
         department_list.remove(user_type)
         return department_list
 
     def _select_new_department(self, collaborator):
+        """
+        Function used to select the new department, in list, for the selected employee.
+
+        Args:
+            collaborator (_type_): _description_
+
+        Returns:
+            _type_: new department
+        """
         department_list = self._get_department_list(collaborator=collaborator)
         user_choice = self.generic_view.select_element_view(department_list)
         return department_list[user_choice]
 
     def _get_new_collaborator_attribute(self, old_attribute):
+        """
+        Function used to get the new value of attribute will be updated, for the selected employee.
+        It's User input.
+
+        Args:
+            collaborator (_type_): _description_
+
+        Returns:
+            _type_: User input/ new value of attribute selected.
+        """
         attribute = {
             "name": [str, 50],
             "email_address": [str, 100],
@@ -163,6 +249,15 @@ class ManagerController:
 
     @auth.is_authenticated
     def update_collaborator(self, session):
+        """
+        Function updates a collaborator.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: collaborator updated.
+        """
         collaborator_selected = self._select_collaborator(session=session)
         attribute_selected = self._select_attribute_collaborator()
         if attribute_selected == "department":
