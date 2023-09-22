@@ -144,7 +144,7 @@ class TestManagerController:
                 assert manager._get_department_list(user) == ["Manager", "Seller"]
 
     @pytest.mark.parametrize("choice", [(0), (1)])
-    def test__select_new_department(self, db_session, users, current_user_is_manager, mocker, choice):
+    def test__select_new_department(self, db_session, users, mocker, choice):
         with db_session as session:
             user = users[0]
             manager = ManagerController()
@@ -158,3 +158,43 @@ class TestManagerController:
                 assert manager._select_new_department(user) == "A"
             elif choice == 1:
                 assert manager._select_new_department(user) == "B"
+
+    @pytest.mark.parametrize(
+        "choice, new_value",
+        [
+            ("name", "toto"),
+            ("email_address", "email@dfkjnekr"),
+            ("phone_number", "12351"),
+            ("password", "passwrgeord"),
+        ],
+    )
+    def test_update_collaborator(self, db_session, users, current_user_is_manager, mocker, choice, new_value):
+        with db_session as session:
+            user = users[1]
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_collaborator",
+                return_value=user,
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._get_new_collaborator_attribute",
+                return_value=new_value,
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_attribute_collaborator",
+                return_value=choice,
+            )
+
+            if choice == "name":
+                manager.update_collaborator(session=session)
+                assert user.name == new_value
+            elif choice == "email_addres":
+                manager.update_collaborator(session=session)
+                assert user.email_address == new_value
+            elif choice == "phone_number":
+                manager.update_collaborator(session=session)
+                assert user.phone_number == new_value
+            elif choice == "paassword":
+                manager.update_collaborator(session=session)
+                assert user.password == new_value
