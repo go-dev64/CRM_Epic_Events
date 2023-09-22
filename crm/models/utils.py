@@ -30,3 +30,6 @@ class Utils:
     @auth.is_authenticated
     def update_address(self, session):
         pass
+
+    def select_element_in_list(self, element_list: list):
+        list_element = element_list

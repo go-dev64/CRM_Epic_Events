@@ -87,7 +87,7 @@ class ManagerController:
         return self.generic_view.display_element(events_list)
 
     @auth.is_authenticated
-    def select_event_without_supporter_to_display(self, session):
+    def select_event_without_supporter_to_display(self, session) -> Event:
         event_list = session.current_user.get_all_event_without_support(session=session)
         return self.generic_view.display_element(event_list)
 
