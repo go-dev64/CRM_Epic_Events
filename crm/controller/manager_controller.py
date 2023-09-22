@@ -188,7 +188,7 @@ class ManagerController:
 
     def _select_attribute_collaborator(self):
         """
-        Function used to select the attribute to be updated, in list, for the selected employee.
+        Function used to select the attribute to be updated, in list, for the selected collaborator.
 
         Returns:
             _type_: Return a attribute to be updated.
@@ -207,7 +207,7 @@ class ManagerController:
         Returns:
             _type_: available department list.
         """
-        department_list = ["manager", "seller", "supporter"]
+        department_list = ["Manager", "Seller", "Supporter"]
         user_type = self.utils.get_type_of_user(collaborator)
         department_list.remove(user_type)
         return department_list
@@ -275,8 +275,43 @@ class ManagerController:
                 new_value=new_value,
             )
 
+    def _select_contract(self, session):
+        """
+        Function used to select the contract, in list, by user.
+
+        Args:
+            collaborator (_type_): _description_
+
+        Returns:
+            _type_: instance of Contract.
+        """
+        contracts = session.current_user.get_all_contracts(session=session)
+        choice = self.generic_view.select_element_view(contracts)
+        return contracts[choice]
+
+    def _select_contract_attribute_to_be_updated(self, contract):
+        """
+        Function used to select the cattribute, in list, for the selected contract.
+
+        Args:
+            collaborator (_type_): _description_
+
+        Returns:
+            _type_: Attribute od contract to be updates.
+        """
+        available_attribute_contract = [x for x in contract.availables_attribue_list().keys()]
+        choice = self.generic_view.select_element_view(available_attribute_contract)
+        return available_attribute_contract[choice]
+
     @auth.is_authenticated
     def update_contract(self):
+        # select contract to updated => ok
+        # select attribute to update
+        # if attibute is attribute is customer :
+        #   - selected a new customer:
+        # get a new value of attribute
+        # contract updated
+
         pass
 
     @auth.is_authenticated

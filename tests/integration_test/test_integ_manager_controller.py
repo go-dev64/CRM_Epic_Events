@@ -4,6 +4,7 @@ from crm.controller.manager_controller import ManagerController
 from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
+from tests.conftest import contracts
 
 
 class TestManagerController:
@@ -78,6 +79,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, choice):
+        # test should return the available department list.
         with db_session as session:
             user = users[choice]
             current_user_is_manager
@@ -91,6 +93,7 @@ class TestManagerController:
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__select_new_department(self, db_session, users, current_user_is_manager, choice, mocker):
+        # according ti user's choice, test should return a good department in list choice.
         with db_session as session:
             user = users[choice]
             current_user_is_manager
@@ -113,3 +116,17 @@ class TestManagerController:
             "crm.view.manager_view.ManagerView.get_new_value_of_collaborator_attribute", return_value=new_value
         )
         assert manager._get_new_collaborator_attribute(old_attribute=old_attribute) == new_value
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test__select_contract(self, db_session, users, contracts, current_user_is_manager, mocker, choice):
+        # test should return the good element of list according to user's choice.
+        with db_session as session:
+            users
+            contract = contracts
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            if choice == 0:
+                assert manager._select_contract(session=session) == contract[0]
+            elif choice == 1:
+                assert manager._select_contract(session=session) == contract[1]

@@ -225,7 +225,7 @@ class TestManagerController:
             )
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController._select_new_department",
-                return_value="supporter",
+                return_value="Supporter",
             )
             new_user = manager.update_collaborator(session=session)
             list_user = session.scalars(select(User)).all()
@@ -233,3 +233,23 @@ class TestManagerController:
             assert new_user.department == "supporter_table"
             assert len(list_user) == 3
             assert len(list_supporter) == 2
+
+    @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
+    def test_select_contract_attribute_to_be_updated(
+        self, db_session, users, contracts, current_user_is_manager, mocker, choice
+    ):
+        # test should retrun a good attribure of cotract according a user's choice.
+        with db_session as session:
+            users
+            contract = contracts[0]
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            if choice == 0:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "total_amount"
+            elif choice == 1:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "remaining"
+            elif choice == 2:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "signed_contract"
+            elif choice == 3:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "customer"
