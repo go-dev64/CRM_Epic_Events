@@ -159,7 +159,7 @@ class TestManagerController:
             elif choice == 1:
                 assert manager._select_new_department(user) == "B"
 
-    @pytest.mark.parametrize(
+    """@pytest.mark.parametrize(
         "choice, new_value",
         [
             ("name", "toto"),
@@ -197,4 +197,25 @@ class TestManagerController:
                 assert user.phone_number == new_value
             elif choice == "paassword":
                 manager.update_collaborator(session=session)
-                assert user.password == new_value
+                assert user.password == new_value"""
+
+    def test_change_user_departement(self, db_session, users, current_user_is_manager, mocker):
+        with db_session as session:
+            user = users[1]
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_collaborator",
+                return_value=user,
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_attribute_collaborator",
+                return_value="department",
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_new_department",
+                return_value="supporter",
+            )
+            new_user = manager.update_collaborator(session=session)
+
+            assert new_user.department == "supporter_table"

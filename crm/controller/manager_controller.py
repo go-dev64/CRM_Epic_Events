@@ -140,7 +140,7 @@ class ManagerController:
         return updatable_attribute_list[user_choice]
 
     def _get_department_list(self, collaborator):
-        department_list = ["Manager", "Seller", "Supporter"]
+        department_list = ["manager", "seller", "supporter"]
         user_type = self.utils.get_type_of_user(collaborator)
         department_list.remove(user_type)
         return department_list
@@ -161,13 +161,10 @@ class ManagerController:
         new_value = self.manager_view.get_new_value_of_collaborator_attribute(restriction=restriction)
         return new_value
 
-    ### TO DO =Create manager_view.get_attribute(restriction=restriction) + test
-
     @auth.is_authenticated
     def update_collaborator(self, session):
         collaborator_selected = self._select_collaborator(session=session)
         attribute_selected = self._select_attribute_collaborator()
-        print(attribute_selected)
         if attribute_selected == "department":
             new_department = self._select_new_department(collaborator_selected)
             return session.current_user.change_user_department(
@@ -175,6 +172,7 @@ class ManagerController:
             )
         else:
             new_value = self._get_new_collaborator_attribute(old_attribute=attribute_selected)
+
             return session.current_user.update_user(
                 session=session,
                 collaborator=collaborator_selected,
