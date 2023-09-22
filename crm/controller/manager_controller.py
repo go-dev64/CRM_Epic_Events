@@ -330,6 +330,21 @@ class ManagerController:
                 session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
             )
 
+    def _select_event(self, session):
+        """
+        Function used to select the event, in list, by user.
+
+        Returns:
+            _type_: instance of Event.
+        """
+        events = session.current_user.get_all_events(session=session)
+        choice = self.generic_view.select_element_view(events)
+        return events[choice]
+
     @auth.is_authenticated
-    def update_event(self):
+    def update_event(self, session):
+        # select event
+        event = self._select_event(session=session)
+        # select a supporter
+        # update event
         pass
