@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from crm.models.authentication import Authentication
 from crm.models.element_administratif import Event
 from crm.models.utils import Utils
@@ -341,10 +342,23 @@ class ManagerController:
         choice = self.generic_view.select_element_view(events)
         return events[choice]
 
+    def _select_supporter(self, session):
+        """
+        Function used to select the event, in list, by user.
+
+        Returns:
+            _type_: instance of Event.
+        """
+        supporters = session.current_user.get_all_supporter(session=session)
+        choice = self.generic_view.select_element_view(supporters)
+        return supporters[choice]
+
     @auth.is_authenticated
     def update_event(self, session):
-        # select event
+        """
+        Function change or add a supporter to event.
+
+        """
         event = self._select_event(session=session)
-        # select a supporter
-        # update event
-        pass
+        supporter = self._select_supporter(session=session)
+        session.current_user.change_supporter_of_event(session=session, event=event, new_supporter=supporter)

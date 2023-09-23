@@ -253,3 +253,23 @@ class TestManagerController:
                 assert manager._select_contract_attribute_to_be_updated(contract) == "signed_contract"
             elif choice == 3:
                 assert manager._select_contract_attribute_to_be_updated(contract) == "customer"
+
+    def test_update_event(self, db_session, events, users, current_user_is_manager, mocker):
+        with db_session as session:
+            events
+            users
+            current_user_is_manager
+            supporter_2 = Supporter(
+                name="supporter_2", email_address="email_supporter2", phone_number="023153", password="35516"
+            )
+            session.add(supporter_2)
+            manager = ManagerController()
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_event",
+                return_value=events[0],
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController._select_supporter", return_value=supporter_2
+            )
+            manager.update_event(session=session)
+            assert events[0].supporter == supporter_2

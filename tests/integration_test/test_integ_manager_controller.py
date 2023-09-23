@@ -225,3 +225,21 @@ class TestManagerController:
                 assert manager._select_event(session=session) == event[0]
             elif choice == 1:
                 assert manager._select_event(session=session) == event[1]
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test__select_supporter(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return the good element of list according to user's choice.
+        with db_session as session:
+            users
+            supporter_2 = Supporter(
+                name="supporter_2", email_address="email_supporter2", phone_number="023153", password="35516"
+            )
+            session.add(supporter_2)
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+
+            if choice == 0:
+                assert manager._select_supporter(session=session) == users[2]
+            elif choice == 1:
+                assert manager._select_supporter(session=session) == supporter_2

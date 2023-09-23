@@ -25,6 +25,15 @@ class TestManager:
             result_excepted = 3
             assert len(users_list) == result_excepted
 
+    def test_get_all_supporter(self, db_session, users, current_user_is_manager):
+        # test should return list of Supporter.
+        with db_session as session:
+            users
+            current_user = current_user_is_manager
+            supporter_list = current_user.get_all_supporter(session=session)
+            result_excepted = 2
+            assert len(supporter_list) == result_excepted
+
     def test_get_all_event_without_support(self, db_session, events, current_user_is_manager):
         # test
         with db_session as session:

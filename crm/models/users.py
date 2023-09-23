@@ -120,6 +120,10 @@ class Manager(User):
         users = session.scalars(select(User)).all()
         return users
 
+    def get_all_supporter(self, session):
+        # Function returns all Supporter.
+        return session.scalars(select(Supporter)).all()
+
     def get_all_event_without_support(self, session):
         # Function return all evant without supporter.
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
