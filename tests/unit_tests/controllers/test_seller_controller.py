@@ -76,3 +76,30 @@ class TestSellerController:
                 assert seller_ctrl.select_element_type_to_be_updated(session=session) == "update_customer"
             elif choice == 1:
                 assert seller_ctrl.select_element_type_to_be_updated(session=session) == "updat_contract"
+
+    @pytest.mark.parametrize(
+        "attribute,new_value",
+        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test"), ("password", "test")],
+    )
+    def test_update_seller_customer(
+        self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            clients
+            users
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController._select_customer",
+                return_value=clients[0],
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController._select_attribute_of_customer",
+                return_value=attribute,
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController._get_new_value_of_attribute",
+                return_value=new_value,
+            )
+            seller.update_seller_customer(session=session)
