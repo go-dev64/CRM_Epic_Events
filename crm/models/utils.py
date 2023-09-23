@@ -1,4 +1,6 @@
+from sqlalchemy import select
 from crm.models.authentication import Authentication
+from crm.models.element_administratif import Address
 from crm.view.generic_view import GenericView
 
 
@@ -29,7 +31,16 @@ class Utils:
 
     @auth.is_authenticated
     def update_address(self, session):
-        pass
+        # update address.
+        # list address
+        address_list = session.scalars(select(Address)).all()
+        # select address
+        address = self._select_element_in_list(element_list=address_list)
+        # select attribute to update
+        attribute = self._select_attribut_of_element(element=address)
+        # new value of attibute
+        new_value = self._get_new_value_of_attribut(attribute_to_updated=attribute, element=address)
+        setattr(address, attribute, new_value)
 
     def _select_element_in_list(self, element_list: list):
         """

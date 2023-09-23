@@ -103,3 +103,33 @@ class TestSellerController:
                 return_value=new_value,
             )
             seller.update_seller_customer(session=session)
+            assert getattr(clients[0], attribute) == new_value
+
+    @pytest.mark.parametrize(
+        "attribute,new_value",
+        [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)],
+    )
+    def test_update_seller_customer(
+        self, db_session, clients, users, contracts, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            clients
+            users
+            contracts
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=contracts[0],
+            )
+            mocker.patch(
+                "crm.models.utils.Utils._select_attribut_of_element",
+                return_value=attribute,
+            )
+            mocker.patch(
+                "crm.models.utils.Utils._get_new_value_of_attribut",
+                return_value=new_value,
+            )
+            seller.update_seller_contract(session=session)
+            assert getattr(contracts[0], attribute) == new_value

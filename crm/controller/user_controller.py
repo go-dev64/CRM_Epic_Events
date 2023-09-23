@@ -103,7 +103,7 @@ class UserController:
             case "Manager":
                 return self.manager_controller.update_element(session=session)
             case "Seller":
-                # return self.seller_controller.select_element_type_to_be_updated(session=session)
+                return self.seller_controller.select_element_type_to_be_updated(session=session)
                 pass
             case "Supporter":
                 # return self.supporter_controller.update_element(session=session)

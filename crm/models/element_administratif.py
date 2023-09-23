@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped
@@ -29,6 +30,16 @@ class Event(Base):
     address_id: Mapped[int] = mapped_column(ForeignKey("address_table.id"))
     address: Mapped["Address"] = relationship(back_populates="event")
 
+    def availables_attribue_list(self) -> dict:
+        return {
+            "name": {"type": int, "max": 50},
+            "date_start": {"type": datetime, "max": None},
+            "date_end": {"type": datetime, "max": None},
+            "attendees": {"type": int, "max": None},
+            "note": {"type": str, "max": 2048},
+            "address": {"type": object, "max": None},
+        }
+
 
 class Contract(Base):
     __tablename__ = "contract_table"
@@ -50,9 +61,9 @@ class Contract(Base):
 
     def availables_attribue_list(self) -> dict:
         return {
-            "total_amount": {"type": int},
-            "remaining": {"type": int},
-            "signed_contract": {"type": bool},
+            "total_amount": {"type": int, "max": None},
+            "remaining": {"type": int, "max": None},
+            "signed_contract": {"type": bool, "max": None},
             "customer": "Customer",
         }
 
@@ -72,3 +83,13 @@ class Address(Base):
     note: Mapped[Optional[str]] = mapped_column(String(2048))
 
     event = relationship("Event", back_populates="address")
+
+    def availables_attribue_list(self) -> dict:
+        return {
+            "number": {"type": int, "max": None},
+            "street": {"type": str, "max": 500},
+            "city": {"type": str, "max": 100},
+            "postal_code": {"type": int, "max": None},
+            "country": {"type": str, "max": 50},
+            "note": {"type": str, "max": 2048},
+        }
