@@ -137,41 +137,15 @@ class SellerController:
                 case 5:
                     break
 
-    def _select_customer(self, session):
-        """
-        Function enabling the current user to select a customer in list:
-
-        Returns:
-            _type_: Customer chosen.
-        """
-        user_customer_list = session.current_user.get_all_clients_of_user(session=session)
-        user_choice = self.generic_view.select_element_view(user_customer_list)
-        return user_customer_list[user_choice]
-
-    def _select_attribute_of_customer(self, customer):
-        """
-        Function used to select the attribute to be updated, in list, for the selected customer.
-
-        Returns:
-            _type_: Return a attribute to be updated.
-        """
-        updatable_attribute_list = [x for x in customer.availables_attribue_list().keys()]
-        user_choice = self.generic_view.select_element_view(updatable_attribute_list)
-        return updatable_attribute_list[user_choice]
-
-    def _get_new_value_of_attribute(self, customer, attribute_to_updated):
-        restriction = customer.availables_attribue_list()[attribute_to_updated]
-        new_value = self.manager_view.get_new_value_of_customer_attribute(restriction=restriction)
-        return new_value
-
     @auth.is_authenticated
     def update_seller_customer(self, session):
+        user_customer_list = session.current_user.get_all_clients_of_user(session=session)
         # select customer in list.
-        customer = self._select_customer(session=session)
+        customer = self.utils._select_element_in_list(element_list=user_customer_list)
         # select attribute to be updated.
-        attribute_selected = self._select_attribute_of_customer(sesion=session, customer=customer)
+        attribute_selected = self.utils._select_attribut_of_element(element=customer)
         # get new value of attribute.
-        new_value = self._get_new_value_of_attribute(customer=customer, attribute_to_updated=attribute_selected)
+        new_value = self.utils._get_new_value_of_attribut(element=customer, attribute_to_updated=attribute_selected)
         # make update
         session.current_user.update_customer(
             session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value

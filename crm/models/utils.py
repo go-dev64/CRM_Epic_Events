@@ -31,5 +31,38 @@ class Utils:
     def update_address(self, session):
         pass
 
-    def select_element_in_list(self, element_list: list):
-        list_element = element_list
+    def _select_element_in_list(self, element_list: list):
+        """
+        Function enabling the current user to select a element in list:
+
+        Returns:
+            _type_: element chosen.
+        """
+        user_choice = self.generic_view.select_element_view(element_list)
+        return element_list[user_choice]
+
+    def _select_attribut_of_element(self, element):
+        """
+        Function used to select the attribute to be updated, in list, for the selected element.
+
+        Returns:
+            _type_: Return a attribute to be updated.
+        """
+        updatable_attribute_list = [x for x in element.availables_attribue_list().keys()]
+        user_choice = self.generic_view.select_element_view(updatable_attribute_list)
+        return updatable_attribute_list[user_choice]
+
+    def _get_new_value_of_attribut(self, element, attribute_to_updated):
+        """
+        function get a new value of element.
+
+        Args:
+            element (_type_): element to be updated
+            attribute_to_updated (_type_): attribute of element to be updated.
+
+        Returns:
+            _type_: new value of attribute.
+        """
+        restriction = element.availables_attribue_list()[attribute_to_updated]
+        new_value = self.manager_view.get_new_value_of_customer_attribute(restriction=restriction)
+        return new_value

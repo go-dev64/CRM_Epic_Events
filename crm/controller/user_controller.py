@@ -103,7 +103,7 @@ class UserController:
             case "Manager":
                 return self.manager_controller.update_element(session=session)
             case "Seller":
-                # return self.seller_controller.update_element(session=session)
+                # return self.seller_controller.select_element_type_to_be_updated(session=session)
                 pass
             case "Supporter":
                 # return self.supporter_controller.update_element(session=session)
@@ -138,6 +138,6 @@ class UserController:
             event_list = session.current_user.get_all_events(session=session)
             return self.generic_view.display_element(event_list)
         elif user_type == "Manager":
-            return self.manager_controller.display_events(session=session)
+            return self.manager_controller.display_event(session=session)
         else:
             return self.supporter_controller.display_event_of_user(session=session)

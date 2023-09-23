@@ -91,15 +91,15 @@ class TestSellerController:
             current_user_is_seller
             seller = SellerController()
             mocker.patch(
-                "crm.controller.seller_controller.SellerController._select_customer",
+                "crm.models.utils.Utils._select_element_in_list",
                 return_value=clients[0],
             )
             mocker.patch(
-                "crm.controller.seller_controller.SellerController._select_attribute_of_customer",
+                "crm.models.utils.Utils._select_attribut_of_element",
                 return_value=attribute,
             )
             mocker.patch(
-                "crm.controller.seller_controller.SellerController._get_new_value_of_attribute",
+                "crm.models.utils.Utils._get_new_value_of_attribut",
                 return_value=new_value,
             )
             seller.update_seller_customer(session=session)
