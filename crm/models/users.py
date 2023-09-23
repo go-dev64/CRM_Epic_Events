@@ -120,6 +120,10 @@ class Manager(User):
         users = session.scalars(select(User)).all()
         return users
 
+    def get_all_supporter(self, session):
+        # Function returns all Supporter.
+        return session.scalars(select(Supporter)).all()
+
     def get_all_event_without_support(self, session):
         # Function return all evant without supporter.
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
@@ -238,7 +242,7 @@ class Manager(User):
         Args:
             session (_type_): _description_
             collaborator (_type_): User to move of department.
-            new_department (str / lowercase): new_department : manager, seller or supporter.
+            new_department (str): new_department : Manager, Seller or Supporter.
 
         Returns:
             _type_: a user with a class of new department.
@@ -251,11 +255,11 @@ class Manager(User):
         }
         self.delete_collaborator(session=session, collaborator_has_delete=collaborator)
         match new_department:
-            case "manager":
+            case "Manager":
                 return self.create_new_manager(session=session, user_info=user_info)
-            case "seller":
+            case "Seller":
                 return self.create_new_seller(session=session, user_info=user_info)
-            case "supporter":
+            case "Supporter":
                 return self.create_new_supporter(session=session, user_info=user_info)
 
     def update_contract(self, session, contract: Contract, attribute_update: str, new_value) -> None:

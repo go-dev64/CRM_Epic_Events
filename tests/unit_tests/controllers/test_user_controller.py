@@ -5,6 +5,7 @@ from crm.controller.user_controller import UserController
 class TestUserController:
     @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
     def test_home_page(self, db_session, users, current_user_is_user, mocker, choice):
+        # test check if the wright function is returned according to user's choise.
         with db_session as session:
             users
             current_user_is_user
@@ -39,6 +40,7 @@ class TestUserController:
 
     @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
     def test_user_choice_is_creating(self, db_session, users, current_user_is_user, mocker, user):
+        # test check if the wright function is returned according to current user's department.
         with db_session as session:
             users
             current_user_is_user
@@ -65,6 +67,7 @@ class TestUserController:
                 assert user_ctr.user_choice_is_creating(session=session) == "create_new_address"
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
+    # test check if the wright function is returned according to user's choice.
     def test_user_choice_is_reading(self, db_session, users, current_user_is_user, mocker, choice):
         with db_session as session:
             users
@@ -92,6 +95,7 @@ class TestUserController:
 
     @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
     def test_get_customer_list(self, db_session, users, current_user_is_user, mocker, user):
+        # test check if the wright function is returned according to current user's department.
         with db_session as session:
             users
             current_user_is_user
@@ -111,6 +115,7 @@ class TestUserController:
 
     @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
     def test_get_contract_list(self, db_session, users, current_user_is_user, mocker, user):
+        # test check if the wright function is returned according to current user's department.
         with db_session as session:
             users
             current_user_is_user
@@ -130,6 +135,7 @@ class TestUserController:
 
     @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
     def test_get_event_list(self, db_session, users, current_user_is_user, mocker, user):
+        # test check if the wright function is returned according to current user's department.
         with db_session as session:
             users
             current_user_is_user
@@ -146,3 +152,31 @@ class TestUserController:
                 assert user_ctr.get_events_list(session=session) == user
             elif user == "Supporter":
                 assert user_ctr.get_events_list(session=session) == "Supporter!"
+
+    @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
+    def test_user_choice_is_updating(self, db_session, users, current_user_is_user, mocker, user):
+        # test check if the wright function is returned according to current user's department.
+        with db_session as session:
+            users
+            current_user_is_user
+            user_ctr = UserController()
+            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.update_element",
+                return_value="update_element_Manager",
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.update_element",
+                return_value="update_element_Seller",
+            )
+            mocker.patch(
+                "crm.controller.supporter_controller.SupporterController.update_element",
+                return_value="update_element_Supporter",
+            )
+
+            if user == "Manager":
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Manager"
+            elif user == "Seller":
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Seller"
+            elif user == "Supporter":
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Supporter"

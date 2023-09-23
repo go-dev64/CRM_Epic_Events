@@ -46,6 +46,15 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_creating(self, session):
+        """
+        Function redirect to create function of user's departement.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: User's function to creating.
+        """
         user_type = self.utils.get_type_of_user(session.current_user)
         match user_type:
             case "Manager":
@@ -57,6 +66,15 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_reading(self, session):
+        """
+        According to current user' s choice, redirect to chosen action.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         while True:
             choice = self.generic_view.select_element_view()
             match choice:
@@ -71,7 +89,25 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_updating(self, session):
-        pass
+        """
+        Function redirect to updating function of user's department.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: Updating function.
+        """
+        user_type = self.utils.get_type_of_user(session.current_user)
+        match user_type:
+            case "Manager":
+                return self.manager_controller.update_element(session=session)
+            case "Seller":
+                # return self.seller_controller.update_element(session=session)
+                pass
+            case "Supporter":
+                # return self.supporter_controller.update_element(session=session)
+                pass
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
@@ -98,8 +134,10 @@ class UserController:
     @auth.is_authenticated
     def get_events_list(self, session):
         user_type = self.utils.get_type_of_user(session.current_user)
-        if user_type != "Supporter":
+        if user_type == "Seller":
             event_list = session.current_user.get_all_events(session=session)
             return self.generic_view.display_element(event_list)
+        elif user_type == "Manager":
+            return self.manager_controller.display_events(session=session)
         else:
             return self.supporter_controller.display_event_of_user(session=session)
