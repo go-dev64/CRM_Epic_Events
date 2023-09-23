@@ -255,6 +255,7 @@ class TestManagerController:
                 assert manager._select_contract_attribute_to_be_updated(contract) == "customer"
 
     def test_update_event(self, db_session, events, users, current_user_is_manager, mocker):
+        # Test should retrun a event with supporter updated.
         with db_session as session:
             events
             users

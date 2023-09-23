@@ -136,3 +136,27 @@ class SellerController:
                     return self.generic_view.display_element(element_list)
                 case 5:
                     break
+
+    @auth.is_authenticated
+    def update_seller_customer(self, session):
+        pass
+
+    @auth.is_authenticated
+    def update_seller_contract(self, session):
+        pass
+
+    @auth.is_authenticated
+    def select_element_type_to_be_updated(self, session):
+        # select element type in list an retrun fuction to updated element.
+        element_list = ["Update your customer", "Update your contracts", "Back"]
+        while True:
+            element_selected = self.generic_view.select_element_view(element_list)
+            match element_selected:
+                case 0:
+                    # Update a user's customers.
+                    return self.update_seller_customer(session=session)
+                case 1:
+                    # update a user's contract.
+                    return self.update_seller_contract(session=session)
+                case 2:
+                    break

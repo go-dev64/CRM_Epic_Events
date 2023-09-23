@@ -57,3 +57,22 @@ class TestSellerController:
                 assert seller_ctrl.select_contract_type_to_display(session=session) == choice
             elif choice == 4:
                 assert seller_ctrl.select_contract_type_to_display(session=session) == choice
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_element_type_to_be_updated(self, db_session, users, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            current_user_is_seller
+            seller_ctrl = SellerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.update_seller_customer",
+                return_value="update_customer",
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.update_seller_contract",
+                return_value="updat_contract",
+            )
+            if choice == 0:
+                assert seller_ctrl.select_element_type_to_be_updated(session=session) == "update_customer"
+            elif choice == 1:
+                assert seller_ctrl.select_element_type_to_be_updated(session=session) == "updat_contract"
