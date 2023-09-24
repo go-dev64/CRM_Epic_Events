@@ -174,6 +174,6 @@ class TestUserController:
             if user == "Manager":
                 assert user_ctr.user_choice_is_updating(session=session) == "update_element_Manager"
             elif user == "Seller":
-                assert user_ctr.user_choice_is_updating(session=session) == None
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Seller"
             elif user == "Supporter":
                 assert user_ctr.user_choice_is_updating(session=session) == None
