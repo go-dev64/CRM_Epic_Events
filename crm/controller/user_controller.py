@@ -104,10 +104,8 @@ class UserController:
                 return self.manager_controller.update_element(session=session)
             case "Seller":
                 return self.seller_controller.select_element_type_to_be_updated(session=session)
-                pass
             case "Supporter":
-                # return self.supporter_controller.update_element(session=session)
-                pass
+                return self.supporter_controller.update_element(session=session)
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):

@@ -170,10 +170,14 @@ class TestUserController:
                 "crm.controller.seller_controller.SellerController.select_element_type_to_be_updated",
                 return_value="update_element_Seller",
             )
+            mocker.patch(
+                "crm.controller.supporter_controller.SupporterController.update_element",
+                return_value="update_element_supporter",
+            )
 
             if user == "Manager":
                 assert user_ctr.user_choice_is_updating(session=session) == "update_element_Manager"
             elif user == "Seller":
                 assert user_ctr.user_choice_is_updating(session=session) == "update_element_Seller"
             elif user == "Supporter":
-                assert user_ctr.user_choice_is_updating(session=session) == None
+                assert user_ctr.user_choice_is_updating(session=session) == "update_element_supporter"
