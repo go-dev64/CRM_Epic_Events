@@ -239,9 +239,15 @@ class ManagerController:
     def update_event(self, session):
         """
         Function change or add a supporter to event.
-
         """
         events = session.current_user.get_all_events(session=session)
         event = self.utils._select_element_in_list(element_list=events)
         supporter = self._select_supporter(session=session)
         session.current_user.change_supporter_of_event(session=session, event=event, new_supporter=supporter)
+
+    @auth.is_authenticated
+    def delete_collaborator(self, session):
+        collaborator_list = session.current_user.get_all_users(session=session)
+        collaborator_list.remove(session.current_user)
+        collaborator_selected = self.utils._select_element_in_list(element_list=collaborator_list)
+        session.current_user.delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)

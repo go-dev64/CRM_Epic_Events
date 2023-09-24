@@ -5,7 +5,7 @@ from crm.models.users import Supporter, User
 
 
 class TestManagerController:
-    @pytest.mark.parametrize("choice", [(1), (2)])
+    @pytest.mark.parametrize("choice", [(0), (1)])
     def test_create_new_element(self, db_session, users, current_user_is_manager, mocker, choice):
         # test should return a good function to according user's choice.
         with db_session as session:
@@ -22,14 +22,14 @@ class TestManagerController:
                 "crm.controller.manager_controller.ManagerController.create_new_contract",
                 return_value="create_new_contract",
             )
-            if choice == 1:
+            if choice == 0:
                 assert manager.create_new_element(session=session) == "create_new_user"
-            elif choice == 2:
+            elif choice == 1:
                 assert manager.create_new_element(session=session) == "create_new_contract"
             else:
                 pass
 
-    @pytest.mark.parametrize("department", [(1), (2), (3)])
+    @pytest.mark.parametrize("department", [(0), (1), (2)])
     def test_create_new_user(self, db_session, users, current_user_is_manager, mocker, department):
         # test should return a good function of creating user according to user's choice..
         with db_session as session:
@@ -42,11 +42,11 @@ class TestManagerController:
             mocker.patch("crm.models.users.Manager.create_new_seller", return_value="new_seller")
             mocker.patch("crm.models.users.Manager.create_new_supporter", return_value="new_supporter")
 
-            if department == 1:
+            if department == 0:
                 assert manager.create_new_user(session=session) == "new_manager"
-            elif department == 2:
+            elif department == 1:
                 assert manager.create_new_user(session=session) == "new_seller"
-            elif department == 3:
+            elif department == 2:
                 assert manager.create_new_user(session=session) == "new_supporter"
 
     @pytest.mark.parametrize("choice", [(0), (1)])

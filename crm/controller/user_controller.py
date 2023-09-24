@@ -24,9 +24,6 @@ class UserController:
         Function redirect to Create element,Read element,
         Update element or Delete element according to the user's choice.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: function choosen.
         """
@@ -49,9 +46,6 @@ class UserController:
         """
         Function redirect to create function of user's departement.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: User's function to creating.
         """
@@ -68,9 +62,6 @@ class UserController:
     def user_choice_is_reading(self, session):
         """
         According to current user' s choice, redirect to chosen action.
-
-        Args:
-            session (_type_): _description_
 
         Returns:
             _type_: _description_
@@ -92,9 +83,6 @@ class UserController:
         """
         Function redirect to updating function of user's department.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: Updating function.
         """
@@ -109,7 +97,14 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
-        pass
+        user_type = self.utils.get_type_of_user(session.current_user)
+        match user_type:
+            case "Manager":
+                return self.manager_controller.delete_collaborator(session=session)
+            case "Seller":
+                return None
+            case "Supporter":
+                return None
 
     @auth.is_authenticated
     def get_customer_list(self, session):
