@@ -143,13 +143,9 @@ class SellerController:
         Function make update of customer of seller.
         """
         user_customer_list = session.current_user.get_all_clients_of_user(session=session)
-        # select customer in list.
         customer = self.utils._select_element_in_list(element_list=user_customer_list)
-        # select attribute to be updated.
         attribute_selected = self.utils._select_attribut_of_element(element=customer)
-        # get new value of attribute.
         new_value = self.utils._get_new_value_of_attribut(element=customer, attribute_to_updated=attribute_selected)
-        # make update
         session.current_user.update_customer(
             session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value
         )
@@ -159,14 +155,10 @@ class SellerController:
         """
         Function make update of contract of seller.
         """
-        # select contract in list.
         contracts_of_seller = session.current_user.get_all_contracts_of_user(session=session)
         contract = self.utils._select_element_in_list(element_list=contracts_of_seller)
-        # select attribute to be updated.
         attribute_to_update = self.utils._select_attribut_of_element(element=contract)
-        # get new value of attribute.
         new_value = self.utils._get_new_value_of_attribut(element=contract, attribute_to_updated=attribute_to_update)
-        # make update
         session.current_user.update_contract(
             session=session, contract=contract, attribute_update=attribute_to_update, new_value=new_value
         )

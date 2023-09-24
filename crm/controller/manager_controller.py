@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from crm.models.authentication import Authentication
 from crm.models.element_administratif import Event
 from crm.models.utils import Utils
@@ -23,22 +22,25 @@ class ManagerController:
         """
         Function redirects to create a new user or a new contract according to the user's choice.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: create_new_user or create_new_contract functions.
         """
         while True:
-            choice = self.generic_view.select_element_view()
+            choice_list = [
+                "Create new Collaborator",
+                "Create new contract",
+                "Create new address",
+                "Back to previous menu",
+            ]
+            choice = self.generic_view.select_element_view(choice_list)
             match choice:
-                case 1:
+                case 0:
                     return self.create_new_user(session=session)
-                case 2:
+                case 1:
                     return self.create_new_contract(session=session)
-                case 3:
+                case 2:
                     return self.utils.create_new_address(session=session)
-                case 4:
+                case 3:
                     break
 
     @auth.is_authenticated
@@ -47,35 +49,30 @@ class ManagerController:
         Function of new user's cretaion.
         According to user's choice, the function willto create a new manager, or new seller or new supporter.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: A neww instance of Manager class , or Seller class or Supporter class.
         """
         while True:
+            department_list = ["Manager", "Seller", "Supporter", "Back to previous menu"]
             user_info = self.user_view.get_user_info_view()
-            department = self.generic_view.select_element_view()
+            department = self.generic_view.select_element_view(department_list)
             match department:
-                case 1:
+                case 0:
                     new_user = session.current_user.create_new_manager(session=session, user_info=user_info)
                     return new_user
-                case 2:
+                case 1:
                     new_user = session.current_user.create_new_seller(session=session, user_info=user_info)
                     return new_user
-                case 3:
+                case 2:
                     new_user = session.current_user.create_new_supporter(session=session, user_info=user_info)
                     return new_user
-                case 4:
+                case 3:
                     break
 
     @auth.is_authenticated
     def create_new_contract(self, session):
         """
         New contract creation function.
-
-        Args:
-            session (_type_): _description_
 
         Returns:
             _type_: new instance of Contract class.
@@ -89,9 +86,6 @@ class ManagerController:
         """
         Function display a element selecting by current user from list of all events.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             Event: Instance of Events.
         """
@@ -103,9 +97,6 @@ class ManagerController:
         """
         Function display a element selecting by current user,
         from list of all events without support department contact.
-
-        Args:
-            session (_type_): _description_
 
         Returns:
             Event: Instance of Events.
@@ -119,14 +110,11 @@ class ManagerController:
         Function enabling the user to select an action between display all events,
         all events without supporter , and back.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: Return the function executing the action chosen by user.
         """
         while True:
-            choice_list = ["Display all Events", "Display all Events without Supporter", "Back"]
+            choice_list = ["Display all Events", "Display all Events without Supporter", "Back to previous menu"]
             choice = self.generic_view.select_element_view(choice_list)
             match choice:
                 case 0:
@@ -146,9 +134,6 @@ class ManagerController:
         "Update Address",
         "back to previous menu".
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: Return the function executing the action chosen by user.
         """
@@ -157,7 +142,7 @@ class ManagerController:
             "Update Contract",
             "Update Event",
             "Update Address",
-            "back to previous menu",
+            "Back to previous menu",
         ]
         while True:
             element = self.generic_view.select_element_view(list_of_choice)
@@ -177,9 +162,6 @@ class ManagerController:
         """
         Function defines the departments available for a user to change department.
 
-        Args:
-            collaborator (_type_): _description_
-
         Returns:
             _type_: available department list.
         """
@@ -191,9 +173,6 @@ class ManagerController:
     def _select_new_department(self, collaborator):
         """
         Function used to select the new department, in list, for the selected employee.
-
-        Args:
-            collaborator (_type_): _description_
 
         Returns:
             _type_: new department

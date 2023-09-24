@@ -68,6 +68,15 @@ class User(Base):
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
 
+    def availables_attribue_list(self) -> dict:
+        return {
+            "name": {"type": str, "max": None},
+            "email_address": {"type": str, "max": 100},
+            "phone_number": {"type": str, "max": 10},
+            "password": {"type": str, "max": None},
+            "department": {"type": object, "max": None},
+        }
+
 
 class Supporter(User):
     __tablename__ = "supporter_table"
@@ -84,7 +93,7 @@ class Supporter(User):
         contracts_list = session.scalars(select(Event).where(Event.supporter == session.current_user)).all()
         return contracts_list
 
-    def update_event(self, session, event: Event, attribute_updated: str, new_value) -> None:
+    def update_event(self, session, event, attribute_updated, new_value) -> None:
         """
         Function updates event.
         If Attribute to be updated in forbidden attribute , the function pass.
