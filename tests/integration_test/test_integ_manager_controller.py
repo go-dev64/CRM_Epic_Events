@@ -155,3 +155,20 @@ class TestManagerController:
                 assert manager._select_supporter(session=session) == users[2]
             elif choice == 1:
                 assert manager._select_supporter(session=session) == supporter_2
+
+    def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
+        # Test should retrun a user less one.
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[1],
+            )
+
+            manager.delete_collaborator(session=session)
+            user_list = session.scalars(select(User)).all()
+            seller_list = session.scalars(select(Seller)).all()
+            assert len(user_list) == 2
+            assert len(seller_list) == 0

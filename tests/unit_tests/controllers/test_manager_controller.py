@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import select
 from crm.controller.manager_controller import ManagerController
-from crm.models.users import Supporter, User
+from crm.models.users import Seller, Supporter, User
 
 
 class TestManagerController:
@@ -201,7 +201,6 @@ class TestManagerController:
     def test_update_event(self, db_session, events, users, current_user_is_manager, mocker):
         # Test should retrun a event with supporter updated.
         with db_session as session:
-            events
             users
             events
             current_user_is_manager
@@ -219,3 +218,21 @@ class TestManagerController:
             )
             manager.update_event(session=session)
             assert events[0].supporter == supporter_2
+
+    def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
+        # Test should retrun a user less one.
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.models.users.Manager.get_all_users", return_value=[x for x in users])
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[1],
+            )
+
+            manager.delete_collaborator(session=session)
+            user_list = session.scalars(select(User)).all()
+            seller_list = session.scalars(select(Seller)).all()
+            assert len(user_list) == 2
+            assert len(seller_list) == 0
