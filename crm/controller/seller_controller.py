@@ -185,4 +185,6 @@ class SellerController:
                     # update a user's contract.
                     return self.update_seller_contract(session=session)
                 case 2:
+                    return self.utils.update_address(session=session)
+                case 3:
                     break
