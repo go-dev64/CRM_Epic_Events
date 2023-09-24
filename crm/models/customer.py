@@ -30,5 +30,14 @@ class Customer(Base):
     def set_updated_date(self):
         self.updated_date = date.today()
 
+    def availables_attribue_list(self) -> dict:
+        return {
+            "name": {"type": str, "max": 50},
+            "email_address": {"type": str, "max": 100},
+            "phone_number": {"type": str, "max": 12},
+            "company": {"type": str, "max": 100},
+            "seller": {"type": object},
+        }
+
     def __repr__(self) -> str:
         return f"Client: {self.name} - company: {self.company} - contact Epic Event: {self.seller_contact}"

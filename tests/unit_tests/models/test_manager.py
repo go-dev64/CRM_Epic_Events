@@ -31,7 +31,7 @@ class TestManager:
             users
             current_user = current_user_is_manager
             supporter_list = current_user.get_all_supporter(session=session)
-            result_excepted = 2
+            result_excepted = 1
             assert len(supporter_list) == result_excepted
 
     def test_get_all_event_without_support(self, db_session, events, current_user_is_manager):
@@ -144,7 +144,7 @@ class TestManager:
 
     @pytest.mark.parametrize(
         "new_department, new_class_department, old_department",
-        [("manager", Manager, 1), ("seller", Seller, 2), ("supporter", Supporter, 0)],
+        [("Manager", Manager, 1), ("Seller", Seller, 2), ("Supporter", Supporter, 0)],
     )
     def test_update_departement(
         self, db_session, users, current_user_is_manager, new_department, new_class_department, old_department

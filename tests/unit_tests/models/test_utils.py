@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import mocker
 from sqlalchemy import select
 from crm.models.element_administratif import Address
 from crm.models.utils import Utils
@@ -44,3 +45,24 @@ class TestUtils:
             u.create_new_address(session=session)
             list_address = session.scalars(select(Address)).all()
             assert len(list_address) == 2
+
+    """@pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
+    def test_select_contract_attribute_to_be_updated(
+        self, db_session, users, contracts, current_user_is_manager, mocker, choice
+    ):
+        # test should retrun a good attribure of cotract according a user's choice.
+        with db_session as session:
+            users
+            contract = contracts[0]
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            if choice == 0:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "total_amount"
+            elif choice == 1:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "remaining"
+            elif choice == 2:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "signed_contract"
+            elif choice == 3:
+                assert manager._select_contract_attribute_to_be_updated(contract) == "customer"
+"""

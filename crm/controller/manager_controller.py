@@ -173,31 +173,6 @@ class ManagerController:
                 case 4:
                     break
 
-    def _select_collaborator(self, session):
-        """
-        Function enabling the current user to select a collaborator in list:
-
-        Args:
-            session (_type_): _description_
-
-        Returns:
-            _type_: Return colaborator chosen.
-        """
-        collaborator_list = session.current_user.get_all_users(session=session)
-        user_choice = self.generic_view.select_element_view(collaborator_list)
-        return collaborator_list[user_choice]
-
-    def _select_attribute_collaborator(self):
-        """
-        Function used to select the attribute to be updated, in list, for the selected collaborator.
-
-        Returns:
-            _type_: Return a attribute to be updated.
-        """
-        updatable_attribute_list = ["name", "email_address", "phone_number", "password", "department"]
-        user_choice = self.generic_view.select_element_view(updatable_attribute_list)
-        return updatable_attribute_list[user_choice]
-
     def _get_department_list(self, collaborator):
         """
         Function defines the departments available for a user to change department.
@@ -227,48 +202,26 @@ class ManagerController:
         user_choice = self.generic_view.select_element_view(department_list)
         return department_list[user_choice]
 
-    def _get_new_collaborator_attribute(self, old_attribute):
-        """
-        Function used to get the new value of attribute will be updated, for the selected employee.
-        It's User input.
-
-        Args:
-            collaborator (_type_): _description_
-
-        Returns:
-            _type_: User input/ new value of attribute selected.
-        """
-        attribute = {
-            "name": [str, 50],
-            "email_address": [str, 100],
-            "phone_number": [str, 10],
-            "password": [str, None],
-        }
-        restriction = attribute[old_attribute]
-        new_value = self.manager_view.get_new_value_of_collaborator_attribute(restriction=restriction)
-        return new_value
-
     @auth.is_authenticated
     def update_collaborator(self, session):
         """
         Function updates a collaborator.
 
-        Args:
-            session (_type_): _description_
-
         Returns:
             _type_: collaborator updated.
         """
-        collaborator_selected = self._select_collaborator(session=session)
-        attribute_selected = self._select_attribute_collaborator()
+        collaborator_list = session.current_user.get_all_users(session=session)
+        collaborator_selected = self.utils._select_element_in_list(element_list=collaborator_list)
+        attribute_selected = self.utils._select_attribut_of_element(element=collaborator_selected)
         if attribute_selected == "department":
             new_department = self._select_new_department(collaborator_selected)
             return session.current_user.change_user_department(
                 session=session, collaborator=collaborator_selected, new_department=new_department
             )
         else:
-            new_value = self._get_new_collaborator_attribute(old_attribute=attribute_selected)
-
+            new_value = self.utils._get_new_value_of_attribut(
+                element=collaborator_selected, attribute_to_updated=attribute_selected
+            )
             return session.current_user.update_user(
                 session=session,
                 collaborator=collaborator_selected,
@@ -276,82 +229,32 @@ class ManagerController:
                 new_value=new_value,
             )
 
-    def _select_contract(self, session):
-        """
-        Function used to select the contract, in list, by user.
-
-        Returns:
-            _type_: instance of Contract.
-        """
-        contracts = session.current_user.get_all_contracts(session=session)
-        choice = self.generic_view.select_element_view(contracts)
-        return contracts[choice]
-
-    def _select_contract_attribute_to_be_updated(self, contract):
-        """
-        Function used to select the attribute, in list, for the selected contract.
-
-        Returns:
-            _type_: Attribute of contract to be updated.
-        """
-        available_attribute_contract = [x for x in contract.availables_attribue_list().keys()]
-        choice = self.generic_view.select_element_view(available_attribute_contract)
-        return available_attribute_contract[choice]
-
-    def _select_new_customer_for_contract(self, session):
-        """
-        Function used to select the customer, in list, for the selected contract.
-
-        Returns:
-            _type_: instance of customer.
-        """
-        customer_list = session.current_user.get_all_customers(session=session)
-        choice = self.generic_view.select_element_view(customer_list)
-        return customer_list[choice]
-
-    def _get_new_value_of_contract_attribute(self, contract, attribute_to_updated):
-        restriction = contract.availables_attribue_list()[attribute_to_updated]
-        new_value = self.manager_view.get_new_value_of_contract_attribute(restriction=restriction)
-        return new_value
-
     @auth.is_authenticated
     def update_contract(self, session):
-        contract = self._select_contract(session=session)
-        attribute_selected = self._select_contract_attribute_to_be_updated(contract=contract)
+        contracts = session.current_user.get_all_contracts(session=session)
+        contract = self.utils._select_element_in_list(element_list=contracts)
+        attribute_selected = self.utils._select_attribut_of_element(element=contract)
         if attribute_selected == "customer":
-            new_customer = self._select_new_customer_for_contract(session=session)
+            customer_list = session.current_user.get_all_customers(session=session)
+            new_customer = self.utils._select_element_in_list(element_list=customer_list)
             session.current_user.update_contract(
                 session=session, contract=contract, attribute_update=attribute_selected, new_value=new_customer
             )
         else:
-            new_value = self._get_new_value_of_contract_attribute(
-                contract=contract, attribute_to_updated=attribute_selected
+            new_value = self.utils._get_new_value_of_attribut(
+                element=contract, attribute_to_updated=attribute_selected
             )
             session.current_user.update_contract(
                 session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
             )
 
-    def _select_event(self, session):
-        """
-        Function used to select the event, in list, by user.
-
-        Returns:
-            _type_: instance of Event.
-        """
-        events = session.current_user.get_all_events(session=session)
-        choice = self.generic_view.select_element_view(events)
-        return events[choice]
-
     def _select_supporter(self, session):
         """
-        Function used to select the event, in list, by user.
-
-        Returns:
-            _type_: instance of Event.
+        Function select a supporter in list.
         """
         supporters = session.current_user.get_all_supporter(session=session)
-        choice = self.generic_view.select_element_view(supporters)
-        return supporters[choice]
+        supporter = self.utils._select_element_in_list(element_list=supporters)
+        return supporter
 
     @auth.is_authenticated
     def update_event(self, session):
@@ -359,6 +262,7 @@ class ManagerController:
         Function change or add a supporter to event.
 
         """
-        event = self._select_event(session=session)
+        events = session.current_user.get_all_events(session=session)
+        event = self.utils._select_element_in_list(element_list=events)
         supporter = self._select_supporter(session=session)
         session.current_user.change_supporter_of_event(session=session, event=event, new_supporter=supporter)

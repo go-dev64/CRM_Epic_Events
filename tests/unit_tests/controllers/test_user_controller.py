@@ -142,14 +142,15 @@ class TestUserController:
             user_ctr = UserController()
             mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
             mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch("crm.controller.manager_controller.ManagerController.display_event", return_value=user)
             mocker.patch(
                 "crm.controller.supporter_controller.SupporterController.display_event_of_user",
                 return_value="Supporter!",
             )
             if user == "Manager":
-                assert user_ctr.get_events_list(session=session) == user
+                assert user_ctr.get_events_list(session=session) == "Manager"
             elif user == "Seller":
-                assert user_ctr.get_events_list(session=session) == user
+                assert user_ctr.get_events_list(session=session) == "Seller"
             elif user == "Supporter":
                 assert user_ctr.get_events_list(session=session) == "Supporter!"
 
@@ -166,12 +167,8 @@ class TestUserController:
                 return_value="update_element_Manager",
             )
             mocker.patch(
-                "crm.controller.seller_controller.SellerController.update_element",
+                "crm.controller.seller_controller.SellerController.select_element_type_to_be_updated",
                 return_value="update_element_Seller",
-            )
-            mocker.patch(
-                "crm.controller.supporter_controller.SupporterController.update_element",
-                return_value="update_element_Supporter",
             )
 
             if user == "Manager":
@@ -179,4 +176,4 @@ class TestUserController:
             elif user == "Seller":
                 assert user_ctr.user_choice_is_updating(session=session) == "update_element_Seller"
             elif user == "Supporter":
-                assert user_ctr.user_choice_is_updating(session=session) == "update_element_Supporter"
+                assert user_ctr.user_choice_is_updating(session=session) == None
