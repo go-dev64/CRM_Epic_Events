@@ -136,3 +136,47 @@ class SellerController:
                     return self.generic_view.display_element(element_list)
                 case 5:
                     break
+
+    @auth.is_authenticated
+    def update_seller_customer(self, session):
+        """
+        Function make update of customer of seller.
+        """
+        user_customer_list = session.current_user.get_all_clients_of_user(session=session)
+        customer = self.utils._select_element_in_list(element_list=user_customer_list)
+        attribute_selected = self.utils._select_attribut_of_element(element=customer)
+        new_value = self.utils._get_new_value_of_attribut(element=customer, attribute_to_updated=attribute_selected)
+        session.current_user.update_customer(
+            session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value
+        )
+
+    @auth.is_authenticated
+    def update_seller_contract(self, session):
+        """
+        Function make update of contract of seller.
+        """
+        contracts_of_seller = session.current_user.get_all_contracts_of_user(session=session)
+        contract = self.utils._select_element_in_list(element_list=contracts_of_seller)
+        attribute_to_update = self.utils._select_attribut_of_element(element=contract)
+        new_value = self.utils._get_new_value_of_attribut(element=contract, attribute_to_updated=attribute_to_update)
+        session.current_user.update_contract(
+            session=session, contract=contract, attribute_update=attribute_to_update, new_value=new_value
+        )
+
+    @auth.is_authenticated
+    def select_element_type_to_be_updated(self, session):
+        # select element type in list an retrun fuction to updated element.
+        element_list = ["Update your customer", "Update your contracts", "Back"]
+        while True:
+            element_selected = self.generic_view.select_element_view(element_list)
+            match element_selected:
+                case 0:
+                    # Update a user's customers.
+                    return self.update_seller_customer(session=session)
+                case 1:
+                    # update a user's contract.
+                    return self.update_seller_contract(session=session)
+                case 2:
+                    return self.utils.update_address(session=session)
+                case 3:
+                    break
