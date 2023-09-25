@@ -22,7 +22,7 @@ URL_OBJECT = URL.create(
 
 class Database:
     def database_engine(self):
-        engine = create_engine(URL_OBJECT, echo=True)
+        engine = create_engine(URL_OBJECT)
         return engine
 
     def create_session(self):

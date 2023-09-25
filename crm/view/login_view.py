@@ -1,21 +1,34 @@
 # View module of user login.
+from rich.console import Console
+from crm.view.generic_view import GenericView
 
 
 class LoginView:
     def __init__(self) -> None:
-        pass
+        self.console = Console()
+        self.generic = GenericView()
 
-    def get_user_email_and_password(self, msg=""):
-        print(
-            "===== Welcome to EPIC EVENTS =====n\
-            Please enter your email and password to log in"
-        )
-        try:
-            print(msg)
-            email = str(input("Your email: ")).lower
-            password = input("Your Password: ")
-        except ValueError:
-            msg = "Le email doit etre une chaine de caractère"
+    def authentication_ok(self):
+        self.console.print("✅ Authentication is ok ✅")
 
-        else:
-            return email, password
+    def get_email(self):
+        return self.console.input(":email:  Please, enter your email:")
+
+    def get_password(self):
+        return self.console.input(":key: Please, enter your Password: ")
+
+    def get_user_email_and_password(self, msg=None):
+        section = "[i]Authentication[i]"
+        while True:
+            self.generic.header(section=section)
+            if msg != None:
+                self.console.print(f":warning: {msg} :warning:")
+            email = self.get_email()
+            password = self.get_password()
+            try:
+                assert 5 < len(email) < 50
+            except AssertionError:
+                msg = "Email trop long ❌"
+
+            else:
+                return email, password

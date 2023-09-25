@@ -5,7 +5,7 @@ from crm.controller.user_controller import UserController
 
 def main():
     db = Database()
-    db.create_tables()
+    # db.create_tables()
     db_session = db.create_session()
     with db_session as session:
         while True:
