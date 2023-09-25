@@ -181,3 +181,21 @@ class TestUserController:
                 assert user_ctr.user_choice_is_updating(session=session) == "update_element_Seller"
             elif user == "Supporter":
                 assert user_ctr.user_choice_is_updating(session=session) == "update_element_supporter"
+
+    @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
+    def test_user_choice_is_deleting(self, db_session, users, current_user_is_manager, mocker, user):
+        with db_session as session:
+            users
+            current_user_is_manager
+            controller = UserController()
+            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.delete_collaborator",
+                return_value="delete_collaborator",
+            )
+            if user == "Manager":
+                assert controller.user_choice_is_deleting(session=session) == "delete_collaborator"
+            elif user == "Seller":
+                assert controller.user_choice_is_deleting(session=session) == None
+            elif user == "Supporter":
+                assert controller.user_choice_is_deleting(session=session) == None

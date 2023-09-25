@@ -1,11 +1,11 @@
 import pytest
 from sqlalchemy import select
 from crm.controller.manager_controller import ManagerController
-from crm.models.users import Supporter, User
+from crm.models.users import Seller, Supporter, User
 
 
 class TestManagerController:
-    @pytest.mark.parametrize("choice", [(1), (2)])
+    @pytest.mark.parametrize("choice", [(0), (1)])
     def test_create_new_element(self, db_session, users, current_user_is_manager, mocker, choice):
         # test should return a good function to according user's choice.
         with db_session as session:
@@ -22,14 +22,14 @@ class TestManagerController:
                 "crm.controller.manager_controller.ManagerController.create_new_contract",
                 return_value="create_new_contract",
             )
-            if choice == 1:
+            if choice == 0:
                 assert manager.create_new_element(session=session) == "create_new_user"
-            elif choice == 2:
+            elif choice == 1:
                 assert manager.create_new_element(session=session) == "create_new_contract"
             else:
                 pass
 
-    @pytest.mark.parametrize("department", [(1), (2), (3)])
+    @pytest.mark.parametrize("department", [(0), (1), (2)])
     def test_create_new_user(self, db_session, users, current_user_is_manager, mocker, department):
         # test should return a good function of creating user according to user's choice..
         with db_session as session:
@@ -42,11 +42,11 @@ class TestManagerController:
             mocker.patch("crm.models.users.Manager.create_new_seller", return_value="new_seller")
             mocker.patch("crm.models.users.Manager.create_new_supporter", return_value="new_supporter")
 
-            if department == 1:
+            if department == 0:
                 assert manager.create_new_user(session=session) == "new_manager"
-            elif department == 2:
+            elif department == 1:
                 assert manager.create_new_user(session=session) == "new_seller"
-            elif department == 3:
+            elif department == 2:
                 assert manager.create_new_user(session=session) == "new_supporter"
 
     @pytest.mark.parametrize("choice", [(0), (1)])
@@ -201,7 +201,6 @@ class TestManagerController:
     def test_update_event(self, db_session, events, users, current_user_is_manager, mocker):
         # Test should retrun a event with supporter updated.
         with db_session as session:
-            events
             users
             events
             current_user_is_manager
@@ -219,3 +218,21 @@ class TestManagerController:
             )
             manager.update_event(session=session)
             assert events[0].supporter == supporter_2
+
+    def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
+        # Test should retrun a user less one.
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.models.users.Manager.get_all_users", return_value=[x for x in users])
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[1],
+            )
+
+            manager.delete_collaborator(session=session)
+            user_list = session.scalars(select(User)).all()
+            seller_list = session.scalars(select(Seller)).all()
+            assert len(user_list) == 2
+            assert len(seller_list) == 0

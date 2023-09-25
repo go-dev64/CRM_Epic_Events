@@ -7,7 +7,7 @@ from crm.models.utils import Utils
 
 
 class TestManagerController:
-    @pytest.mark.parametrize("department", [(1), (2), (3)])
+    @pytest.mark.parametrize("department", [(0), (1), (2)])
     def test_create_new_user(self, db_session, users, current_user_is_manager, mocker, department):
         # test should return a new user.
         with db_session as session:
@@ -23,20 +23,21 @@ class TestManagerController:
             mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=department)
             mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
 
-            if department == 1:
+            if department == 0:
                 new_user = manager_ctrl.create_new_user(session=session)
+                print(new_user)
                 list_manager = session.scalars(select(Manager)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_manager) == 2
                 assert len(list_user) == 4
 
-            elif department == 2:
+            elif department == 1:
                 new_user = manager_ctrl.create_new_user(session=session)
                 list_seller = session.scalars(select(Seller)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_seller) == 2
                 assert len(list_user) == 4
-            elif department == 3:
+            elif department == 2:
                 new_user = manager_ctrl.create_new_user(session=session)
                 list_supporter = session.scalars(select(Supporter)).all()
                 list_user = session.scalars(select(User)).all()
@@ -154,3 +155,20 @@ class TestManagerController:
                 assert manager._select_supporter(session=session) == users[2]
             elif choice == 1:
                 assert manager._select_supporter(session=session) == supporter_2
+
+    def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
+        # Test should retrun a user less one.
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[1],
+            )
+
+            manager.delete_collaborator(session=session)
+            user_list = session.scalars(select(User)).all()
+            seller_list = session.scalars(select(Seller)).all()
+            assert len(user_list) == 2
+            assert len(seller_list) == 0
