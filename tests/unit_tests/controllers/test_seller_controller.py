@@ -1,0 +1,118 @@
+import pytest
+from crm.controller.seller_controller import SellerController
+
+
+class TestSellerController:
+    @pytest.mark.parametrize("choice", [(1), (2)])
+    def test_create_new_element(self, db_session, users, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_seller
+            seller_ctrl = SellerController()
+
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.create_new_customer",
+                return_value="create_new_customer",
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.create_new_event", return_value="create_new_event"
+            )
+            if choice == 1:
+                assert seller_ctrl.create_new_element(session=session) == "create_new_customer"
+            elif choice == 2:
+                assert seller_ctrl.create_new_element(session=session) == "create_new_event"
+            else:
+                pass
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_customer_type_to_display(self, db_session, users, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_seller
+            seller_ctrl = SellerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=choice)
+            if choice == 0:
+                assert seller_ctrl.select_customer_type_to_display(session=session) == choice
+            elif choice == 1:
+                assert seller_ctrl.select_customer_type_to_display(session=session) == choice
+
+    @pytest.mark.parametrize("choice", [(0), (1), (2), (3), (4)])
+    def test_select_contract_type_to_display(self, db_session, users, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_seller
+            seller_ctrl = SellerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=choice)
+            if choice == 0:
+                assert seller_ctrl.select_contract_type_to_display(session=session) == choice
+            elif choice == 1:
+                assert seller_ctrl.select_contract_type_to_display(session=session) == choice
+            elif choice == 2:
+                assert seller_ctrl.select_contract_type_to_display(session=session) == choice
+            elif choice == 3:
+                assert seller_ctrl.select_contract_type_to_display(session=session) == choice
+            elif choice == 4:
+                assert seller_ctrl.select_contract_type_to_display(session=session) == choice
+
+    @pytest.mark.parametrize("choice", [(0), (1), (2)])
+    def test_select_element_type_to_be_updated(self, db_session, users, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            current_user_is_seller
+            seller_ctrl = SellerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.update_seller_customer",
+                return_value="update_customer",
+            )
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.update_seller_contract",
+                return_value="updat_contract",
+            )
+            mocker.patch("crm.models.utils.Utils.update_address", return_value="update_address")
+            if choice == 0:
+                assert seller_ctrl.select_element_type_to_be_updated(session=session) == "update_customer"
+            elif choice == 1:
+                assert seller_ctrl.select_element_type_to_be_updated(session=session) == "updat_contract"
+            elif choice == 2:
+                assert seller_ctrl.select_element_type_to_be_updated(session=session) == "update_address"
+
+    @pytest.mark.parametrize(
+        "attribute,new_value",
+        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test"), ("password", "test")],
+    )
+    def test_update_seller_customer(
+        self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            clients
+            users
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=clients[0])
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
+            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            seller.update_seller_customer(session=session)
+            assert getattr(clients[0], attribute) == new_value
+
+    @pytest.mark.parametrize(
+        "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]
+    )
+    def test_update_seller_customer(
+        self, db_session, clients, users, contracts, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            clients
+            users
+            contracts
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=contracts[0])
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
+            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            seller.update_seller_contract(session=session)
+            assert getattr(contracts[0], attribute) == new_value

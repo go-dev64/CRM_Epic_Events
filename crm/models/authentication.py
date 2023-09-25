@@ -11,15 +11,12 @@ load_dotenv()
 
 
 class Authentication:
-    def __init__(self) -> None:
-        self.ph = argon2.PasswordHasher()
-
     def get_user_with_email(self, session, email: str):
         """
         function return User usinfg input email.
 
         Args:
-            email (str]): Input email.
+            email (str): Input email.
 
         Returns:
             _type_: User and None if fails.
@@ -31,7 +28,7 @@ class Authentication:
         else:
             return None
 
-    def login(self, db_session, email: str, input_password: str):
+    def login(self, session, email: str, input_password: str):
         """
         User login function.
         Return User, None if email invalid and False if password invalid.
@@ -44,12 +41,13 @@ class Authentication:
             User connected or None if invalid email  and False if invalid pasword.
         """
 
-        user = self.get_user_with_email(db_session, email=email)
+        user = self.get_user_with_email(session, email=email)
         if user == None:
             return None
         else:
             try:
-                self.ph.verify(user.password, input_password)
+                ph = argon2.PasswordHasher()
+                ph.verify(user.password, input_password)
             except argon2.exceptions.VerifyMismatchError:
                 return False
             else:
