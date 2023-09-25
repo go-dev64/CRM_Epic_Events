@@ -7,7 +7,7 @@ from crm.view.login_view import LoginView
 class LoginController:
     auth = Authentication()
 
-    def __init__(self, session) -> None:
+    def __init__(self) -> None:
         self.login_view = LoginView()
         self.auth = Authentication()
         self.manager = ManagerController()
