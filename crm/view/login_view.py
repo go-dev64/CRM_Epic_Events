@@ -1,8 +1,6 @@
 # View module of user login.
 from rich.console import Console
-from rich import print
 from crm.view.generic_view import GenericView
-from rich.panel import Panel
 
 
 class LoginView:
@@ -10,18 +8,19 @@ class LoginView:
         self.console = Console()
         self.generic = GenericView()
 
-    def email(self):
-        email = input("Your email: ")
+    def authentication_ok(self):
+        self.console.print("✅ Authentication is ok ✅")
 
-    def get_user_email_and_password(self, msg=""):
+    def get_user_email_and_password(self, msg=None):
         section = "[i]Authentication[i]"
         while True:
             self.generic.header(section=section)
-            self.console.print(msg)
-            email = input("Your email: ")
-            password = input("Your Password: ")
+            if msg != None:
+                self.console.print(f":warning: {msg} :warning:")
+            email = self.console.input(":email:  Please, enter your email:")
+            password = self.console.input(":key: Please, enter your Password: ")
             try:
-                assert len(email) < 2
+                assert 5 < len(email) < 50
             except AssertionError:
                 msg = "Email trop long ❌"
 

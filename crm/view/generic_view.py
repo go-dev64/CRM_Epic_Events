@@ -12,6 +12,9 @@ class GenericView:
         title_panel = Panel(section, title="[bold i]CRM Epic EVENT[/bold i]")
         self.console.print(title_panel)
 
+    def home_view(self):
+        pass
+
     def display_element_list(self, list_element):
         for i in range(len(list_element)):
             print(f"{i} - {list_element[i]}")
