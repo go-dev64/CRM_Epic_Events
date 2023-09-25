@@ -1,7 +1,5 @@
-import sys
 import pytest
 from crm.view.generic_view import GenericView
-from rich.panel import Panel
 
 
 class TestGenericView:

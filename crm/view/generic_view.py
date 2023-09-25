@@ -9,7 +9,7 @@ class GenericView:
 
     def header(self, section):
         print("\033c", end="")  # Efface la page précédente
-        title_panel = Panel(section, title="[bold i]CRM Epic Event[/bold i]")
+        title_panel = Panel(section, title="[i bold]CRM Epic Event[/i bold]")
         self.console.print(title_panel)
 
     def home_view(self):
