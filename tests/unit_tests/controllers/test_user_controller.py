@@ -44,8 +44,8 @@ class TestUserController:
         with db_session as session:
             users
             current_user_is_user
+            session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.create_new_element",
                 return_value="create_new_element_Manager",
@@ -99,8 +99,8 @@ class TestUserController:
         with db_session as session:
             users
             current_user_is_user
+            session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
             mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_customer_type_to_display",
@@ -119,8 +119,9 @@ class TestUserController:
         with db_session as session:
             users
             current_user_is_user
+            session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
+
             mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_contract_type_to_display",
@@ -139,8 +140,8 @@ class TestUserController:
         with db_session as session:
             users
             current_user_is_user
+            session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
             mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
             mocker.patch("crm.controller.manager_controller.ManagerController.display_event", return_value=user)
             mocker.patch(
@@ -160,8 +161,8 @@ class TestUserController:
         with db_session as session:
             users
             current_user_is_user
+            session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.update_element",
                 return_value="update_element_Manager",
@@ -187,8 +188,8 @@ class TestUserController:
         with db_session as session:
             users
             current_user_is_manager
+            session.current_user_department = user
             controller = UserController()
-            mocker.patch("crm.models.utils.Utils.get_type_of_user", return_value=user)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.delete_collaborator",
                 return_value="delete_collaborator",
