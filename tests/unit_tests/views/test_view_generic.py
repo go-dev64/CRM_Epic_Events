@@ -55,7 +55,7 @@ class TestGenericView:
             assert i in out
 
     @pytest.mark.parametrize("result", [(1), (2), (3)])
-    def test_select_element_in_list(self, mocker, capsys, result):
+    def test_select_element_in_list(self, mocker, result):
         mocker.patch("crm.view.generic_view.GenericView.display_element_list", return_value="")
         mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
         list_element = ["element 1", " element 2", "element 3"]
@@ -63,3 +63,9 @@ class TestGenericView:
             section="", department="", current_user_name=",", list_element=list_element
         )
         assert resultat == result - 1
+
+    def test_string_form(self, mocker):
+        restriction = {"attribute_name": "name", "parametre": {"type": str, "max": 50}}
+        mocker.patch("rich.prompt.Prompt.ask", return_value="une string")
+        result = GenericView().string_form(restriction=restriction)
+        assert result == "une string"

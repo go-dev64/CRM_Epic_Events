@@ -68,14 +68,14 @@ class User(Base):
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
 
-    def availables_attribue_list(self) -> dict:
-        return {
-            "name": {"type": str, "max": None},
-            "email_address": {"type": str, "max": 100},
-            "phone_number": {"type": str, "max": 10},
-            "password": {"type": str, "max": None},
-            "department": {"type": object, "max": None},
-        }
+    def availables_attribue_list(self) -> list:
+        return [
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
+            {"attribute_name": "password", "parametre": {"type": str, "max": None}},
+            {"attribute_name": "department", "parametre": {"type": object, "max": None}},
+        ]
 
 
 class Supporter(User):

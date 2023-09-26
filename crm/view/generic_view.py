@@ -2,7 +2,7 @@ from rich import print
 from rich.console import Console, Group
 from rich.columns import Columns
 from rich.panel import Panel
-from rich.prompt import Prompt, IntPrompt
+from rich.prompt import Prompt, IntPrompt, Confirm
 from rich.text import Text
 
 
@@ -106,3 +106,31 @@ class GenericView:
 
     def get_address_info(self):
         pass
+
+    def string_form(self, restriction: dict) -> str:
+        attribute_name = restriction["attribute_name"]
+        condition_restriction = restriction["parametre"]["max"]
+        if condition_restriction is None:
+            condition_restriction = 2048
+        while True:
+            element_string = Prompt.ask(f"Entrer  {attribute_name}:")
+            if len(element_string) < restriction["parametre"]["max"]:
+                break
+            self.console.print(f"[prompt.invalid]{attribute_name} too long")
+        self.console.print()
+        return element_string
+
+    def integer_form(self):
+        while True:
+            result = IntPrompt.ask(":rocket: Enter a number between [b]1[/b] and [b]10[/b]", default=5)
+            if result >= 1 and result <= 10:
+                break
+            print(":pile_of_poo: [prompt.invalid]Number must be between 1 and 10")
+            print(f"number={result}")
+        return result
+
+    def bool_form(self):
+        if Confirm.ask("Contract is signed?", default=True):
+            return True
+        else:
+            return False

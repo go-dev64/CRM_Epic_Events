@@ -32,7 +32,12 @@ class ManagerController:
                 "Create new address",
                 "Back to previous menu",
             ]
-            choice = self.generic_view.select_element_view(choice_list)
+            choice = self.generic_view.select_element_view(
+                section="Create new element",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=choice_list,
+            )
             match choice:
                 case 0:
                     return self.create_new_user(session=session)
@@ -54,7 +59,11 @@ class ManagerController:
         """
         while True:
             department_list = ["Manager", "Seller", "Supporter", "Back to previous menu"]
-            user_info = self.user_view.get_user_info_view()
+            user_info = self.user_view.get_user_info_view(
+                section="Create new collaborator",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+            )
             department = self.generic_view.select_element_view(department_list)
             match department:
                 case 0:
