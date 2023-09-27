@@ -7,6 +7,8 @@ from rich.text import Text
 
 
 class GenericView:
+    RUN = True
+
     def __init__(self) -> None:
         self.console = Console()
 
@@ -84,8 +86,9 @@ class GenericView:
         user selevt a element in list and his index is returned.
 
         Args:
-            section (str): Hearder information. Section.
-
+            section (str): Section information to display in header
+            department (str): department name to display in header
+            current_user_name(str): Currentu ser name to display in header
             list_element (list): List of element to display
 
         Returns:
@@ -95,38 +98,50 @@ class GenericView:
             section=section, department=department, current_user_name=current_user_name, list_element=list_element
         )
         range_list = len(list_element)
-        while True:
+        while self.RUN:
             result = IntPrompt.ask(
                 f" Enter a number between [b]1[/b] and [b]{range_list}[/b]",
             )
             if result >= 1 and result <= range_list:
                 break
-            print(":pile_of_poo: [prompt.invalid]Number must be between 1 and range_list")
+            self.console.print(f":pile_of_poo: [prompt.invalid]Number must be between 1 and {range_list}")
         return result - 1
 
     def get_address_info(self):
         pass
 
     def string_form(self, restriction: dict) -> str:
+        """
+        Function of form to input string.
+
+        Args:
+            restriction (dict): Restriction to input. Number max of caractere, etc.
+            example:{"attribute_name": "name", "parametre": {"type": str, "max": 50}}
+
+        Returns:
+            str: input of user rspected restriction.
+        """
         attribute_name = restriction["attribute_name"]
         condition_restriction = restriction["parametre"]["max"]
         if condition_restriction is None:
             condition_restriction = 2048
-        while True:
+        while self.RUN:
             element_string = Prompt.ask(f"Entrer  {attribute_name}:")
             if len(element_string) < restriction["parametre"]["max"]:
                 break
             self.console.print(f"[prompt.invalid]{attribute_name} too long")
-        self.console.print()
+
         return element_string
 
-    def integer_form(self):
-        while True:
-            result = IntPrompt.ask(":rocket: Enter a number between [b]1[/b] and [b]10[/b]", default=5)
-            if result >= 1 and result <= 10:
+    def integer_form(self, restriction: dict) -> int:
+        condition_restriction = restriction["parametre"]["max"]
+        if condition_restriction is None:
+            condition_restriction = 99999
+        while self.RUN:
+            result = IntPrompt.ask(f":rocket: Enter a number between [b]0[/b] and [b]{condition_restriction}[/b]")
+            if result >= 0 and result <= condition_restriction - 1:
                 break
-            print(":pile_of_poo: [prompt.invalid]Number must be between 1 and 10")
-            print(f"number={result}")
+            self.console.print(f"[prompt.invalid]Number must be between 0 and {condition_restriction}")
         return result
 
     def bool_form(self):

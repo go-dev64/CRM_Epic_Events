@@ -55,7 +55,7 @@ class TestGenericView:
             assert i in out
 
     @pytest.mark.parametrize("result", [(1), (2), (3)])
-    def test_select_element_in_list(self, mocker, result):
+    def test_select_element_view(self, mocker, result):
         mocker.patch("crm.view.generic_view.GenericView.display_element_list", return_value="")
         mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
         list_element = ["element 1", " element 2", "element 3"]
@@ -64,8 +64,44 @@ class TestGenericView:
         )
         assert resultat == result - 1
 
+    def test_select_element_view_with_bad_input(self, mocker, capsys):
+        # test should return a msg error for input outside condition.
+        mocker.patch("crm.view.generic_view.GenericView.display_element_list", return_value="")
+        mock = mocker.patch("rich.prompt.IntPrompt.ask")
+        mock.side_effect = [5, 1]
+        list_element = ["element 1", " element 2", "element 3"]
+        GenericView().select_element_view(section="", department="", current_user_name=",", list_element=list_element)
+        out, err = capsys.readouterr()
+        assert out == f"💩 Number must be between 1 and 3\n"
+
     def test_string_form(self, mocker):
+        # test should return input if his respect condition(input < 50).
         restriction = {"attribute_name": "name", "parametre": {"type": str, "max": 50}}
         mocker.patch("rich.prompt.Prompt.ask", return_value="une string")
         result = GenericView().string_form(restriction=restriction)
         assert result == "une string"
+
+    def test_string_form_with_bad_input(self, mocker, capsys):
+        # test should return msg "name is toll long  with input > 2).
+        mock = mocker.patch("rich.prompt.Prompt.ask")
+        mock.side_effect = ["une string", "a"]
+        restriction = {"attribute_name": "name", "parametre": {"type": str, "max": 2}}
+        GenericView().string_form(restriction=restriction)
+        out, err = capsys.readouterr()
+        assert out == f"name too long\n\n"
+
+    def test_integer_form(self, mocker):
+        # test should return input if his respect condition(input < 50).
+        restriction = {"attribute_name": "attendees", "parametre": {"type": int, "max": 50}}
+        mocker.patch("rich.prompt.IntPrompt.ask", return_value=12)
+        result = GenericView().integer_form(restriction=restriction)
+        assert result == 12
+
+    def test_string_form_with_bad_input(self, mocker, capsys):
+        # test should return msg "name is toll long  with input > 10).
+        mock = mocker.patch("rich.prompt.IntPrompt.ask")
+        mock.side_effect = [55, 3]
+        restriction = {"attribute_name": "attendees", "parametre": {"type": int, "max": 10}}
+        GenericView().integer_form(restriction=restriction)
+        out, err = capsys.readouterr()
+        assert out == f"Number must be between 0 and 10\n"
