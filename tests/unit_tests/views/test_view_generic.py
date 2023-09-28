@@ -62,7 +62,7 @@ class TestGenericView:
     @pytest.mark.parametrize("result", [(1), (2), (3)])
     def test_select_element_view(self, mocker, result):
         # test should return a index of chosen element in list of elements.
-        mocker.patch("crm.view.generic_view.GenericView.display_element_list", return_value="")
+        mocker.patch("crm.view.generic_view.GenericView.display_element_list")
         mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
         list_element = ["element 1", " element 2", "element 3"]
         resultat = GenericView().select_element_view(
@@ -72,7 +72,7 @@ class TestGenericView:
 
     def test_select_element_view_with_bad_input(self, mocker, capsys):
         # test should return a msg error for input outside condition.
-        mocker.patch("crm.view.generic_view.GenericView.display_element_list", return_value="")
+        mocker.patch("crm.view.generic_view.GenericView.display_element_list")
         mock = mocker.patch("rich.prompt.IntPrompt.ask")
         mock.side_effect = [5, 1]
         list_element = ["element 1", " element 2", "element 3"]
@@ -113,12 +113,14 @@ class TestGenericView:
         assert out == f"Number must be between 0 and 10\n"
 
     def test__input_password(self, mocker):
+        # test check if password entered is valid. Should return value entered.
         mocker.patch("rich.prompt.Prompt.ask", return_value="password")
         mocker.patch("crm.models.authentication.Authentication._password_validator", return_value=True)
         result = GenericView()._input_password()
         assert result == "password"
 
     def test__input_password_with_bad_password(self, mocker, capsys):
+        # test check if password entered is valid. Should return error message.
         mocker.patch("rich.prompt.Prompt.ask", return_value="password")
         mock = mocker.patch("crm.models.authentication.Authentication._password_validator")
         mock.side_effect = [None, True]

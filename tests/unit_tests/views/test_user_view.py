@@ -5,6 +5,7 @@ import argon2
 
 class TestUserView:
     def test_get_user_info_view(self, mocker):
+        # testvalid if dict returned is correct.
         mocker.patch("crm.view.generic_view.GenericView.header")
         user_restriction = [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
@@ -22,6 +23,7 @@ class TestUserView:
         assert len(result.keys()) == 4
 
     def test__get_user_password(self, mocker):
+        # test check if both password is the same and check of returned password is hashed.
         mocker.patch("crm.view.generic_view.GenericView._input_password", return_value="password")
         mocker.patch("rich.prompt.Prompt.ask", return_value="password")
         result = UserView()._get_user_password()
@@ -29,6 +31,7 @@ class TestUserView:
         assert ph.verify(result, "password")
 
     def test_get_user_password_with_bad_password(self, mocker, capsys):
+        # test check if error message is displayed with two differents password..
         mocker.patch("crm.view.generic_view.GenericView._input_password", return_value="password")
         mock = mocker.patch("rich.prompt.Prompt.ask")
         mock.side_effect = ["toto", "password"]
