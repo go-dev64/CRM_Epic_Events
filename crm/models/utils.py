@@ -11,8 +11,7 @@ class Utils:
         self.generic_view = GenericView()
 
     def get_type_of_user(self, user) -> str:
-        """
-        Return l type of user: "Manager", "Seller" or "Supporter"
+        """Return l type of user: "Manager", "Seller" or "Supporter"
 
         Args:
             user (_type_): Instance User class.

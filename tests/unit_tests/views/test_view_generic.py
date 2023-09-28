@@ -127,3 +127,24 @@ class TestGenericView:
         GenericView()._input_password()
         out, err = capsys.readouterr()
         assert "Invalid password" in out
+
+    def test_get_address_info_view(self, mocker):
+        mocker.patch("crm.view.generic_view.GenericView.header")
+        restrictions = [
+            {"attribute_name": "number", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "street", "parametre": {"type": str, "max": 500}},
+            {"attribute_name": "city", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "postal_code", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "country", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
+        ]
+        mocker.patch("crm.view.generic_view.GenericView.integer_form", return_value=21)
+        mocker.patch("crm.view.generic_view.GenericView.string_form", return_value="string")
+        result = GenericView().get_address_info_view(department="", current_user_name="")
+        assert result.get("number") == 21
+        assert result.get("street") == "string"
+        assert result.get("city") == "string"
+        assert result.get("postal_code") == 21
+        assert result.get("country") == "string"
+        assert result.get("note") == "string"
+        assert len(result.keys()) == len(restrictions)

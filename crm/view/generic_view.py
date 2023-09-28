@@ -6,6 +6,7 @@ from rich.prompt import Prompt, IntPrompt, Confirm
 from rich.text import Text
 
 from crm.models.authentication import Authentication
+from crm.models.element_administratif import Address
 
 
 class GenericView:
@@ -109,8 +110,31 @@ class GenericView:
             self.console.print(f":pile_of_poo: [prompt.invalid]Number must be between 1 and {range_list}")
         return result - 1
 
-    def get_address_info(self):
-        pass
+    def get_address_info_view(
+        self, department: str, current_user_name: str, section: str = "Create new address/Get Information"
+    ) -> dict:
+        """Function is used to get information create a new address.
+
+        Args:
+            department (str): Department information to display in header.
+            current_user_name (str): Name of current user to display in header.
+            section (str, optional): Info to display in header. Defaults to "Create new address/Get Information".
+
+        Returns:
+            dict: dict with info of new address.
+        """
+        address_info = {}
+        restrictions = Address().availables_attribue_list()
+        self.header(department=department, current_user=current_user_name, section=section)
+        for restriction in restrictions:
+            attribute_name = restriction["attribute_name"]
+            if restriction["parametre"]["type"] == str:
+                address_info[attribute_name] = self.string_form(restriction=restriction)
+            elif restriction["parametre"]["type"] == int:
+                address_info[attribute_name] = self.integer_form(restriction=restriction)
+            elif restriction["parametre"]["type"] == bool:
+                address_info[attribute_name] = self.bool_form(restriction=restriction)
+        return address_info
 
     def string_form(self, restriction: dict) -> str:
         """
