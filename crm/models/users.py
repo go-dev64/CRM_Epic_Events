@@ -25,17 +25,17 @@ class User(Base):
         "polymorphic_on": "department",
     }
 
-    def get_all_customers(self, session) -> list:
+    def get_all_customers(self, session) -> list[Customer]:
         # Function return all Custumers.
         customers = session.scalars(select(Customer)).all()
         return customers
 
-    def get_all_contracts(self, session) -> list:
+    def get_all_contracts(self, session) -> list[Contract]:
         # Function return all Contracts.
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
-    def get_all_events(self, session) -> list:
+    def get_all_events(self, session) -> list[Event]:
         # Function return all Events.
         events = session.scalars(select(Event)).all()
         return events
@@ -124,27 +124,45 @@ class Manager(User):
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
-    def get_all_users(self, session):
-        # Function return all User.
+    def get_all_users(self, session) -> list[User]:
+        """Function return all collaborator.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            list[User]: List of all collaboraotor.
+        """
         users = session.scalars(select(User)).all()
         return users
 
-    def get_all_supporter(self, session):
-        # Function returns all Supporter.
+    def get_all_supporter(self, session) -> list[Supporter]:
+        """Function returns all Supporter.
+        Args:
+            session (_type_): actual Session.
+        Returns:
+            list[Supporter]: list of Suppotrer.
+        """
         return session.scalars(select(Supporter)).all()
 
-    def get_all_event_without_support(self, session):
-        # Function return all evant without supporter.
+    def get_all_event_without_support(self, session) -> list[Event]:
+        """Function return all event without supporter.
+        Args:
+            session (_type_):  actual Session
+        Returns:
+            list[Event]: Event list without Supporter.
+        """
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
         return event_without_supporter
 
-    def create_new_manager(self, session, user_info: dict):
-        """
-        Function add a new Manager to database.
+    def create_new_manager(self, session, user_info: dict) -> "Manager":
+        """Function add a new Manager to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
+
+        Return Manager created.
         """
         try:
             new_manager = Manager(
@@ -161,12 +179,13 @@ class Manager(User):
             return new_manager
 
     def create_new_seller(self, session, user_info: dict):
-        """
-        Function add a new Seller to database.
+        """Function add a new Seller to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
+
+        Retrun Seller created.
         """
         try:
             new_seller = Seller(

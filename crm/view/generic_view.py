@@ -84,8 +84,8 @@ class GenericView:
 
     def select_element_view(self, section: str, department: str, current_user_name: str, list_element: list) -> int:
         """
-        Function display Header and list of element.
-        user selevt a element in list and his index is returned.
+        The Function is used to select a element in list, the element index is returned.
+        The header and elements list will be to display.
 
         Args:
             section (str): Section information to display in header
@@ -138,7 +138,7 @@ class GenericView:
     def integer_form(self, restriction: dict) -> int:
         condition_restriction = restriction["parametre"]["max"]
         if condition_restriction is None:
-            condition_restriction = 99999
+            condition_restriction = 9999999
         while self.RUN:
             result = IntPrompt.ask(f":rocket: Enter a number between [b]0[/b] and [b]{condition_restriction}[/b]")
             if result >= 0 and result <= condition_restriction - 1:

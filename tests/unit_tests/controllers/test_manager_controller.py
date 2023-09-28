@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy import select
 from crm.controller.manager_controller import ManagerController
+from crm.models.element_administratif import Contract
 from crm.models.users import Seller, Supporter, User
 
 
@@ -49,6 +50,59 @@ class TestManagerController:
                 assert manager.create_new_user(session=session) == "new_seller"
             elif department == 2:
                 assert manager.create_new_user(session=session) == "new_supporter"
+
+    def test_get_contract_info(self, db_session, clients, current_user_is_manager, mocker):
+        # test should return a info of contract.
+        with db_session as session:
+            clients
+            current_user_is_manager
+            info_contract = {
+                "total_amount": 2133333,
+                "remaining": 123,
+                "signed_contract": True,
+                "customer": clients[0],
+            }
+            mocker.patch("crm.view.contract_view.ContractView.get_info_contract_view", return_value=info_contract)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_customer_of_contract", return_value=""
+            )
+            result = ManagerController().get_info_contract(session=session)
+            assert result == info_contract
+
+    def test_select_customer_of_contract(self, db_session, users, current_user_is_manager, mocker):
+        # test should return element of index list 1.
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager = ManagerController()
+            element_list = ["A", "B", "C"]
+            mocker.patch("crm.models.users.Manager.get_all_customers", return_value=element_list)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=1)
+            result = manager.select_customer_of_contract(session=session)
+            assert result == element_list[1]
+
+    def test_create_new_contract(sself, db_session, users, clients, current_user_is_manager, mocker):
+        # test should return a new contract.
+        with db_session as session:
+            users
+            clients
+            current_user_is_manager
+            info_contract = {
+                "total_amount": 2133333,
+                "remaining": 123,
+                "signed_contract": True,
+                "customer": clients[0],
+            }
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.get_info_contract", return_value=info_contract
+            )
+            result = ManagerController().create_new_contract(session=session)
+            number_of_contract = session.scalars(select(Contract)).all()
+            assert len(number_of_contract) == 1
+            assert result.total_amount == 2133333
+            assert result.remaining == 123
+            assert result.signed_contract == True
+            assert result.customer == clients[0]
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_display_event(self, db_session, users, current_user_is_manager, mocker, choice):

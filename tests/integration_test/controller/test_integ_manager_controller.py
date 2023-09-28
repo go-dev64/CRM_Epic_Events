@@ -29,6 +29,10 @@ class TestManagerController:
                 list_user = session.scalars(select(User)).all()
                 assert len(list_manager) == 2
                 assert len(list_user) == 4
+                assert new_user.name == "toto"
+                assert new_user.email_address == "email@fr"
+                assert new_user.phone_number == "+064849"
+                assert new_user.password == "password"
 
             elif department == 1:
                 new_user = manager_ctrl.create_new_user(session=session)
@@ -36,30 +40,20 @@ class TestManagerController:
                 list_user = session.scalars(select(User)).all()
                 assert len(list_seller) == 2
                 assert len(list_user) == 4
+                assert new_user.name == "toto"
+                assert new_user.email_address == "email@fr"
+                assert new_user.phone_number == "+064849"
+                assert new_user.password == "password"
             elif department == 2:
                 new_user = manager_ctrl.create_new_user(session=session)
                 list_supporter = session.scalars(select(Supporter)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_supporter) == 2
                 assert len(list_user) == 4
-
-    def test_create_new_contract(self, db_session, users, clients, contracts, current_user_is_manager, mocker):
-        # test should return a new contract.
-        with db_session as session:
-            contracts
-            current_user_is_manager
-            manager_ctrl = ManagerController()
-            contract_info = {
-                "total_amount": 1000,
-                "remaining": 0,
-                "signed_contract": True,
-                "customer": clients[0],
-                "seller": users[1],
-            }
-            mocker.patch("crm.view.contract_view.ContractView.get_info_contract", return_value=contract_info)
-            new_contract = manager_ctrl.create_new_contract(session=session)
-            list_contract = session.scalars(select(Contract)).all()
-            assert len(list_contract) == 3
+                assert new_user.name == "toto"
+                assert new_user.email_address == "email@fr"
+                assert new_user.phone_number == "+064849"
+                assert new_user.password == "password"
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, choice):
@@ -89,6 +83,17 @@ class TestManagerController:
                 assert manager._select_new_department(user) == "Manager"
             elif choice == 2:
                 assert manager._select_new_department(user) == "Manager"
+
+    def test_select_customer_of_contract(self, db_session, clients, current_user_is_manager, mocker):
+        # test should return customer of index list 1.
+        with db_session as session:
+            clients
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=1)
+            result = manager.select_customer_of_contract(session=session)
+
+            assert result == clients[1]
 
     @pytest.mark.parametrize(
         "old_attribute, new_value",

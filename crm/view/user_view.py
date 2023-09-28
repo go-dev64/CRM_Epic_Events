@@ -28,7 +28,12 @@ class UserView:
         ph = argon2.PasswordHasher()
         return ph.hash(password=password)
 
-    def get_user_info_view(self, section: str, department: str, current_user_name: str) -> dict:
+    def get_user_info_view(
+        self,
+        department: str,
+        current_user_name: str,
+        section: str = "Create New Collaborator/Get Information",
+    ) -> dict:
         """
         Function get inforations for create a new collaborator. The Department will get in other function.
 
