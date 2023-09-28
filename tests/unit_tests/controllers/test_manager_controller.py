@@ -62,7 +62,7 @@ class TestManagerController:
                 "signed_contract": True,
                 "customer": clients[0],
             }
-            mocker.patch("crm.view.contract_view.ContractView.get_info_contract_view", return_value=info_contract)
+            mocker.patch("crm.view.manager_view.ManagerView.get_info_contract_view", return_value=info_contract)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.select_customer_of_contract", return_value=""
             )

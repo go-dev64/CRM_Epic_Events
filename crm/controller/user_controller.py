@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.users import User
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
@@ -82,11 +83,11 @@ class UserController:
             "Display Customers list ",
             "Display Contracts List",
             "Display Events list",
-            "Disconnection",
+            "Back to previous menu",
         ]
         while True:
             choice = self.generic_view.select_element_view(
-                section="Consultation Page",
+                section="Consultation Page / Choice",
                 department=session.current_user_department,
                 current_user_name=session.current_user.name,
                 list_element=element_list,
@@ -133,7 +134,7 @@ class UserController:
     def get_customer_list(self, session):
         user_type = session.current_user_department
         if user_type != "Seller":
-            customer_list = session.current_user.get_all_customers(session=session)
+            customer_list = User().get_all_customers(session=session)
             return self.generic_view.display_element(customer_list)
         else:
             return self.seller_controller.select_customer_type_to_display(session=session)
@@ -142,7 +143,7 @@ class UserController:
     def get_contract_list(self, session):
         user_type = session.current_user_department
         if user_type != "Seller":
-            contract_list = session.current_user.get_all_contracts(session=session)
+            contract_list = User().get_all_contracts(session=session)
             return self.generic_view.display_element(contract_list)
         else:
             return self.seller_controller.select_contract_type_to_display(session=session)
@@ -151,7 +152,7 @@ class UserController:
     def get_events_list(self, session):
         user_type = session.current_user_department
         if user_type == "Seller":
-            event_list = session.current_user.get_all_events(session=session)
+            event_list = User().get_all_events(session=session)
             return self.generic_view.display_element(event_list)
         elif user_type == "Manager":
             return self.manager_controller.display_event(session=session)

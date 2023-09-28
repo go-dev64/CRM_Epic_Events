@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytest
 from sqlalchemy import select
-from crm.controller import seller_controller
+from crm.controller.seller_controller import SellerController
 from crm.controller.manager_controller import ManagerController
 from crm.models.users import Manager, Seller, Supporter, User, Event, Customer
 
@@ -17,9 +17,11 @@ class TestSellerController:
                 "phone_number": "+516184684",
                 "company": "une company",
             }
-            mocker.patch("crm.view.customer_view.CustomerView.get_info_customer", return_value=customer_info)
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.get_info_customer", return_value=customer_info
+            )
 
-            new_customer = seller_controller.SellerController().create_new_customer(session=session)
+            new_customer = SellerController().create_new_customer(session=session)
             list_customer = session.scalars(select(Customer)).all()
             assert len(list_customer) == 3
             assert new_customer.name == customer_info["name"]
@@ -46,7 +48,7 @@ class TestSellerController:
             }
             mocker.patch("crm.view.event_view.EventView.get_event_info", return_value=event_info)
 
-            new_event = seller_controller.SellerController().create_new_event(session=session)
+            new_event = SellerController().create_new_event(session=session)
             list_event = session.scalars(select(Event)).all()
             assert len(list_event) == 1
             assert new_event.name == event_info["name"]

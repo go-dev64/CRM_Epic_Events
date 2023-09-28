@@ -42,7 +42,7 @@ class TestUtils:
                 "country": "country",
                 "note": "note",
             }
-            mocker.patch("crm.view.generic_view.GenericView.get_address_info", return_value=address_info)
+            mocker.patch("crm.view.generic_view.GenericView.get_address_info_view", return_value=address_info)
             u.create_new_address(session=session)
             list_address = session.scalars(select(Address)).all()
             assert len(list_address) == 2

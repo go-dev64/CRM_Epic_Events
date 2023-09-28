@@ -1,8 +1,8 @@
 import pytest
-from crm.view.contract_view import ContractView
+from crm.view.manager_view import ManagerView
 
 
-class TestContractView:
+class TestManagerView:
     def test_get_user_info_view(self, mocker):
         # testvalid if dict returned is correct.
         mocker.patch("crm.view.generic_view.GenericView.header")
@@ -16,7 +16,7 @@ class TestContractView:
         )
         mocker.patch("crm.view.generic_view.GenericView.integer_form", return_value=500)
         mocker.patch("crm.view.generic_view.GenericView.bool_form", return_value=True)
-        result = ContractView().get_info_contract(department="", current_user_name="")
+        result = ManagerView().get_info_contract_view(department="", current_user_name="")
         assert result.get("total_amount") == 500
         assert result.get("remaining") == 500
         assert result.get("signed_contract") == True

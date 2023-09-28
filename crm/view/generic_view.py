@@ -28,8 +28,7 @@ class GenericView:
         return Text.assemble(("User Connected:", "yellow bold"), (f"{current_user}", "blod"), justify="center")
 
     def set_element_renderable(self, section: Text, department: Text, current_user: Text) -> list[Panel]:
-        """
-        Function return list of Panel of elements with own style.
+        """Function return list of Panel of elements with own style.
 
         Args:
             section (Text): Section to display.
@@ -47,8 +46,7 @@ class GenericView:
         return elements_renderables
 
     def header(self, department: str = "", current_user: str = "", section: str = ""):
-        """
-        Function display header of application with Section , department and user connected.
+        """Function display header of application with Section , department and user connected.
 
         Args:
             department (str, optional): Department of usr connected. Defaults to "".
@@ -64,8 +62,7 @@ class GenericView:
         self.console.print(Columns(elements_renderables, expand=True))
 
     def display_element_list(self, section: str, department: str, current_user_name: str, list_element: list):
-        """
-        Function display each element from list in Panel.
+        """Function display each element from list in Panel.
 
         Args:
             section (str): function header information. Actual section
@@ -84,8 +81,7 @@ class GenericView:
         return element
 
     def select_element_view(self, section: str, department: str, current_user_name: str, list_element: list) -> int:
-        """
-        The Function is used to select a element in list, the element index is returned.
+        """The Function is used to select a element in list, the element index is returned.
         The header and elements list will be to display.
 
         Args:

@@ -1,6 +1,8 @@
 from crm.models.authentication import Authentication
+from crm.models.customer import Customer
+from crm.models.users import Seller
 from crm.models.utils import Utils
-from crm.view.customer_view import CustomerView
+from crm.view.seller_view import SellerView
 from crm.view.event_view import EventView
 from crm.view.generic_view import GenericView
 
@@ -10,7 +12,7 @@ class SellerController:
 
     def __init__(self) -> None:
         self.generic_view = GenericView()
-        self.customer_view = CustomerView()
+        self.seller_view = SellerView()
         self.event_view = EventView()
         self.utils = Utils()
 
@@ -26,7 +28,18 @@ class SellerController:
             _type_: create_new_customer() or create_new_event()
         """
         while True:
-            choice = self.generic_view.select_element_view()
+            list_of_choice = [
+                "Create a new Customer",
+                "Create a new Event",
+                "Create a new Address",
+                "Back to previous menu",
+            ]
+            choice = self.generic_view.select_element_view(
+                section="Create Element: Choice",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=list_of_choice,
+            )
             match choice:
                 case 1:
                     return self.create_new_customer(session=session)
@@ -38,7 +51,23 @@ class SellerController:
                     break
 
     @auth.is_authenticated
-    def create_new_customer(self, session):
+    def get_info_customer(self, session) -> dict:
+        """Function is used to get a customer info by user.
+        Seller of customer is current user.
+
+        Args:
+            session (_type_): Sqlalchemay actual session.
+
+        Returns:
+            dict: {"name: str,"email_address":str,"phone_number":str,"company" : str}
+        """
+        customer_info = self.seller_view.get_info_customer_view(
+            department=session.current_user_department, current_user_name=session.current_user.name
+        )
+        return customer_info
+
+    @auth.is_authenticated
+    def create_new_customer(self, session) -> Customer:
         """
         Function will create a new customer with the information entered by user.
 
@@ -48,8 +77,8 @@ class SellerController:
         Returns:
             _type_: a new instance of Customer class.
         """
-        customer_info = self.customer_view.get_info_customer()
-        new_customer = session.current_user.create_new_customer(session=session, customer_info=customer_info)
+        customer_info = self.get_info_customer()
+        new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
         return new_customer
 
     @auth.is_authenticated

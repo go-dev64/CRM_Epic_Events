@@ -3,7 +3,6 @@ from crm.models.customer import Customer
 from crm.models.element_administratif import Contract, Event
 from crm.models.users import Manager, User
 from crm.models.utils import Utils
-from crm.view.contract_view import ContractView
 from crm.view.generic_view import GenericView
 from crm.view.manager_view import ManagerView
 from crm.view.user_view import UserView
@@ -15,7 +14,6 @@ class ManagerController:
     def __init__(self) -> None:
         self.generic_view = GenericView()
         self.user_view = UserView()
-        self.contract_view = ContractView()
         self.manager_view = ManagerView()
         self.utils = Utils()
 
@@ -94,7 +92,7 @@ class ManagerController:
         Returns:
             dict: {"total_amount: int, "remaining":int,"signed_contract":bool,"customer: Instance of Customer}
         """
-        contract_info = self.contract_view.get_info_contract_view(
+        contract_info = self.manager_view.get_info_contract_view(
             department=session.current_user_department, current_user_name=session.current_user.name
         )
         contract_info["customer"] = self.select_customer_of_contract(session=session)
@@ -296,6 +294,6 @@ class ManagerController:
     @auth.is_authenticated
     def delete_collaborator(self, session):
         collaborator_list = Manager().get_all_users(session=session)
-        collaborator_list.remove(Manager())
+        collaborator_list.remove(session.current_user)
         collaborator_selected = self.utils._select_element_in_list(element_list=collaborator_list)
         Manager().delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)
