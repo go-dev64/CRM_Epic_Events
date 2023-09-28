@@ -1,3 +1,4 @@
+from datetime import datetime
 from rich import print
 from rich.console import Console, Group
 from rich.columns import Columns
@@ -171,6 +172,72 @@ class GenericView:
             return True
         else:
             return False
+
+    def get_date(self, msg) -> datetime:
+        """The function is used to get a date of event.
+        Args:
+            msg (_type_): message to display for define type date.
+
+        Returns:
+            datetime.date: Date
+        """
+        while True:
+            try:
+                date_input = Prompt.ask(f"Enter a date of {msg} of event(dd-mm-yyyy):")
+                date_obj = datetime.strptime(date_input, "%d-%m-%Y")
+            except ValueError:
+                self.console.print(f"[prompt.invalid] Format date invalid")
+            else:
+                break
+        return date_obj
+
+    def get_hour(self, msg) -> datetime:
+        """The function is used to get a hour of event.
+        Args:
+            msg (_type_): message to display for define type hour.
+
+        Returns:
+            datetime.hour: hour
+        """
+        while True:
+            try:
+                hour_input = Prompt.ask(f"Enter a hour of {msg} of event(hh-24h):")
+                date_obj = datetime.strptime(hour_input, "%H")
+            except ValueError:
+                self.console.print(f"[prompt.invalid] Format hour invalid")
+            else:
+                break
+        return date_obj
+
+    def date_validator(self, msg) -> datetime:
+        """The function check id date is greter than today.
+
+        Args:
+            msg (_type_):
+        Returns:
+            datetime: date entered by user.
+        """
+        while True:
+            date = self.get_date(msg=msg)
+            if date > datetime.today():
+                break
+            else:
+                self.console.print(f"[prompt.invalid]the date must be greater than today.")
+        return date
+
+    def date_form(self, msg: str) -> datetime:
+        """The function is used to get date and hour of event by input user.
+
+        Args:
+            msg (str): msg to display (exempel: start or end)
+
+        Returns:
+            datetime: return the date.
+        """
+        date = self.date_validator(msg=msg)
+        hour = self.get_hour(msg=msg)
+        complet_date = datetime(year=date.year, month=date.month, day=date.day, hour=hour.hour)
+        return complet_date
 
     def _input_password(self) -> str:
         """

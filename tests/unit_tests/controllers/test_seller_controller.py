@@ -1,5 +1,10 @@
+from datetime import datetime
 import pytest
+from sqlalchemy import select
 from crm.controller.seller_controller import SellerController
+from crm.models.customer import Customer
+from crm.models.element_administratif import Event
+from crm.models.users import Seller
 
 
 class TestSellerController:
@@ -24,6 +29,87 @@ class TestSellerController:
                 assert seller_ctrl.create_new_element(session=session) == "create_new_event"
             else:
                 pass
+
+    def test_create_new_costumer(self, db_session, clients, current_user_is_seller, mocker):
+        # test should return a new customer.
+        with db_session as session:
+            clients
+            current_user_is_seller
+            customer_info = {
+                "name": "toto le client",
+                "email_address": "email@com",
+                "phone_number": "+516184684",
+                "company": "une company",
+            }
+            mocker.patch(
+                "crm.controller.seller_controller.SellerController.get_info_customer", return_value=customer_info
+            )
+            new_customer = SellerController().create_new_customer(session=session)
+            list_customer = session.scalars(select(Customer)).all()
+            assert len(list_customer) == 3
+            assert new_customer.name == customer_info["name"]
+            assert new_customer.email_address == customer_info["email_address"]
+            assert new_customer.phone_number == customer_info["phone_number"]
+            assert new_customer.company == customer_info["company"]
+            assert new_customer.seller_contact == session.current_user
+
+    def test_select_contract_of_event(self, db_session, users, current_user_is_seller, mocker):
+        # test should return element of index list 1.
+        with db_session as session:
+            users
+            current_user_is_seller
+            seller = SellerController()
+            element_list = ["A", "B", "C"]
+            mocker.patch("crm.models.users.Seller.get_all_contracts_of_user_without_event", return_value=element_list)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=1)
+            result = seller.select_contract_of_event(session=session)
+            assert result == element_list[1]
+
+    def get_event_info(self, db_session, clients, current_user_is_seller, mocker):
+        # test should return a info of event.
+        with db_session as session:
+            clients
+            current_user_is_seller
+            info_event = {
+                "total_amount": 2133333,
+                "remaining": 123,
+                "signed_contract": True,
+                "customer": "",
+            }
+            mocker.patch("crm.view.seller_view.SellerView.get_event_info_view", return_value=info_event)
+            info_event["customer"] = mocker.patch(
+                "crm.controller.seller_controller.SellerController.select_contract_of_event", return_value="toto"
+            )
+            result = Seller().get_event_info(session=session)
+            assert result == info_event
+
+    def test_create_new_event(self, db_session, contracts, address, current_user_is_seller, mocker):
+        # test should return a new event in event list.
+        with db_session as session:
+            contract = contracts[0]
+            address = address
+            current_user = current_user_is_seller
+            event_info = {
+                "name": "new_event",
+                "date_start": datetime.now(),
+                "date_end": datetime.now(),
+                "attendees": 20,
+                "note": "queles notes",
+                "contract": contract,
+                "supporter": None,
+                "address": address,
+            }
+            mocker.patch("crm.controller.seller_controller.SellerController.get_event_info", return_value=event_info)
+
+            new_event = SellerController().create_new_event(session=session)
+            list_event = session.scalars(select(Event)).all()
+            assert len(list_event) == 1
+            assert new_event.name == event_info["name"]
+            assert isinstance(new_event.date_start, datetime)
+            assert isinstance(new_event.date_end, datetime)
+            assert new_event.attendees == event_info["attendees"]
+            assert new_event.note == event_info["note"]
+            assert new_event.address == address
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_customer_type_to_display(self, db_session, users, current_user_is_seller, mocker, choice):

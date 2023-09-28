@@ -113,6 +113,7 @@ class ManagerController:
             section="Select Customer of contract",
             department=session.current_user_department,
             current_user_name=session.current_user.name,
+            list_element=customers_list,
         )
         return customers_list[choice]
 

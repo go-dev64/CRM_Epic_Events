@@ -1,5 +1,6 @@
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
+from crm.models.element_administratif import Contract, Event
 from crm.models.users import Seller
 from crm.models.utils import Utils
 from crm.view.seller_view import SellerView
@@ -13,7 +14,6 @@ class SellerController:
     def __init__(self) -> None:
         self.generic_view = GenericView()
         self.seller_view = SellerView()
-        self.event_view = EventView()
         self.utils = Utils()
 
     @auth.is_authenticated
@@ -81,10 +81,43 @@ class SellerController:
         new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
         return new_customer
 
-    @auth.is_authenticated
-    def create_new_event(self, session):
+    def select_contract_of_event(self, session) -> Contract:
+        """The function is used to select a contract in contract list for event.
+
+        Args:
+            session (_type_): Actual sqlalchemy session.
+
+        Returns:
+            Contract: contract selected by user.
         """
-        Function will create a new event with the information entered by user.
+        contract_list = Seller().get_all_contracts_of_user_without_event(session=session)
+        choice = self.generic_view.select_element_view(
+            section="Select Contract of Event",
+            department=session.current_user_department,
+            current_user_name=session.current_user.name,
+            list_element=contract_list,
+        )
+        return contract_list[choice]
+
+    @auth.is_authenticated
+    def get_event_info(self, session) -> dict:
+        """The function is used to get event info for create a new event.
+
+        Args:
+            session (_type_): actual Sqlalchemy session.
+
+        Returns:
+            dict: event_info
+        """
+        event_info = self.seller_view.get_event_info_view(
+            department=session.current_user_department, current_user_name=session.current_user.name
+        )
+        event_info["contract"] = self.select_contract_of_event(session=session)
+        return event_info
+
+    @auth.is_authenticated
+    def create_new_event(self, session) -> Event:
+        """Function will create a new event with the information entered by user.
 
         Args:
             session (_type_): _description_
@@ -93,7 +126,7 @@ class SellerController:
             _type_: a new instance of Event class.
         """
 
-        event_info = self.event_view.get_event_info()
+        event_info = self.get_event_info()
         new_event = session.current_user.create_new_event(session=session, event_info=event_info)
         return new_event
 

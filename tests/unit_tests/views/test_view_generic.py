@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 import pytest
 from crm.view.generic_view import GenericView
@@ -129,6 +130,7 @@ class TestGenericView:
         assert "Invalid password" in out
 
     def test_get_address_info_view(self, mocker):
+        # test should return a new adrress.
         mocker.patch("crm.view.generic_view.GenericView.header")
         restrictions = [
             {"attribute_name": "number", "parametre": {"type": int, "max": None}},
@@ -148,3 +150,59 @@ class TestGenericView:
         assert result.get("country") == "string"
         assert result.get("note") == "string"
         assert len(result.keys()) == len(restrictions)
+
+    def test_get_date(self, mocker):
+        # test check if is datetime.
+        mocker.patch("rich.prompt.Prompt.ask", return_value="10-10-2020")
+        result = GenericView().get_date(msg="")
+        assert type(result) == datetime
+
+    def test_get_date_with_bad_input(self, mocker, capsys):
+        # test should return error msg.
+        mock = mocker.patch("rich.prompt.Prompt.ask")
+        mock.side_effect = ["toto", "10-10-2020"]
+        result = GenericView().get_date(msg="")
+        out, err = capsys.readouterr()
+        assert "Format date invalid" in out
+
+    def test_get_hour(self, mocker):
+        # test valid if is hour datetime.
+        mocker.patch("rich.prompt.Prompt.ask", return_value="10")
+        result = GenericView().get_hour(msg="")
+        assert type(result) == datetime
+
+    def test_get_hour_with_bad_input(self, mocker, capsys):
+        # test should return error msg.
+        mock = mocker.patch("rich.prompt.Prompt.ask")
+        mock.side_effect = ["toto", "10"]
+        result = GenericView().get_hour(msg="")
+        out, err = capsys.readouterr()
+        assert "Format hour invalid" in out
+
+    def test_date_validator(self, mocker):
+        # test valid if input iss greater than today.
+        date = datetime.strptime("10-10-2023", "%d-%m-%Y")
+        mocker.patch("crm.view.generic_view.GenericView.get_date", return_value=date)
+        result = GenericView().date_validator(msg="")
+        assert type(result) == datetime
+
+    def test_date_validator_with_bad_input(self, mocker, capsys):
+        # test should return error msg with date earlier than today.
+        date = datetime.strptime("10-10-2023", "%d-%m-%Y")
+        bad_date = datetime.strptime("10-10-2022", "%d-%m-%Y")
+        mock = mocker.patch("crm.view.generic_view.GenericView.get_date")
+        mock.side_effect = [bad_date, date]
+        GenericView().date_validator(msg="")
+        out, err = capsys.readouterr()
+        assert "the date must be greater than today." in out
+
+    def test_date_form(self, mocker):
+        # test return a datetime.
+        date = datetime.strptime("10-10-2023", "%d-%m-%Y")
+        mock = mocker.patch("crm.view.generic_view.GenericView.get_date")
+        mock.side_effect = [date]
+        hour = datetime.strptime("10", "%H")
+        mock1 = mocker.patch("crm.view.generic_view.GenericView.get_hour")
+        mock1.side_effect = [hour]
+        result = GenericView().date_form(msg="")
+        assert result == datetime(2023, 10, 10, 10, 0)

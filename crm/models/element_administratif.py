@@ -32,12 +32,14 @@ class Event(Base):
 
     def availables_attribue_list(self) -> dict:
         return [
-            {"attribute_name": "name", "parametre": {"type": int, "max": 50}},
-            {"attribute_name": "date_start", "parametre": {"type": datetime, "max": None}},
-            {"attribute_name": "date_end", "parametre": {"type": datetime, "max": None}},
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "date_start", "parametre": {"type": "datetime", "max": None}},
+            {"attribute_name": "date_end", "parametre": {"type": "datetime", "max": None}},
             {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
+            {"attribute_name": "contract", "parametre": {"type": object, "max": None}},
             {"attribute_name": "address", "parametre": {"type": object, "max": None}},
+            {"attribute_name": "supporter", "parametre": {"type": object, "max": None}},
         ]
 
 

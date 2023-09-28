@@ -405,14 +405,11 @@ class Seller(User):
 
     def create_new_event(self, session, event_info: dict) -> Event:
         """
-        Function add a new eventto database.
+        Function add a new event to database.
 
         Args:
             session (_type_): _description_
             event_info (_type_): _description_
-
-        Returns:
-            _type_: _description_
         """
         try:
             # get customer of new event.
