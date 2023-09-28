@@ -5,6 +5,8 @@ from rich.panel import Panel
 from rich.prompt import Prompt, IntPrompt, Confirm
 from rich.text import Text
 
+from crm.models.authentication import Authentication
+
 
 class GenericView:
     RUN = True
@@ -144,8 +146,26 @@ class GenericView:
             self.console.print(f"[prompt.invalid]Number must be between 0 and {condition_restriction}")
         return result
 
-    def bool_form(self):
+    def bool_form(self) -> bool:
         if Confirm.ask("Contract is signed?", default=True):
             return True
         else:
             return False
+
+    def _input_password(self) -> str:
+        """
+        Function get input password by user, and check validity of password.
+
+        Returns:
+            _type_(str): password entered by user if validity is ok.
+        """
+        while True:
+            password = Prompt.ask("Entrer your password:")
+            if Authentication()._password_validator(password) is None:
+                self.console.print(
+                    "[prompt.invalid]Invalid password, password must contain:\n"
+                    "Minimum 8 characters, one should be of Upper Case, special charatere and number between 0-9"
+                )
+            else:
+                break
+        return password

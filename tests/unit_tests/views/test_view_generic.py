@@ -8,6 +8,7 @@ from rich.panel import Panel
 
 class TestGenericView:
     def test_set_section(self):
+        # test check the contents of section.
         section = "une section"
         result = GenericView().set_section(section)
         result_expected = f"Section:{section}"
@@ -22,6 +23,7 @@ class TestGenericView:
         assert result == result_expected
 
     def test_set_currenut_user(self):
+        # test check the contents of current user.
         element = "une element"
         result = GenericView().set_current_user(element)
         result_expected = f"User Connected:{element}"
@@ -29,6 +31,7 @@ class TestGenericView:
         assert result == result_expected
 
     def test_element_renderable(self, mocker):
+        # test check the contents of element_renderable.
         mocker.patch("crm.view.generic_view.GenericView.set_section", return_value="une section")
         mocker.patch("crm.view.generic_view.GenericView.set_department", return_value="une department")
         mocker.patch("crm.view.generic_view.GenericView.set_current_user", return_value="une user")
@@ -39,6 +42,7 @@ class TestGenericView:
         assert elements[2].renderable == "une user"
 
     def test_headers(self, mocker, capsys):
+        # test checkthe contents of headers.
         element = [Panel("une section"), Panel("un departement"), Panel("un user")]
         mocker.patch("crm.view.generic_view.GenericView.set_element_renderable", return_value=element)
         GenericView().header()
@@ -47,7 +51,8 @@ class TestGenericView:
         assert "une section" and "un departement" and "un user" in out
 
     def test_display_element_list(self, mocker, capsys):
-        mocker.patch("crm.view.generic_view.GenericView.header", return_value="")
+        # test check if the elements are displayed.
+        mocker.patch("crm.view.generic_view.GenericView.header")
         list_element = ["element 1", " element 2", "element 3"]
         GenericView().display_element_list(section="", department="", current_user_name=",", list_element=list_element)
         out, err = capsys.readouterr()
@@ -56,6 +61,7 @@ class TestGenericView:
 
     @pytest.mark.parametrize("result", [(1), (2), (3)])
     def test_select_element_view(self, mocker, result):
+        # test should return a index of chosen element in list of elements.
         mocker.patch("crm.view.generic_view.GenericView.display_element_list", return_value="")
         mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
         list_element = ["element 1", " element 2", "element 3"]
@@ -105,3 +111,17 @@ class TestGenericView:
         GenericView().integer_form(restriction=restriction)
         out, err = capsys.readouterr()
         assert out == f"Number must be between 0 and 10\n"
+
+    def test__input_password(self, mocker):
+        mocker.patch("rich.prompt.Prompt.ask", return_value="password")
+        mocker.patch("crm.models.authentication.Authentication._password_validator", return_value=True)
+        result = GenericView()._input_password()
+        assert result == "password"
+
+    def test__input_password_with_bad_password(self, mocker, capsys):
+        mocker.patch("rich.prompt.Prompt.ask", return_value="password")
+        mock = mocker.patch("crm.models.authentication.Authentication._password_validator")
+        mock.side_effect = [None, True]
+        GenericView()._input_password()
+        out, err = capsys.readouterr()
+        assert "Invalid password" in out
