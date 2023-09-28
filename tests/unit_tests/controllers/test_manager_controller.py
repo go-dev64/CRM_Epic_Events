@@ -41,6 +41,7 @@ class TestManagerController:
             mocker.patch("crm.models.users.Manager.create_new_manager", return_value="new_manager")
             mocker.patch("crm.models.users.Manager.create_new_seller", return_value="new_seller")
             mocker.patch("crm.models.users.Manager.create_new_supporter", return_value="new_supporter")
+            mocker.patch("crm.view.user_view.UserView.get_user_info_view")
 
             if department == 0:
                 assert manager.create_new_user(session=session) == "new_manager"

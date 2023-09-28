@@ -25,7 +25,6 @@ class TestManagerController:
 
             if department == 0:
                 new_user = manager_ctrl.create_new_user(session=session)
-                print(new_user)
                 list_manager = session.scalars(select(Manager)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_manager) == 2
