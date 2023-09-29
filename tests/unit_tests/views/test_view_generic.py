@@ -5,6 +5,7 @@ from crm.view.generic_view import GenericView
 from crm.models.users import Manager, Seller, Supporter
 from rich.layout import Layout
 from rich.panel import Panel
+from rich.console import Console
 
 
 class TestGenericView:
@@ -206,3 +207,35 @@ class TestGenericView:
         mock1.side_effect = [hour]
         result = GenericView().date_form(msg="")
         assert result == datetime(2023, 10, 10, 10, 0)
+
+    def test__set_table(self, capsys):
+        restrictions = [
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
+        ]
+        result = GenericView()._set_table(title_table="test", restrictions=restrictions)
+        assert len(result.columns) == len(restrictions) + 1  # +1 is column of numero of row.
+        assert "N°" == result.columns[0].header
+        assert "name" == result.columns[1].header
+        assert "email_address" == result.columns[2].header
+        assert "phone_number" == result.columns[3].header
+
+    def test_display_table_of_elements(self, capsys, mocker, db_session, users):
+        with db_session as session:
+            users
+            restrictions = [
+                {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+                {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
+                {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
+            ]
+            toto = GenericView().display_table_of_elements(
+                section="",
+                department="",
+                current_user_name="",
+                title_table="test_title",
+                list_element=users,
+                restrictions=restrictions,
+            )
+            out, err = capsys.readouterr()
+            assert "test_title" and "name" and "email_address" and "phone_number" and "N°" in out

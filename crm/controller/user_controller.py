@@ -6,8 +6,6 @@ from crm.controller.seller_controller import SellerController
 from crm.controller.supporter_controller import SupporterController
 from crm.view.generic_view import GenericView
 
-# from crm.controller.supporter_controller import SupporterController
-
 
 class UserController:
     auth = Authentication()
@@ -135,7 +133,7 @@ class UserController:
         user_type = session.current_user_department
         if user_type != "Seller":
             customer_list = User().get_all_customers(session=session)
-            return self.generic_view.display_element(customer_list)
+            return self.generic_view.display_table_of_elements(customer_list)
         else:
             return self.seller_controller.select_customer_type_to_display(session=session)
 

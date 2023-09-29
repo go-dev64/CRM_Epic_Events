@@ -4,7 +4,9 @@ from rich.console import Console, Group
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.prompt import Prompt, IntPrompt, Confirm
+from rich.table import Table
 from rich.text import Text
+from rich.color import ANSI_COLOR_NAMES
 
 from crm.models.authentication import Authentication
 from crm.models.element_administratif import Address
@@ -76,10 +78,54 @@ class GenericView:
         for i in range(len(list_element)):
             self.console.print(Panel(Text(f"{i} - {list_element[i]}", justify="center")))
 
-    def display_element(self, list_element, restriction):
-        element = self.select_element_view(list_element)
-        print(element)
-        return element
+    def _set_table(self, title_table: str, restrictions: dict) -> Table:
+        """The function is used to define table to display.
+
+        Args:
+            title_table (str): Title of table.
+            restrictions (_type_): define number od columns ans column title.
+
+        return: Display a rich table.
+        """
+        color = [x for x in ANSI_COLOR_NAMES.keys() if x != "black"]
+        table = Table(title=title_table, expand=True)
+        table.add_column("N°", justify="left", no_wrap=True)
+        for i in range(len(restrictions)):
+            table.add_column(restrictions[i]["attribute_name"], justify="center", style=color[i])
+
+        return table
+
+    def display_table_of_elements(
+        self,
+        section: str,
+        department: str,
+        current_user_name: str,
+        title_table: str,
+        list_element: list,
+        restrictions: list[dict],
+    ) -> Table:
+        """The function is used to display an element list in table and header..
+
+        Args:
+            section (str): Information on section display in the header.
+            department (str): Information on user department display in the header.
+            current_user_name (str): User name iformationdisplay in the header.
+            title_table (str): title of table to display
+            list_element (list): elmement list to display
+            restrictions (list[dict]): Restriction on element displayed.
+            It a dict with attribute name of each element to display.
+
+        Returns:
+            Table: Display header and table.
+        """
+        self.header(department=department, current_user=current_user_name, section=section)
+        table = self._set_table(title_table=title_table, restrictions=restrictions)
+        for i in range(len(list_element)):
+            element_to_display = [str(getattr(list_element[i], x["attribute_name"])) for x in restrictions]
+            element_to_display.insert(0, str(i + 1))
+            table.add_row(*element_to_display)
+
+        self.console.print(table)
 
     def select_element_view(self, section: str, department: str, current_user_name: str, list_element: list) -> int:
         """The Function is used to select a element in list, the element index is returned.
