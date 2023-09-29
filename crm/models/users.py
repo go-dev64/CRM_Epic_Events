@@ -25,17 +25,17 @@ class User(Base):
         "polymorphic_on": "department",
     }
 
-    def get_all_customers(self, session) -> list:
+    def get_all_customers(self, session) -> list[Customer]:
         # Function return all Custumers.
         customers = session.scalars(select(Customer)).all()
         return customers
 
-    def get_all_contracts(self, session) -> list:
+    def get_all_contracts(self, session) -> list[Contract]:
         # Function return all Contracts.
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
-    def get_all_events(self, session) -> list:
+    def get_all_events(self, session) -> list[Event]:
         # Function return all Events.
         events = session.scalars(select(Event)).all()
         return events
@@ -68,14 +68,14 @@ class User(Base):
     def __repr__(self):
         return f"User {self.name} - team:{self.department}"
 
-    def availables_attribue_list(self) -> dict:
-        return {
-            "name": {"type": str, "max": None},
-            "email_address": {"type": str, "max": 100},
-            "phone_number": {"type": str, "max": 10},
-            "password": {"type": str, "max": None},
-            "department": {"type": object, "max": None},
-        }
+    def availables_attribue_list(self) -> list:
+        return [
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
+            {"attribute_name": "password", "parametre": {"type": str, "max": None}},
+            {"attribute_name": "department", "parametre": {"type": object, "max": None}},
+        ]
 
 
 class Supporter(User):
@@ -124,27 +124,45 @@ class Manager(User):
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
-    def get_all_users(self, session):
-        # Function return all User.
+    def get_all_users(self, session) -> list[User]:
+        """Function return all collaborator.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            list[User]: List of all collaboraotor.
+        """
         users = session.scalars(select(User)).all()
         return users
 
-    def get_all_supporter(self, session):
-        # Function returns all Supporter.
+    def get_all_supporter(self, session) -> list[Supporter]:
+        """Function returns all Supporter.
+        Args:
+            session (_type_): actual Session.
+        Returns:
+            list[Supporter]: list of Suppotrer.
+        """
         return session.scalars(select(Supporter)).all()
 
-    def get_all_event_without_support(self, session):
-        # Function return all evant without supporter.
+    def get_all_event_without_support(self, session) -> list[Event]:
+        """Function return all event without supporter.
+        Args:
+            session (_type_):  actual Session
+        Returns:
+            list[Event]: Event list without Supporter.
+        """
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
         return event_without_supporter
 
-    def create_new_manager(self, session, user_info: dict):
-        """
-        Function add a new Manager to database.
+    def create_new_manager(self, session, user_info: dict) -> "Manager":
+        """Function add a new Manager to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
+
+        Return Manager created.
         """
         try:
             new_manager = Manager(
@@ -161,12 +179,13 @@ class Manager(User):
             return new_manager
 
     def create_new_seller(self, session, user_info: dict):
-        """
-        Function add a new Seller to database.
+        """Function add a new Seller to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
+
+        Retrun Seller created.
         """
         try:
             new_seller = Seller(
@@ -386,14 +405,11 @@ class Seller(User):
 
     def create_new_event(self, session, event_info: dict) -> Event:
         """
-        Function add a new eventto database.
+        Function add a new event to database.
 
         Args:
             session (_type_): _description_
             event_info (_type_): _description_
-
-        Returns:
-            _type_: _description_
         """
         try:
             # get customer of new event.

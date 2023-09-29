@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from crm.models.users import Contract, Customer, Event, Manager, Seller, Supporter, User
 from crm.models.authentication import Authentication
 from crm.models.element_administratif import Address
+from crm.models.utils import Utils
 
 load_dotenv()
 
@@ -135,31 +136,39 @@ def events(db_session, contracts, users, clients, address):
 
 @pytest.fixture(scope="function")
 def current_user_is_user(db_session):
+    users
     user = db_session.scalars(select(User)).first()
     user = Authentication.get_token(user)
     db_session.current_user = user
+    db_session.current_user_department = Utils().get_type_of_user(user)
     return db_session.current_user
 
 
 @pytest.fixture(scope="function")
 def current_user_is_manager(db_session):
+    users
     user = db_session.scalars(select(Manager)).first()
     user = Authentication.get_token(user)
     db_session.current_user = user
+    db_session.current_user_department = Utils().get_type_of_user(user)
     return db_session.current_user
 
 
 @pytest.fixture(scope="function")
 def current_user_is_seller(db_session):
+    users
     user = db_session.scalars(select(Seller)).first()
     user = Authentication.get_token(user)
     db_session.current_user = user
+    db_session.current_user_department = Utils().get_type_of_user(user)
     return db_session.current_user
 
 
 @pytest.fixture(scope="function")
 def current_user_is_supporter(db_session):
+    users
     user = db_session.scalars(select(Supporter)).first()
     user = Authentication.get_token(user)
     db_session.current_user = user
+    db_session.current_user_department = Utils().get_type_of_user(user)
     return db_session.current_user

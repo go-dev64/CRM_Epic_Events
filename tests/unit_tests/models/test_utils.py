@@ -28,6 +28,7 @@ class TestUtils:
             assert u.get_type_of_user(session.current_user) == "Supporter"
 
     def test_create_new_address(self, db_session, users, current_user_is_user, address, mocker):
+        # test should return a new address.
         u = Utils()
         with db_session as session:
             users
@@ -41,28 +42,7 @@ class TestUtils:
                 "country": "country",
                 "note": "note",
             }
-            mocker.patch("crm.view.generic_view.GenericView.get_address_info", return_value=address_info)
+            mocker.patch("crm.view.generic_view.GenericView.get_address_info_view", return_value=address_info)
             u.create_new_address(session=session)
             list_address = session.scalars(select(Address)).all()
             assert len(list_address) == 2
-
-    """@pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
-    def test_select_contract_attribute_to_be_updated(
-        self, db_session, users, contracts, current_user_is_manager, mocker, choice
-    ):
-        # test should retrun a good attribure of cotract according a user's choice.
-        with db_session as session:
-            users
-            contract = contracts[0]
-            current_user_is_manager
-            manager = ManagerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
-            if choice == 0:
-                assert manager._select_contract_attribute_to_be_updated(contract) == "total_amount"
-            elif choice == 1:
-                assert manager._select_contract_attribute_to_be_updated(contract) == "remaining"
-            elif choice == 2:
-                assert manager._select_contract_attribute_to_be_updated(contract) == "signed_contract"
-            elif choice == 3:
-                assert manager._select_contract_attribute_to_be_updated(contract) == "customer"
-"""

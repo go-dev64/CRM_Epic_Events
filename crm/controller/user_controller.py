@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.users import User
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
@@ -28,7 +29,19 @@ class UserController:
             _type_: function choosen.
         """
         while True:
-            choice = self.generic_view.select_element_view()
+            element_list = [
+                "Create element(like Customer, Contract...)",
+                "Display element (like Customer, Contract, Event...)",
+                "Update element",
+                "Delete element",
+                "Disconnection",
+            ]
+            choice = self.generic_view.select_element_view(
+                section="Home Page",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=element_list,
+            )
             match choice:
                 case 0:
                     return self.user_choice_is_creating(session=session)
@@ -49,7 +62,7 @@ class UserController:
         Returns:
             _type_: User's function to creating.
         """
-        user_type = self.utils.get_type_of_user(session.current_user)
+        user_type = session.current_user_department
         match user_type:
             case "Manager":
                 return self.manager_controller.create_new_element(session=session)
@@ -66,8 +79,19 @@ class UserController:
         Returns:
             _type_: _description_
         """
+        element_list = [
+            "Display Customers list ",
+            "Display Contracts List",
+            "Display Events list",
+            "Back to previous menu",
+        ]
         while True:
-            choice = self.generic_view.select_element_view()
+            choice = self.generic_view.select_element_view(
+                section="Consultation Page / Choice",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=element_list,
+            )
             match choice:
                 case 0:
                     return self.get_customer_list(session=session)
@@ -86,7 +110,7 @@ class UserController:
         Returns:
             _type_: Updating function.
         """
-        user_type = self.utils.get_type_of_user(session.current_user)
+        user_type = session.current_user_department
         match user_type:
             case "Manager":
                 return self.manager_controller.update_element(session=session)
@@ -97,7 +121,7 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
-        user_type = self.utils.get_type_of_user(session.current_user)
+        user_type = session.current_user_department
         match user_type:
             case "Manager":
                 return self.manager_controller.delete_collaborator(session=session)
@@ -108,27 +132,27 @@ class UserController:
 
     @auth.is_authenticated
     def get_customer_list(self, session):
-        user_type = self.utils.get_type_of_user(session.current_user)
+        user_type = session.current_user_department
         if user_type != "Seller":
-            customer_list = session.current_user.get_all_customers(session=session)
+            customer_list = User().get_all_customers(session=session)
             return self.generic_view.display_element(customer_list)
         else:
             return self.seller_controller.select_customer_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_contract_list(self, session):
-        user_type = self.utils.get_type_of_user(session.current_user)
+        user_type = session.current_user_department
         if user_type != "Seller":
-            contract_list = session.current_user.get_all_contracts(session=session)
+            contract_list = User().get_all_contracts(session=session)
             return self.generic_view.display_element(contract_list)
         else:
             return self.seller_controller.select_contract_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_events_list(self, session):
-        user_type = self.utils.get_type_of_user(session.current_user)
+        user_type = session.current_user_department
         if user_type == "Seller":
-            event_list = session.current_user.get_all_events(session=session)
+            event_list = User().get_all_events(session=session)
             return self.generic_view.display_element(event_list)
         elif user_type == "Manager":
             return self.manager_controller.display_event(session=session)

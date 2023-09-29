@@ -11,8 +11,7 @@ class Utils:
         self.generic_view = GenericView()
 
     def get_type_of_user(self, user) -> str:
-        """
-        Return l type of user: "Manager", "Seller" or "Supporter"
+        """Return l type of user: "Manager", "Seller" or "Supporter"
 
         Args:
             user (_type_): Instance User class.
@@ -25,7 +24,7 @@ class Utils:
 
     @auth.is_authenticated
     def create_new_address(self, session):
-        address_info = self.generic_view.get_address_info()
+        address_info = self.generic_view.get_address_info_view()
         new_address = session.current_user.create_new_address(session=session, address_info=address_info)
         return new_address
 

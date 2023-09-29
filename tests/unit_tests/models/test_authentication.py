@@ -131,3 +131,17 @@ class TestAuthentication:
             session.current_user = user_manager
             result_excepted = self._foo(session=session)
             assert result_excepted == None
+
+    def test__password_validator_with_good_password(
+        self,
+    ):
+        password = "Abcdefgh@10"
+        result = Authentication._password_validator(password)
+        assert result == True
+
+    @pytest.mark.parametrize(
+        "password", [("bdsg"), ("abcdefgh@10"), ("Abcdefgh@"), ("Abcdefgh10"), ("Abcde fgh@10"), ("ABCDEFHH@10")]
+    )
+    def test___password_validator_with_good_password(self, password):
+        result = Authentication._password_validator(password)
+        assert result == None
