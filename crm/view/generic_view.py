@@ -9,7 +9,9 @@ from rich.text import Text
 from rich.color import ANSI_COLOR_NAMES
 
 from crm.models.authentication import Authentication
+from crm.models.customer import Customer
 from crm.models.element_administratif import Address
+from crm.models.users import User
 
 
 class GenericView:

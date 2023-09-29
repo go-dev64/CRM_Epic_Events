@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.customer import Customer
 from crm.models.users import User
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
@@ -133,7 +134,15 @@ class UserController:
         user_type = session.current_user_department
         if user_type != "Seller":
             customer_list = User().get_all_customers(session=session)
-            return self.generic_view.display_table_of_elements(customer_list)
+            attribute_to_display = Customer().availables_attribue_list()
+            return self.generic_view.display_table_of_elements(
+                section="Display Customers",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                restrictions=attribute_to_display,
+                list_element=customer_list,
+                title_table="Table of all customers",
+            )
         else:
             return self.seller_controller.select_customer_type_to_display(session=session)
 
