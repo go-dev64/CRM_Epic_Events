@@ -1,6 +1,8 @@
 from datetime import datetime
 import pytest
 
+from crm.models.users import Supporter
+
 
 class TestSupporter:
     def test_get_event_of_supporter(self, db_session, events, current_user_is_supporter):
@@ -64,3 +66,13 @@ class TestSupporter:
                 session=session, event=event, attribute_updated=attribute_updated, new_value=new_value
             )
             assert getattr(event, attribute_updated) != new_value
+
+    def test_attribute_to_display(self):
+        assert Supporter().attribute_to_display() == [
+            "name",
+            "email_address",
+            "phone_number",
+            "department",
+            "created_date",
+            "events",
+        ]

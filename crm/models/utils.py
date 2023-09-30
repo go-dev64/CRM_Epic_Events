@@ -48,7 +48,7 @@ class Utils:
         Returns:
             _type_: element chosen.
         """
-        user_choice = self.generic_view.select_element_view(element_list)
+        user_choice = self.generic_view.select_element_in_menu_view(element_list)
         return element_list[user_choice]
 
     def _select_attribut_of_element(self, element):
@@ -59,7 +59,7 @@ class Utils:
             _type_: Return a attribute to be updated.
         """
         updatable_attribute_list = [x for x in element.availables_attribue_list().keys()]
-        user_choice = self.generic_view.select_element_view(updatable_attribute_list)
+        user_choice = self.generic_view.select_element_in_menu_view(updatable_attribute_list)
         return updatable_attribute_list[user_choice]
 
     def _get_new_value_of_attribut(self, element, attribute_to_updated):

@@ -32,7 +32,7 @@ class ManagerController:
                 "Create new address",
                 "Back to previous menu",
             ]
-            choice = self.generic_view.select_element_view(
+            choice = self.generic_view.select_element_in_menu_view(
                 section="Create new element",
                 department=session.current_user_department,
                 current_user_name=session.current_user.name,
@@ -63,7 +63,7 @@ class ManagerController:
                 department=session.current_user_department,
                 current_user_name=session.current_user.name,
             )
-            department = self.generic_view.select_element_view(department_list)
+            department = self.generic_view.select_element_in_menu_view(department_list)
             match department:
                 case 0:
                     new_user = Manager().create_new_manager(session=session, user_info=user_info)
@@ -109,7 +109,7 @@ class ManagerController:
             Customer: Customer selected by user.
         """
         customers_list = Manager().get_all_customers(session=session)
-        choice = self.generic_view.select_element_view(
+        choice = self.generic_view.select_element_in_menu_view(
             section="Select Customer of contract",
             department=session.current_user_department,
             current_user_name=session.current_user.name,
@@ -162,7 +162,7 @@ class ManagerController:
         """
         while True:
             choice_list = ["Display all Events", "Display all Events without Supporter", "Back to previous menu"]
-            choice = self.generic_view.select_element_view(choice_list)
+            choice = self.generic_view.select_element_in_menu_view(choice_list)
             match choice:
                 case 0:
                     return self.select_event_to_display(session=session)
@@ -192,7 +192,7 @@ class ManagerController:
             "Back to previous menu",
         ]
         while True:
-            element = self.generic_view.select_element_view(list_of_choice)
+            element = self.generic_view.select_element_in_menu_view(list_of_choice)
             match element:
                 case 0:
                     return self.update_collaborator(session=session)
@@ -225,7 +225,7 @@ class ManagerController:
             _type_: new department
         """
         department_list = self._get_department_list(collaborator=collaborator)
-        user_choice = self.generic_view.select_element_view(department_list)
+        user_choice = self.generic_view.select_element_in_menu_view(department_list)
         return department_list[user_choice]
 
     @auth.is_authenticated

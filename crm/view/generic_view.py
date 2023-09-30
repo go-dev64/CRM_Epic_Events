@@ -1,13 +1,18 @@
 from datetime import datetime
+from operator import index
 from rich import print
 from rich.console import Console, Group
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.prompt import Prompt, IntPrompt, Confirm
+from rich.table import Table
 from rich.text import Text
+from rich.color import ANSI_COLOR_NAMES
 
 from crm.models.authentication import Authentication
+from crm.models.customer import Customer
 from crm.models.element_administratif import Address
+from crm.models.users import User
 
 
 class GenericView:
@@ -64,6 +69,7 @@ class GenericView:
 
     def display_element_list(self, section: str, department: str, current_user_name: str, list_element: list):
         """Function display each element from list in Panel.
+        Fuction is used to display menu choice.
 
         Args:
             section (str): function header information. Actual section
@@ -76,13 +82,78 @@ class GenericView:
         for i in range(len(list_element)):
             self.console.print(Panel(Text(f"{i} - {list_element[i]}", justify="center")))
 
-    def display_element(self, list_element, restriction):
-        element = self.select_element_view(list_element)
-        print(element)
-        return element
+    def _set_table(self, title_table: str, attributes: list[dict]) -> Table:
+        """The function is used to define table to display.
 
-    def select_element_view(self, section: str, department: str, current_user_name: str, list_element: list) -> int:
+        Args:
+            title_table (str): Title of table.
+            attributes (list[dict]): list of attribute to be displayed.
+            [{"atribute_name}:"ex, "parametre":{"type":"ex", "max":"ex"}]
+
+        return: Display a rich table.
+        """
+        color = [x for x in ANSI_COLOR_NAMES.keys() if x != "black"]
+        table = Table(title=title_table, expand=True)
+        table.add_column("N°", justify="left", no_wrap=True)
+        for i in range(len(attributes)):
+            table.add_column(attributes[i]["attribute_name"], justify="center", style=color[i])
+
+        return table
+
+    def display_table_of_elements(
+        self,
+        section: str,
+        department: str,
+        current_user_name: str,
+        title_table: str,
+        list_element: list,
+        attributes: list[dict],
+    ) -> Table:
+        """The function is used to display an element list in table and header..
+
+        Args:
+            section (str): Information on section display in the header.
+            department (str): Information on user department to displayed in the header.
+            current_user_name (str): User name information to displayed in the header.
+            title_table (str): title of table to display
+            list_element (list): elmement list to display
+            attributes (list[dict]): name of columns table. Is attribute name of element in elements list.
+            It a dict with attribute name of each element to be  display.
+
+        Returns:
+            Table: Display header and table.
+        """
+        self.header(department=department, current_user=current_user_name, section=section)
+        table = self._set_table(title_table=title_table, attributes=attributes)
+        for i in range(len(list_element)):
+            element_to_display = [str(getattr(list_element[i], x["attribute_name"])) for x in attributes]
+            element_to_display.insert(0, str(i + 1))
+            table.add_row(*element_to_display)
+
+        self.console.print(table)
+
+    def _select_element_in_list(self, list_element) -> int:
         """The Function is used to select a element in list, the element index is returned.
+        Args:
+            list_element (_type_): element list
+
+        Returns:
+            int: index of element choosen
+        """
+        range_list = len(list_element)
+        while self.RUN:
+            result = IntPrompt.ask(
+                f" Enter a number between [b]1[/b] and [b]{range_list}[/b]",
+            )
+            if result >= 1 and result <= range_list:
+                break
+            self.console.print(f":pile_of_poo: [prompt.invalid]Number must be between 1 and {range_list}")
+        return result - 1
+
+    def select_element_in_menu_view(
+        self, section: str, department: str, current_user_name: str, list_element: list
+    ) -> int:
+        """The Function is used to select a element in menu list, the element index is returned.
         The header and elements list will be to display.
 
         Args:
@@ -97,15 +168,90 @@ class GenericView:
         self.display_element_list(
             section=section, department=department, current_user_name=current_user_name, list_element=list_element
         )
-        range_list = len(list_element)
-        while self.RUN:
-            result = IntPrompt.ask(
-                f" Enter a number between [b]1[/b] and [b]{range_list}[/b]",
-            )
-            if result >= 1 and result <= range_list:
-                break
-            self.console.print(f":pile_of_poo: [prompt.invalid]Number must be between 1 and {range_list}")
-        return result - 1
+        index_element = self._select_element_in_list(list_element=list_element)
+        return index_element
+
+    def choice_display_details_of_element(
+        self, element_list: list, msg: str = "Do you want to see details of an element of the list?"
+    ):
+        """the function is used to give choice to user to select an element.
+
+        Args:
+            element_list (list): list of element
+            msg (str, optional): _description_. Defaults to "Do you want to see details of an element of the list?".
+
+        Returns:
+            _type_: Index element chossen
+        """
+        if Confirm.ask(f"{msg}", default=True):
+            index_element = self._select_element_in_list(element_list)
+            return index_element
+        else:
+            return False
+
+    def display_elements(
+        self,
+        section,
+        session,
+        title_table,
+        elements_list,
+        attributes,
+        msg="Do you want to see details of an element of the list?",
+    ):
+        """Function is used to displayed a elements list in Table.The user can select an displayed this details.
+
+        Args:
+            section (str): section information to be displayed in header.
+            session (_type_): actual session.
+            title_table (str): title of elements list table.
+            elements_list (list): list of elements to displayed.
+            attributes (list[dict]): Name of columns table, attributes name of element of elements list.
+            msg (str):Message of confirmation: Defaults to "Do you want to see details of an element of the list?".
+
+        Returns:
+            _type_: _description_
+        """
+        self.display_table_of_elements(
+            section=section,
+            department=session.current_user_department,
+            current_user_name=session.current_user.name,
+            list_element=elements_list,
+            title_table=title_table,
+            attributes=attributes,
+        )
+        index_of_element = self.choice_display_details_of_element(element_list=elements_list, msg=msg)
+        if index_of_element != False:
+            self.display_detail_element(session, element=elements_list[index_of_element], title="")
+            return index_of_element
+        else:
+            return False
+
+    def display_detail_element(self, session, section: str, element):
+        """Function display details of element.
+        Args:
+            session (_type_): actual session
+            section (str): Information of section to display in header.
+            element (_type_): element to display.
+
+        """
+        attributes = element.attribute_to_display()
+        self.header(
+            department=session.current_user_department,
+            current_user=session.current_user.name,
+            section=section,
+        )
+        table = Table(title=f"Details of {element}")
+        table.add_column("Information", justify="center")
+        table.add_column("Value", justify="center")
+        for attribute in attributes:
+            table.add_row(str(attribute), str(getattr(element, attribute)))
+
+        self.console.print(table)
+
+        if Confirm.ask("Do you want continue?", default=True):
+            return True
+        else:
+            return False
 
     def get_address_info_view(
         self, department: str, current_user_name: str, section: str = "Create new address/Get Information"

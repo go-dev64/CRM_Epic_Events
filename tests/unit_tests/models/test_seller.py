@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 from sqlalchemy import select
-from crm.models.users import Event
+from crm.models.users import Event, Seller
 from crm.models.customer import Customer
 
 
@@ -184,3 +184,14 @@ class TestSeller:
                 session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
             )
             assert getattr(contract, attribute_update) != new_value
+
+    def test_attribute_to_display(self):
+        assert Seller().attribute_to_display() == [
+            "name",
+            "email_address",
+            "phone_number",
+            "department",
+            "created_date",
+            "customers",
+            "contracts",
+        ]

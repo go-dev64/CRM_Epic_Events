@@ -14,6 +14,6 @@ class TestSellerController:
             contracts
             current_user_is_seller
             seller = SellerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=0)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=0)
             result = seller.select_contract_of_event(session=session)
             assert result == contracts[0]

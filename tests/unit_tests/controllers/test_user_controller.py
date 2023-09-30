@@ -1,5 +1,6 @@
 import pytest
 from crm.controller.user_controller import UserController
+from crm.models.users import User
 
 
 class TestUserController:
@@ -11,7 +12,7 @@ class TestUserController:
             current_user_is_user
             user_ctr = UserController()
 
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.user_controller.UserController.user_choice_is_creating",
                 return_value="user_choice_is_creating",
@@ -73,7 +74,7 @@ class TestUserController:
             users
             current_user_is_user
             user_ctr = UserController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.user_controller.UserController.get_customer_list",
                 return_value="get_customer_list",
@@ -101,7 +102,7 @@ class TestUserController:
             current_user_is_user
             session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_table_of_elements", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_customer_type_to_display",
                 return_value="Seller",
@@ -122,7 +123,7 @@ class TestUserController:
             session.current_user_department = user
             user_ctr = UserController()
 
-            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_contract_type_to_display",
                 return_value="Seller",
@@ -142,7 +143,7 @@ class TestUserController:
             current_user_is_user
             session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value=user)
             mocker.patch("crm.controller.manager_controller.ManagerController.display_event", return_value=user)
             mocker.patch(
                 "crm.controller.supporter_controller.SupporterController.display_event_of_user",
@@ -200,3 +201,13 @@ class TestUserController:
                 assert controller.user_choice_is_deleting(session=session) == None
             elif user == "Supporter":
                 assert controller.user_choice_is_deleting(session=session) == None
+
+    def test_get_address_list(self, db_session, address, current_user_is_user, users, mocker):
+        # test should return
+        with db_session as session:
+            users
+            address
+            current_user_is_user
+            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value="value")
+            result = UserController().get_address_list(session=session)
+            assert result == "value"

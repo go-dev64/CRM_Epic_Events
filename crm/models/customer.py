@@ -36,8 +36,19 @@ class Customer(Base):
             {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
             {"attribute_name": "phone_number", "parametre": {"type": str, "max": 12}},
             {"attribute_name": "company", "parametre": {"type": str, "max": 100}},
-            {"attribute_name": "seller", "parametre": {"type": object}},
+            {"attribute_name": "seller_contact", "parametre": {"type": object}},
         ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+        ["name", "email_address", "phone_number", "company", "seller_contact", "created_date", "updated_date", "contracts", "events"]
+
+        Returns:
+            list: List of attribute name.
+        """
+        list_attribute = [x["attribute_name"] for x in self.availables_attribue_list()]
+        add_attribute = ["created_date", "updated_date", "contracts", "events"]
+        return list_attribute + add_attribute
 
     def __repr__(self) -> str:
         return f"Client: {self.name} - company: {self.company} - contact Epic Event: {self.seller_contact}"

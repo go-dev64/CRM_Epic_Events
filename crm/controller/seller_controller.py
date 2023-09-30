@@ -34,7 +34,7 @@ class SellerController:
                 "Create a new Address",
                 "Back to previous menu",
             ]
-            choice = self.generic_view.select_element_view(
+            choice = self.generic_view.select_element_in_menu_view(
                 section="Create Element: Choice",
                 department=session.current_user_department,
                 current_user_name=session.current_user.name,
@@ -91,7 +91,7 @@ class SellerController:
             Contract: contract selected by user.
         """
         contract_list = Seller().get_all_contracts_of_user_without_event(session=session)
-        choice = self.generic_view.select_element_view(
+        choice = self.generic_view.select_element_in_menu_view(
             section="Select Contract of Event",
             department=session.current_user_department,
             current_user_name=session.current_user.name,
@@ -137,22 +137,38 @@ class SellerController:
         - Display all customers .
         - Display customers handling by current user.
 
-
         Args:
             session (_type_): _description_
 
         Returns:
-            _type_: elment selected. (customer)
+            _type_: element selected. (customer)
         """
-        choice_list = ["Select all customers", "Select yours customers"]
-        choice = self.generic_view.select_element_view(list_element=choice_list)
+        choice_list = ["Select all customers", "Select yours customers", "Back to previous menu"]
+        choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
+        attribute_to_display = Customer().availables_attribue_list()
         match choice:
             case 0:
-                customer_list = session.current_user.get_all_customers(session=session)
-                return self.generic_view.display_element(customer_list)
+                customer_list = Seller().get_all_customers(session=session)
+                return self.generic_view.display_table_of_elements(
+                    section="Display Customers",
+                    department=session.current_user_department,
+                    current_user_name=session.current_user.name,
+                    restrictions=attribute_to_display,
+                    list_element=customer_list,
+                    title_table="Table of all customers",
+                )
             case 1:
-                yours_customers_list = session.current_user.get_all_clients_of_user(session)
-                return self.generic_view.display_element(yours_customers_list)
+                yours_customers_list = Seller().get_all_clients_of_user(session)
+                return self.generic_view.display_table_of_elements(
+                    section="Display Customers",
+                    department=session.current_user_department,
+                    current_user_name=session.current_user.name,
+                    restrictions=attribute_to_display,
+                    list_element=yours_customers_list,
+                    title_table="Table of yours customers",
+                )
+            case 2:
+                pass
 
     @auth.is_authenticated
     def select_contract_type_to_display(self, session):
@@ -176,26 +192,57 @@ class SellerController:
             "Display your unpayed contracts",
             "Display your unsigned contract",
             "Display your contract signed without Event",
+            "Back to previous menu",
         ]
         while True:
-            choice = self.generic_view.select_element_view(list_element=choice_list)
-
+            choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
+            attributes_displayed = Contract().availables_attribue_list()
             match choice:
                 case 0:
-                    contract_list = session.current_user.get_all_contracts(session=session)
-                    return self.generic_view.display_element(contract_list)
+                    contract_list = Seller().get_all_contracts(session=session)
+                    return self.generic_view.display_elements(
+                        session=session,
+                        section="Display Contracts",
+                        title_table="All Contracts",
+                        elements_list=contract_list,
+                        attributes=attributes_displayed,
+                    )
                 case 1:
-                    yours_contract_list = session.current_user.get_all_contracts_of_user(session)
-                    return self.generic_view.display_element(yours_contract_list)
+                    yours_contract_list = Seller().get_all_contracts_of_user(session)
+                    return self.generic_view.display_elements(
+                        session=session,
+                        section="Display Contracts",
+                        title_table="All Yours Contracts",
+                        elements_list=yours_contract_list,
+                        attributes=attributes_displayed,
+                    )
                 case 2:
-                    unpayed_contracts_list = session.current_user.get_unpayed_contracts(session)
-                    return self.generic_view.display_element(unpayed_contracts_list)
+                    unpayed_contracts_list = Seller().get_unpayed_contracts(session)
+                    return self.generic_view.display_elements(
+                        session=session,
+                        section="Display Contracts",
+                        title_table="All Yours Unpayed Contracts",
+                        elements_list=unpayed_contracts_list,
+                        attributes=attributes_displayed,
+                    )
                 case 3:
-                    unsigned_contracts_list = session.current_user.get_unsigned_contracts(session)
-                    return self.generic_view.display_element(unsigned_contracts_list)
+                    unsigned_contracts_list = Seller().get_unsigned_contracts(session)
+                    return self.generic_view.display_elements(
+                        session=session,
+                        section="Display Contracts",
+                        title_table="All Yours Unsigned Contracts",
+                        elements_list=unsigned_contracts_list,
+                        attributes=attributes_displayed,
+                    )
                 case 4:
-                    element_list = session.current_user.get_all_contracts_of_user_without_event(session)
-                    return self.generic_view.display_element(element_list)
+                    element_list = Seller().get_all_contracts_of_user_without_event(session)
+                    return self.generic_view.display_elements(
+                        session=session,
+                        section="Display Contracts",
+                        title_table="All Yours signed Contracts availabes for events",
+                        elements_list=element_list,
+                        attributes=attributes_displayed,
+                    )
                 case 5:
                     break
 
@@ -230,7 +277,7 @@ class SellerController:
         # select element type in list an retrun fuction to updated element.
         element_list = ["Update your customer", "Update your contracts", "Back"]
         while True:
-            element_selected = self.generic_view.select_element_view(element_list)
+            element_selected = self.generic_view.select_element_in_menu_view(element_list)
             match element_selected:
                 case 0:
                     # Update a user's customers.

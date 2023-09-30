@@ -1,4 +1,5 @@
 from crm.models.authentication import Authentication
+from crm.models.element_administratif import Event
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
 
@@ -13,7 +14,14 @@ class SupporterController:
     @auth.is_authenticated
     def display_event_of_user(self, session):
         event_list = session.current_user.get_event_of_supporter(session=session)
-        return self.generic_view.display_element(event_list)
+        attributes_displayed = Event().availables_attribue_list()
+        return self.generic_view.display_elements(
+            session=session,
+            section="Display Events",
+            title_table="All Event",
+            elements_list=event_list,
+            attributes=attributes_displayed,
+        )
 
     @auth.is_authenticated
     def update_element(self, session):

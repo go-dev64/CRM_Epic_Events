@@ -35,12 +35,23 @@ class Event(Base):
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
             {"attribute_name": "date_start", "parametre": {"type": "datetime", "max": None}},
             {"attribute_name": "date_end", "parametre": {"type": "datetime", "max": None}},
+            {"attribute_name": "address", "parametre": {"type": object, "max": None}},
             {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
             {"attribute_name": "contract", "parametre": {"type": object, "max": None}},
-            {"attribute_name": "address", "parametre": {"type": object, "max": None}},
             {"attribute_name": "supporter", "parametre": {"type": object, "max": None}},
         ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+        ["name", "customer", "date_start", "date_end", "attendees", "address", "note", "contract", "supporter"]
+
+        Returns:
+            list: List of attribute name.
+        """
+        attribut = [x["attribute_name"] for x in self.availables_attribue_list()]
+        attribut.insert(1, "customer")
+        return attribut
 
 
 class Contract(Base):
@@ -63,14 +74,28 @@ class Contract(Base):
 
     def availables_attribue_list(self) -> dict:
         return [
+            {"attribute_name": "customer", "parametre": "Customer"},
             {"attribute_name": "total_amount", "parametre": {"type": int, "max": None}},
             {"attribute_name": "remaining", "parametre": {"type": int, "max": None}},
             {"attribute_name": "signed_contract", "parametre": {"type": bool, "max": None}},
-            {"attribute_name": "customer", "parametre": "Customer"},
+            {"attribute_name": "event", "parametre": "Event"},
         ]
 
-    def __repr__(self) -> str:
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+        list[id, customer, total_amount, remaining, signed_contract, event, seller]
+
+        Returns:
+            list: List of attribute name.
+        """
+        list_attribute = [x["attribute_name"] for x in self.availables_attribue_list()]
+        list_attribute.insert(0, "id")
+        list_attribute.append("seller")
+        return list_attribute
+
+    """def __repr__(self) -> str:
         return f"Contrant N°:{self.id} -Client: {self.customer.name} - created: {self.created_date} - signed:{self.signed_contract}"
+"""
 
 
 class Address(Base):
@@ -95,3 +120,11 @@ class Address(Base):
             {"attribute_name": "country", "parametre": {"type": str, "max": 50}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
         ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+                [number, street, city,postal_code,country, note]
+        [        Returns:
+                    list: List of attribute name.
+        """
+        return [x["attribute_name"] for x in self.availables_attribue_list()]
