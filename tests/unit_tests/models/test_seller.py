@@ -187,11 +187,11 @@ class TestSeller:
 
     def test_attribute_to_display(self):
         assert Seller().attribute_to_display() == [
-            {"attribute_name": "name"},
-            {"attribute_name": "email_address"},
-            {"attribute_name": "phone_number"},
-            {"attribute_name": "created_date"},
-            {"attribute_name": "department"},
-            {"attribute_name": "customers"},
-            {"attribute_name": "contracts"},
+            "name",
+            "email_address",
+            "phone_number",
+            "department",
+            "created_date",
+            "customers",
+            "contracts",
         ]

@@ -26,19 +26,28 @@ class User(Base):
     }
 
     def get_all_customers(self, session) -> list[Customer]:
-        # Function return all Custumers.
+        """The function return all customers in list."""
+
         customers = session.scalars(select(Customer)).all()
         return customers
 
     def get_all_contracts(self, session) -> list[Contract]:
-        # Function return all Contracts.
+        """The function return all contracts in list."""
+
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
     def get_all_events(self, session) -> list[Event]:
-        # Function return all Events.
+        """Function return all events in list"""
+
         events = session.scalars(select(Event)).all()
         return events
+
+    def get_all_adress(self, session) -> list[Address]:
+        """The function return all addresses in list."""
+
+        addresses = session.scalars(select(Address)).all()
+        return addresses
 
     def create_new_address(self, session, address_info: dict):
         """Function add a new Address.
@@ -89,7 +98,11 @@ class User(Base):
         Returns:
             list: List  of attribute name.
         """
-        return [x["attribute_name"] for x in self.availables_attribue_list() if x["attribute_name"] != "password"]
+        attribute_list = [
+            x["attribute_name"] for x in self.availables_attribue_list() if x["attribute_name"] != "password"
+        ]
+        add_attribute = ["created_date"]
+        return attribute_list + add_attribute
 
 
 class Supporter(User):
@@ -104,9 +117,9 @@ class Supporter(User):
 
     def attribute_to_display(self) -> list:
         """Function return all attribute available to be displayed(reading)."""
-        base_attributes = super().attribute_to_display()
-        additional_attributes = ["events"]
-        return base_attributes + additional_attributes
+        list_attributes = super().attribute_to_display()
+        add_attributes = ["events"]
+        return list_attributes + add_attributes
 
     def get_event_of_supporter(self, session) -> list:
         # Function return all contracts of user.
@@ -377,9 +390,9 @@ class Seller(User):
 
     def attribute_to_display(self) -> list:
         """Function return all attribute available to be displayed, including additional attributes."""
-        base_attributes = super().attribute_to_display()
-        additional_attributes = ["customers", "contracts"]
-        return base_attributes + additional_attributes
+        list_attributes = super().attribute_to_display()
+        add_attributes = ["customers", "contracts"]
+        return list_attributes + add_attributes
 
     def get_all_clients_of_user(self, session) -> list:
         # Function return all clients of user.

@@ -117,7 +117,7 @@ class GenericView:
             current_user_name (str): User name information to displayed in the header.
             title_table (str): title of table to display
             list_element (list): elmement list to display
-            attributes (list[dict]): attributes of element to be displayed.
+            attributes (list[dict]): name of columns table. Is attribute name of element in elements list.
             It a dict with attribute name of each element to be  display.
 
         Returns:
@@ -189,7 +189,28 @@ class GenericView:
         else:
             return False
 
-    def display_elements(self, section, session, title_table, elements_list, attributes, msg):
+    def display_elements(
+        self,
+        section,
+        session,
+        title_table,
+        elements_list,
+        attributes,
+        msg="Do you want to see details of an element of the list?",
+    ):
+        """Function is used to displayed a elements list in Table.The user can select an displayed this details.
+
+        Args:
+            section (str): section information to be displayed in header.
+            session (_type_): actual session.
+            title_table (str): title of elements list table.
+            elements_list (list): list of elements to displayed.
+            attributes (list[dict]): Name of columns table, attributes name of element of elements list.
+            msg (str):Message of confirmation: Defaults to "Do you want to see details of an element of the list?".
+
+        Returns:
+            _type_: _description_
+        """
         self.display_table_of_elements(
             section=section,
             department=session.current_user_department,

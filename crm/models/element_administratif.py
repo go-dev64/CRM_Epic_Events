@@ -49,7 +49,9 @@ class Event(Base):
         Returns:
             list: List of attribute name.
         """
-        return [x["attribute_name"] for x in self.availables_attribue_list()]
+        attribut = [x["attribute_name"] for x in self.availables_attribue_list()]
+        attribut.insert(1, "customer")
+        return attribut
 
 
 class Contract(Base):

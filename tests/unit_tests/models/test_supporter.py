@@ -69,10 +69,10 @@ class TestSupporter:
 
     def test_attribute_to_display(self):
         assert Supporter().attribute_to_display() == [
-            {"attribute_name": "name"},
-            {"attribute_name": "email_address"},
-            {"attribute_name": "phone_number"},
-            {"attribute_name": "created_date"},
-            {"attribute_name": "department"},
-            {"attribute_name": "events"},
+            "name",
+            "email_address",
+            "phone_number",
+            "department",
+            "created_date",
+            "events",
         ]

@@ -32,23 +32,25 @@ class TestIntGenericView:
             assert i in out
 
     @pytest.mark.parametrize("result", [(1), (2), (3)])
-    def test_select_element_view(self, mocker, result, capsys):
+    def test_select_element_in_menu_view(self, mocker, result, capsys):
         # test should return a index of chosen element in list of elements.
         mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
         list_element = ["element 1", " element 2", "element 3"]
-        resultat = GenericView().select_element_view(
+        resultat = GenericView().select_element_in_menu_view(
             section="", department="", current_user_name=",", list_element=list_element
         )
         out, err = capsys.readouterr()
         assert resultat == result - 1
         assert "element 1" and " element 2" and "element 3" in out
 
-    def test_select_element_view_with_bad_input(self, mocker, capsys):
+    def test_select_element_in_menu_view_with_bad_input(self, mocker, capsys):
         # test should return a msg error for input outside condition.
         mock = mocker.patch("rich.prompt.IntPrompt.ask")
         mock.side_effect = [5, 1]
         list_element = ["element 1", " element 2", "element 3"]
-        GenericView().select_element_view(section="", department="", current_user_name=",", list_element=list_element)
+        GenericView().select_element_in_menu_view(
+            section="", department="", current_user_name=",", list_element=list_element
+        )
         out, err = capsys.readouterr()
         assert f"💩 Number must be between 1 and 3\n" in out
         assert "element 1" and " element 2" and "element 3" in out

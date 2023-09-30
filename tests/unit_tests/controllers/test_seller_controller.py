@@ -15,7 +15,7 @@ class TestSellerController:
             current_user_is_seller
             seller_ctrl = SellerController()
 
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.create_new_customer",
                 return_value="create_new_customer",
@@ -61,7 +61,7 @@ class TestSellerController:
             seller = SellerController()
             element_list = ["A", "B", "C"]
             mocker.patch("crm.models.users.Seller.get_all_contracts_of_user_without_event", return_value=element_list)
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=1)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
             result = seller.select_contract_of_event(session=session)
             assert result == element_list[1]
 
@@ -117,7 +117,7 @@ class TestSellerController:
             users
             current_user_is_seller
             seller_ctrl = SellerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch("crm.view.generic_view.GenericView.display_table_of_elements", return_value=choice)
             if choice == 0:
                 assert seller_ctrl.select_customer_type_to_display(session=session) == choice
@@ -130,8 +130,8 @@ class TestSellerController:
             users
             current_user_is_seller
             seller_ctrl = SellerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
-            mocker.patch("crm.controller.seller_controller.SellerController.display_contracts", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value=choice)
             if choice == 0:
                 assert seller_ctrl.select_contract_type_to_display(session=session) == choice
             elif choice == 1:
@@ -148,7 +148,7 @@ class TestSellerController:
         with db_session as session:
             current_user_is_seller
             seller_ctrl = SellerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.update_seller_customer",
                 return_value="update_customer",

@@ -14,13 +14,13 @@ class TestCustomer:
 
     def test_attribut_to_display(self):
         assert Customer().attribute_to_display() == [
-            {"attribute_name": "name"},
-            {"attribute_name": "email_address"},
-            {"attribute_name": "phone_number"},
-            {"attribute_name": "company"},
-            {"attribute_name": "seller_contact"},
-            {"attribute_name": "created_date"},
-            {"attribute_name": "updated_date"},
-            {"attribute_name": "contracts"},
-            {"attribute_name": "events"},
+            "name",
+            "email_address",
+            "phone_number",
+            "company",
+            "seller_contact",
+            "created_date",
+            "updated_date",
+            "contracts",
+            "events",
         ]

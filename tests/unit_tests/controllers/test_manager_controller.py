@@ -14,7 +14,7 @@ class TestManagerController:
             current_user_is_manager
             manager = ManagerController()
 
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.create_new_user",
                 return_value="create_new_user",
@@ -38,7 +38,7 @@ class TestManagerController:
             current_user_is_manager
             manager = ManagerController()
 
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=department)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
             mocker.patch("crm.models.users.Manager.create_new_manager", return_value="new_manager")
             mocker.patch("crm.models.users.Manager.create_new_seller", return_value="new_seller")
             mocker.patch("crm.models.users.Manager.create_new_supporter", return_value="new_supporter")
@@ -77,7 +77,7 @@ class TestManagerController:
             manager = ManagerController()
             element_list = ["A", "B", "C"]
             mocker.patch("crm.models.users.Manager.get_all_customers", return_value=element_list)
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=1)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
             result = manager.select_customer_of_contract(session=session)
             assert result == element_list[1]
 
@@ -111,7 +111,7 @@ class TestManagerController:
             users
             current_user_is_manager
             manager = ManagerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.select_event_to_display",
                 return_value="Display all Events",
@@ -133,7 +133,7 @@ class TestManagerController:
             current_user_is_manager
             manager = ManagerController()
 
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.update_collaborator",
                 return_value="update_collaborator",
@@ -181,7 +181,7 @@ class TestManagerController:
                 "crm.controller.manager_controller.ManagerController._get_department_list",
                 return_value=returned_list,
             )
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             if choice == 0:
                 assert manager._select_new_department(user) == "A"
             elif choice == 1:

@@ -1,7 +1,7 @@
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
-from crm.models.element_administratif import Contract
-from crm.models.users import User
+from crm.models.element_administratif import Address, Contract, Event
+from crm.models.users import Supporter, User
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
@@ -36,7 +36,7 @@ class UserController:
                 "Delete element",
                 "Disconnection",
             ]
-            choice = self.generic_view.select_element_view(
+            choice = self.generic_view.select_element_in_menu_view(
                 section="Home Page",
                 department=session.current_user_department,
                 current_user_name=session.current_user.name,
@@ -83,10 +83,10 @@ class UserController:
             "Display Customers list ",
             "Display Contracts List",
             "Display Events list",
-            "Back to previous menu",
+            "Display Address" "Back to previous menu",
         ]
         while True:
-            choice = self.generic_view.select_element_view(
+            choice = self.generic_view.select_element_in_menu_view(
                 section="Consultation Page / Choice",
                 department=session.current_user_department,
                 current_user_name=session.current_user.name,
@@ -100,12 +100,14 @@ class UserController:
                 case 2:
                     return self.get_events_list(session=session)
                 case 3:
+                    return self.get_address_list(session=session)
+
+                case 4:
                     break
 
     @auth.is_authenticated
     def user_choice_is_updating(self, session):
-        """
-        Function redirect to updating function of user's department.
+        """Function redirect to updating function of user's department.
 
         Returns:
             _type_: Updating function.
@@ -121,6 +123,14 @@ class UserController:
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
+        """Function redirect to the delete function of user's department.
+
+        Args:
+            session (_type_): actual session.
+
+        Returns:
+            _type_: Delete function of department.
+        """
         user_type = session.current_user_department
         match user_type:
             case "Manager":
@@ -132,8 +142,19 @@ class UserController:
 
     @auth.is_authenticated
     def get_customer_list(self, session):
+        """Function redirect to the display customer functions of user's department.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: display customer functions of department.
+        """
         user_type = session.current_user_department
-        if user_type != "Seller":
+        if user_type == "Seller":
+            return self.seller_controller.select_customer_type_to_display(session=session)
+
+        else:
             customer_list = User().get_all_customers(session=session)
             attribute_to_display = Customer().availables_attribue_list()
             return self.generic_view.display_table_of_elements(
@@ -144,27 +165,69 @@ class UserController:
                 list_element=customer_list,
                 title_table="Table of all customers",
             )
-        else:
-            return self.seller_controller.select_customer_type_to_display(session=session)
 
     @auth.is_authenticated
     def get_contract_list(self, session):
+        """Function redirect to the display contracts functions of user's department.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: display custocontractsmer functions of department.
+        """
         user_type = session.current_user_department
-        if user_type != "Seller":
-            contract_list = User().get_all_contracts(session=session)
-            return self.generic_view.display_elements(
-                session=session, element_list=contract_list, msg="Table of all Contracts"
-            )
-        else:
+        if user_type == "Seller":
             return self.seller_controller.select_contract_type_to_display(session=session)
+        else:
+            contract_list = User().get_all_contracts(session=session)
+            attributes_displayed = Contract().availables_attribue_list()
+            return self.generic_view.display_elements(
+                session=session,
+                section="Display Contracts",
+                title_table="All Contracts",
+                elements_list=contract_list,
+                attributes=attributes_displayed,
+            )
+            r
 
     @auth.is_authenticated
     def get_events_list(self, session):
+        """Function redirect to the display events functions of user's department.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: display events functions of department.
+        """
         user_type = session.current_user_department
-        if user_type == "Seller":
-            event_list = User().get_all_events(session=session)
-            return self.generic_view.display_element(event_list)
-        elif user_type == "Manager":
-            return self.manager_controller.display_event(session=session)
-        else:
+        event_list = User().get_all_events(session=session)
+        attributes_displayed = Event().availables_attribue_list()
+        if user_type == "Supporter":
             return self.supporter_controller.display_event_of_user(session=session)
+        else:
+            return self.generic_view.display_elements(
+                session=session,
+                section="Display Events",
+                title_table="All Event",
+                elements_list=event_list,
+                attributes=attributes_displayed,
+            )
+
+    @auth.is_authenticated
+    def get_address_list(self, session):
+        """Function display list of address.
+
+        Returns:
+            _type_: display address list.
+        """
+        address_list = User().get_all_adress(session=session)
+        attributes_displayed = Address().availables_attribue_list()
+        return self.generic_view.display_elements(
+            session=session,
+            section="Display Address",
+            title_table="All Address",
+            elements_list=address_list,
+            attributes=attributes_displayed,
+        )
