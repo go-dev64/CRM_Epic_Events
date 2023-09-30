@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytest
 from sqlalchemy import select
-from crm.models.users import Manager, Seller, Supporter, Address
+from crm.models.users import Manager, Seller, Supporter, Address, User
 from crm.models.customer import Customer
 
 
@@ -57,3 +57,21 @@ class TestUser:
             address_list = session.scalars(select(Address)).all()
             result_excepted = 2
             assert len(address_list) == result_excepted
+
+    def test_attribute_to_display(self):
+        assert User().attribute_to_display() == [
+            {"attribute_name": "name"},
+            {"attribute_name": "email_address"},
+            {"attribute_name": "phone_number"},
+            {"attribute_name": "created_date"},
+            {"attribute_name": "department"},
+        ]
+
+    def test_availables_attribue_list(self):
+        assert User().availables_attribue_list() == [
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
+            {"attribute_name": "password", "parametre": {"type": str, "max": None}},
+            {"attribute_name": "department", "parametre": {"type": object, "max": None}},
+        ]

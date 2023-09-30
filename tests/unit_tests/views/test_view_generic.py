@@ -6,6 +6,7 @@ from crm.models.users import Manager, Seller, Supporter
 from rich.layout import Layout
 from rich.panel import Panel
 from rich.console import Console
+from rich.prompt import Confirm
 
 
 class TestGenericView:
@@ -62,23 +63,30 @@ class TestGenericView:
             assert i in out
 
     @pytest.mark.parametrize("result", [(1), (2), (3)])
-    def test_select_element_view(self, mocker, result):
+    def test_select_element_in_menu_view(self, mocker, result):
         # test should return a index of chosen element in list of elements.
         mocker.patch("crm.view.generic_view.GenericView.display_element_list")
-        mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
+        mocker.patch("crm.view.generic_view.GenericView._select_element_in_list", return_value=result - 1)
         list_element = ["element 1", " element 2", "element 3"]
-        resultat = GenericView().select_element_view(
+        resultat = GenericView().select_element_in_menu_view(
             section="", department="", current_user_name=",", list_element=list_element
         )
         assert resultat == result - 1
 
-    def test_select_element_view_with_bad_input(self, mocker, capsys):
+    @pytest.mark.parametrize("result", [(1), (2)])
+    def test__select_element_in_list(self, mocker, result):
+        # test should return a index of chosen element in list of elements.
+        mocker.patch("rich.prompt.IntPrompt.ask", return_value=result)
+        list_element = ["element 1", " element 2", "element 3"]
+        resultat = GenericView()._select_element_in_list(list_element=list_element)
+        assert resultat == result - 1
+
+    def test__select_element_in_list_with_bad_input(self, mocker, capsys):
         # test should return a msg error for input outside condition.
-        mocker.patch("crm.view.generic_view.GenericView.display_element_list")
         mock = mocker.patch("rich.prompt.IntPrompt.ask")
         mock.side_effect = [5, 1]
         list_element = ["element 1", " element 2", "element 3"]
-        GenericView().select_element_view(section="", department="", current_user_name=",", list_element=list_element)
+        GenericView()._select_element_in_list(list_element=list_element)
         out, err = capsys.readouterr()
         assert out == f"💩 Number must be between 1 and 3\n"
 
@@ -209,13 +217,13 @@ class TestGenericView:
         assert result == datetime(2023, 10, 10, 10, 0)
 
     def test__set_table(self, capsys):
-        restrictions = [
+        attributes = [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
             {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
             {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
         ]
-        result = GenericView()._set_table(title_table="test", restrictions=restrictions)
-        assert len(result.columns) == len(restrictions) + 1  # +1 is column of numero of row.
+        result = GenericView()._set_table(title_table="test", attributes=attributes)
+        assert len(result.columns) == len(attributes) + 1  # +1 is column of numero of row.
         assert "N°" == result.columns[0].header
         assert "name" == result.columns[1].header
         assert "email_address" == result.columns[2].header
@@ -224,7 +232,7 @@ class TestGenericView:
     def test_display_table_of_elements(self, capsys, mocker, db_session, users):
         with db_session as session:
             users
-            restrictions = [
+            attributes = [
                 {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
                 {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
                 {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
@@ -235,7 +243,100 @@ class TestGenericView:
                 current_user_name="",
                 title_table="test_title",
                 list_element=users,
-                restrictions=restrictions,
+                attributes=attributes,
             )
             out, err = capsys.readouterr()
             assert "test_title" and "name" and "email_address" and "phone_number" and "N°" in out
+
+    def test_choice_display_details_of_element(self, mocker):
+        mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+        mocker.patch("crm.view.generic_view.GenericView._select_element_in_list", return_value=1)
+        result = GenericView().choice_display_details_of_element(element_list=[1, 2, 3, 4, 5, 6])
+        assert result == 1
+
+    def test_choice_display_details_of_element_false(self, mocker):
+        mocker.patch("rich.prompt.Confirm.ask", return_value=False)
+        mocker.patch("crm.view.generic_view.GenericView._select_element_in_list", return_value=1)
+        result = GenericView().choice_display_details_of_element(element_list=[1, 2, 3, 4, 5, 6])
+        assert result == False
+
+    def test_display_detail_element_with_customer(self, mocker, db_session, clients, current_user_is_user, capsys):
+        # test dislpay customer details.
+        with db_session as session:
+            clients
+            current_user_is_user
+            attributes = clients[0].attribute_to_display()
+            mocker.patch("crm.view.generic_view.GenericView.header")
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            GenericView().display_detail_element(session=session, element=clients[0], section="")
+            out, err = capsys.readouterr()
+            for i in attributes:
+                assert i in out
+
+    def test_display_detail_element_with_contract(self, mocker, db_session, contracts, current_user_is_user, capsys):
+        # test dislpay customer details.
+        with db_session as session:
+            contracts
+            current_user_is_user
+            attributes = contracts[0].attribute_to_display()
+            mocker.patch("crm.view.generic_view.GenericView.header")
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            GenericView().display_detail_element(session=session, element=contracts[0], section="")
+            out, err = capsys.readouterr()
+            for i in attributes:
+                assert i in out
+
+    def test_display_detail_element_with_event(self, mocker, db_session, events, current_user_is_user, capsys):
+        # test dislpay customer details.
+        with db_session as session:
+            events
+            current_user_is_user
+            attributes = events[0].attribute_to_display()
+            mocker.patch("crm.view.generic_view.GenericView.header")
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            GenericView().display_detail_element(session=session, element=events[0], section="")
+            out, err = capsys.readouterr()
+            for i in attributes:
+                assert i in out
+
+    def test_display_detail_element_with_manager(self, mocker, db_session, users, current_user_is_manager, capsys):
+        # test dislpay customer details.
+        with db_session as session:
+            users
+            current_user_is_manager
+            attributes = users[0].attribute_to_display()
+            mocker.patch("crm.view.generic_view.GenericView.header")
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            GenericView().display_detail_element(session=session, element=users[0], section="")
+            out, err = capsys.readouterr()
+            for i in attributes:
+                assert i in out
+            print(out)
+
+    def test_display_detail_element_with_manager(
+        self, mocker, db_session, users, address, current_user_is_manager, capsys
+    ):
+        # test dislpay customer details.
+        with db_session as session:
+            users
+            address
+            current_user_is_manager
+            attributes = address.attribute_to_display()
+            mocker.patch("crm.view.generic_view.GenericView.header")
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            GenericView().display_detail_element(session=session, element=address, section="")
+            out, err = capsys.readouterr()
+            for i in attributes:
+                assert i in out
+            print(out)
+
+    def test_display_elements(self, mocker, db_session, clients, current_user_is_user, capsys):
+        with db_session as session:
+            clients
+            current_user_is_user
+            mocker.patch("crm.view.generic_view.GenericView.display_table_of_elements")
+            mocker.patch("crm.view.generic_view.GenericView.display_detail_element")
+            mocker.patch("crm.view.generic_view.GenericView.choice_display_details_of_element", return_value=1)
+            result = GenericView().display_elements(
+                session, elements_list=clients, session=session, title_table="", attributes="", msg=""
+            )

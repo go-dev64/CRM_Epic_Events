@@ -101,7 +101,7 @@ class TestUserController:
             current_user_is_user
             session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_table_of_elements", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_customer_type_to_display",
                 return_value="Seller",
@@ -122,7 +122,7 @@ class TestUserController:
             session.current_user_department = user
             user_ctr = UserController()
 
-            mocker.patch("crm.view.generic_view.GenericView.display_element", return_value=user)
+            mocker.patch("crm.controller.seller_controller.SellerController.display_contracts", return_value=user)
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_contract_type_to_display",
                 return_value="Seller",

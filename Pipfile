@@ -20,6 +20,8 @@ mypy = "*"
 rich = "*"
 install = "*"
 curses-menu = "*"
+coverage = "*"
+pytest-cov = "*"
 
 [dev-packages]
 

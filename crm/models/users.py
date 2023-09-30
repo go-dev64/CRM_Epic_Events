@@ -41,8 +41,7 @@ class User(Base):
         return events
 
     def create_new_address(self, session, address_info: dict):
-        """
-        Function add a new Address to database.
+        """Function add a new Address.
 
         Args:
             session (_type_): database session
@@ -66,9 +65,16 @@ class User(Base):
             return new_address
 
     def __repr__(self):
-        return f"User {self.name} - team:{self.department}"
+        return f"User {self.name}"
 
-    def availables_attribue_list(self) -> list:
+    def availables_attribue_list(self) -> list[dict]:
+        """Fuction return a list od dict of attribut availables for creation and update user.
+
+        Returns:
+            list[dict]: exemeple:[
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            ]
+        """
         return [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
             {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
@@ -76,6 +82,14 @@ class User(Base):
             {"attribute_name": "password", "parametre": {"type": str, "max": None}},
             {"attribute_name": "department", "parametre": {"type": object, "max": None}},
         ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed(reading).
+
+        Returns:
+            list: List  of attribute name.
+        """
+        return [x["attribute_name"] for x in self.availables_attribue_list() if x["attribute_name"] != "password"]
 
 
 class Supporter(User):
@@ -87,6 +101,12 @@ class Supporter(User):
     events: Mapped[list["Event"]] = relationship(back_populates="supporter")
 
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute available to be displayed(reading)."""
+        base_attributes = super().attribute_to_display()
+        additional_attributes = ["events"]
+        return base_attributes + additional_attributes
 
     def get_event_of_supporter(self, session) -> list:
         # Function return all contracts of user.
@@ -354,6 +374,12 @@ class Seller(User):
     customers: Mapped[list["Customer"]] = relationship(back_populates="seller_contact")
     # listes des contrats gerer( one-to-many)
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute available to be displayed, including additional attributes."""
+        base_attributes = super().attribute_to_display()
+        additional_attributes = ["customers", "contracts"]
+        return base_attributes + additional_attributes
 
     def get_all_clients_of_user(self, session) -> list:
         # Function return all clients of user.

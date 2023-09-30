@@ -1,5 +1,6 @@
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
+from crm.models.element_administratif import Contract
 from crm.models.users import User
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
@@ -151,7 +152,9 @@ class UserController:
         user_type = session.current_user_department
         if user_type != "Seller":
             contract_list = User().get_all_contracts(session=session)
-            return self.generic_view.display_element(contract_list)
+            return self.generic_view.display_elements(
+                session=session, element_list=contract_list, msg="Table of all Contracts"
+            )
         else:
             return self.seller_controller.select_contract_type_to_display(session=session)
 
