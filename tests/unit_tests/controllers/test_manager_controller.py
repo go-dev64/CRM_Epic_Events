@@ -364,6 +364,7 @@ class TestManagerController:
             assert getattr(contracts[0], name) == new_value
 
     def test_select_supporter(self, db_session, events, users, current_user_is_manager, mocker):
+        # test should return wright supporter.
         with db_session as session:
             users
             events

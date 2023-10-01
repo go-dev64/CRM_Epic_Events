@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from operator import index
 from rich import print
 from rich.console import Console, Group
 from rich.columns import Columns

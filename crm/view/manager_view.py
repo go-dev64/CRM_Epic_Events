@@ -38,9 +38,3 @@ class ManagerView:
             elif restriction["parametre"]["type"] == bool:
                 contract_info[attribute_name] = self.generic_view.bool_form(restriction=restriction)
         return contract_info
-
-    def get_new_value_of_collaborator_attribute(self, restriction):
-        pass
-
-    def get_new_value_of_contract_attribute(self, restriction):
-        pass

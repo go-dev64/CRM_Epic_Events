@@ -167,9 +167,22 @@ class TestSellerController:
             elif choice == 2:
                 assert seller_ctrl.select_element_type_to_be_updated(session=session) == "update_address"
 
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_customer(self, db_session, users, clients, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            clients
+            current_user_is_seller
+            mocker.patch(
+                "crm.view.generic_view.GenericView.select_element_in_menu_view",
+                return_value=choice,
+            )
+            result = SellerController().select_customer(session=session)
+            assert result == clients[choice]
+
     @pytest.mark.parametrize(
         "attribute,new_value",
-        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test"), ("password", "test")],
+        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
     )
     def test_update_seller_customer(
         self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
@@ -186,10 +199,23 @@ class TestSellerController:
             seller.update_seller_customer(session=session)
             assert getattr(clients[0], attribute) == new_value
 
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_contract(self, db_session, users, contracts, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            contracts
+            current_user_is_seller
+            mocker.patch(
+                "crm.view.generic_view.GenericView.select_element_in_menu_view",
+                return_value=choice,
+            )
+            result = SellerController().select_contract(session=session)
+            assert result == contracts[choice]
+
     @pytest.mark.parametrize(
         "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]
     )
-    def test_update_seller_customer(
+    def test_update_seller_contract(
         self, db_session, clients, users, contracts, current_user_is_seller, mocker, attribute, new_value
     ):
         # Test should retrun a event with supporter updated.

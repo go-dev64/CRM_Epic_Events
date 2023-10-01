@@ -29,16 +29,34 @@ class Utils:
         return new_address
 
     @auth.is_authenticated
-    def update_address(self, session):
-        # update address.
-        # list address
+    def select_address(self, session) -> Address:
+        """The function is used to select an address.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            Address: address selected.
+        """
         address_list = session.scalars(select(Address)).all()
-        # select address
-        address = self._select_element_in_list(element_list=address_list)
-        # select attribute to update
-        attribute = self._select_attribut_of_element(element=address)
-        # new value of attibute
-        new_value = self._get_new_value_of_attribut(attribute_to_updated=attribute, element=address)
+        address = self._select_element_in_list(
+            session=session, section="Update/ Select Address", element_list=address_list
+        )
+        return address
+
+    @auth.is_authenticated
+    def update_address(self, session):
+        address = self.select_address(session=session)
+        attribute = self._select_attribut_of_element(
+            session=session, section="Update/ Select attribute", element=address
+        )
+        new_value = self.generic_view.get_new_value_of_attribute(
+            section="Update/ Select attribute",
+            department="session.current_user_department",
+            current_user=session.current_user.name,
+            attribute_to_updated=attribute,
+            element=address,
+        )
         setattr(address, attribute, new_value)
 
     def _select_element_in_list(self, session, section: str, element_list: list):

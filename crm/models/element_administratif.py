@@ -33,8 +33,8 @@ class Event(Base):
     def availables_attribue_list(self) -> dict:
         return [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-            {"attribute_name": "date_start", "parametre": {"type": "datetime", "max": None}},
-            {"attribute_name": "date_end", "parametre": {"type": "datetime", "max": None}},
+            {"attribute_name": "date_start", "parametre": {"type": "date", "max": None}},
+            {"attribute_name": "date_end", "parametre": {"type": "date", "max": None}},
             {"attribute_name": "address", "parametre": {"type": object, "max": None}},
             {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
@@ -89,12 +89,11 @@ class Contract(Base):
         """
         list_attribute = [x["attribute_name"] for x in self.availables_attribue_list()]
         list_attribute.insert(0, "id")
-        list_attribute.append("event", "seller")
-        return list_attribute
+        add_attribute = ["event", "seller"]
+        return list_attribute + add_attribute
 
-    """def __repr__(self) -> str:
-        return f"Contrant N°:{self.id} -Client: {self.customer.name} - created: {self.created_date} - signed:{self.signed_contract}"
-"""
+    def __repr__(self) -> str:
+        return f"Contrat N°:{self.id}"
 
 
 class Address(Base):
