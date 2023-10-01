@@ -78,11 +78,11 @@ class TestManagerController:
             manager = ManagerController()
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=0)
             if choice == 0:
-                assert manager._select_new_department(user) == "Seller"
+                assert manager.select_new_department(section="", session=session, collaborator=user) == "Seller"
             elif choice == 1:
-                assert manager._select_new_department(user) == "Manager"
+                assert manager.select_new_department(user) == "Manager"
             elif choice == 2:
-                assert manager._select_new_department(user) == "Manager"
+                assert manager.select_new_department(user) == "Manager"
 
     def test_select_customer_of_contract(self, db_session, clients, current_user_is_manager, mocker):
         # test should return customer of index list 1.
@@ -112,7 +112,7 @@ class TestManagerController:
                 "crm.models.utils.Utils._select_attribut_of_element",
                 return_value=old_attribute,
             )
-            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             manager.update_contract(session=session)
             if old_attribute == "total_amount":
                 assert getattr(contract, old_attribute) == new_value
@@ -156,9 +156,9 @@ class TestManagerController:
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
 
             if choice == 0:
-                assert manager._select_supporter(session=session) == users[2]
+                assert manager.select_supporter(session=session) == users[2]
             elif choice == 1:
-                assert manager._select_supporter(session=session) == supporter_2
+                assert manager.select_supporter(session=session) == supporter_2
 
     def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
         # Test should retrun a user less one.

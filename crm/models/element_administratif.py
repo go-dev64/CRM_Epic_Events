@@ -78,7 +78,6 @@ class Contract(Base):
             {"attribute_name": "total_amount", "parametre": {"type": int, "max": None}},
             {"attribute_name": "remaining", "parametre": {"type": int, "max": None}},
             {"attribute_name": "signed_contract", "parametre": {"type": bool, "max": None}},
-            {"attribute_name": "event", "parametre": "Event"},
         ]
 
     def attribute_to_display(self) -> list:
@@ -90,7 +89,7 @@ class Contract(Base):
         """
         list_attribute = [x["attribute_name"] for x in self.availables_attribue_list()]
         list_attribute.insert(0, "id")
-        list_attribute.append("seller")
+        list_attribute.append("event", "seller")
         return list_attribute
 
     """def __repr__(self) -> str:

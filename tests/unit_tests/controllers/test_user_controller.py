@@ -67,7 +67,7 @@ class TestUserController:
             elif user == "Supporter":
                 assert user_ctr.user_choice_is_creating(session=session) == "create_new_address"
 
-    @pytest.mark.parametrize("choice", [(0), (1), (2)])
+    @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
     # test check if the wright function is returned according to user's choice.
     def test_user_choice_is_reading(self, db_session, users, current_user_is_user, mocker, choice):
         with db_session as session:
@@ -87,12 +87,18 @@ class TestUserController:
                 "crm.controller.user_controller.UserController.get_events_list",
                 return_value="get_events_list",
             )
+            mocker.patch(
+                "crm.controller.user_controller.UserController.get_address_list",
+                return_value="get_address_list",
+            )
             if choice == 0:
                 assert user_ctr.user_choice_is_reading(session=session) == "get_customer_list"
             elif choice == 1:
                 assert user_ctr.user_choice_is_reading(session=session) == "get_contract_list"
             elif choice == 2:
                 assert user_ctr.user_choice_is_reading(session=session) == "get_events_list"
+            elif choice == 3:
+                assert user_ctr.user_choice_is_reading(session=session) == "get_address_list"
 
     @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
     def test_get_customer_list(self, db_session, users, current_user_is_user, mocker, user):
@@ -143,12 +149,13 @@ class TestUserController:
             current_user_is_user
             session.current_user_department = user
             user_ctr = UserController()
-            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value=user)
-            mocker.patch("crm.controller.manager_controller.ManagerController.display_event", return_value=user)
             mocker.patch(
-                "crm.controller.supporter_controller.SupporterController.display_event_of_user",
+                "crm.controller.supporter_controller.SupporterController.display_event",
                 return_value="Supporter!",
             )
+            mocker.patch("crm.controller.manager_controller.ManagerController.display_event", return_value=user)
+            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value=user)
+
             if user == "Manager":
                 assert user_ctr.get_events_list(session=session) == "Manager"
             elif user == "Seller":

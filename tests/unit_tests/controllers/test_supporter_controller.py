@@ -31,6 +31,6 @@ class TestSupportController:
             mocker.patch("crm.models.users.Supporter.get_event_of_supporter", retrun_value=[])
             mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=events[0])
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
-            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             supporter.update_element(session=session)
             assert getattr(events[0], attribute) == new_value

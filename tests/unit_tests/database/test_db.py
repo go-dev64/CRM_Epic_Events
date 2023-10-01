@@ -11,7 +11,10 @@ db = Database()
 
 
 class TestDatabase:
-    def test_database_connection(self, db_session):
+    def test_database_connection(self):
+        pass
+
+    def test_database_connection_for_test(self, db_session):
         # test try to connect to database
         try:
             assert db_session is not None

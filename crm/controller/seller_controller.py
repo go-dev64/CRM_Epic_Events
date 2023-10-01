@@ -41,30 +41,14 @@ class SellerController:
                 list_element=list_of_choice,
             )
             match choice:
-                case 1:
+                case 0:
                     return self.create_new_customer(session=session)
-                case 2:
+                case 1:
                     return self.create_new_event(session=session)
-                case 3:
+                case 2:
                     return self.utils.create_new_address(session=session)
-                case 4:
+                case 3:
                     break
-
-    @auth.is_authenticated
-    def get_info_customer(self, session) -> dict:
-        """Function is used to get a customer info by user.
-        Seller of customer is current user.
-
-        Args:
-            session (_type_): Sqlalchemay actual session.
-
-        Returns:
-            dict: {"name: str,"email_address":str,"phone_number":str,"company" : str}
-        """
-        customer_info = self.seller_view.get_info_customer_view(
-            department=session.current_user_department, current_user_name=session.current_user.name
-        )
-        return customer_info
 
     @auth.is_authenticated
     def create_new_customer(self, session) -> Customer:
@@ -77,7 +61,9 @@ class SellerController:
         Returns:
             _type_: a new instance of Customer class.
         """
-        customer_info = self.get_info_customer()
+        customer_info = self.seller_view.get_info_customer_view(
+            department=session.current_user_department, current_user_name=session.current_user.name
+        )
         new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
         return new_customer
 
@@ -274,7 +260,16 @@ class SellerController:
 
     @auth.is_authenticated
     def select_element_type_to_be_updated(self, session):
-        # select element type in list an retrun fuction to updated element.
+        """The function is used to select an action in menu list.
+        Choices are differents type of element to update.
+        Retrun fuction to updated element
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: Uppdate function for element choosen.
+        """
         element_list = ["Update your customer", "Update your contracts", "Back"]
         while True:
             element_selected = self.generic_view.select_element_in_menu_view(element_list)
@@ -286,6 +281,7 @@ class SellerController:
                     # update a user's contract.
                     return self.update_seller_contract(session=session)
                 case 2:
+                    # update address
                     return self.utils.update_address(session=session)
                 case 3:
                     break
