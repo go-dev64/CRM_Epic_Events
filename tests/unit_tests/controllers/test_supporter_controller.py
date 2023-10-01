@@ -4,8 +4,17 @@ from crm.controller.supporter_controller import SupporterController
 
 
 class TestSupportController:
-    def test_display_read_function(self):
-        pass
+    def test_select_event(self, db_session, events, users, current_user_is_supporter, mocker):
+        with db_session as session:
+            users
+            events
+            current_user_is_supporter
+            mocker.patch(
+                "crm.view.generic_view.GenericView.select_element_in_menu_view",
+                return_value=0,
+            )
+            result = SupporterController().select_event(session=session)
+            assert result == events[1]
 
     @pytest.mark.parametrize(
         "attribute,new_value",
@@ -22,7 +31,6 @@ class TestSupportController:
     ):
         # Test should retrun a event updated.
         with db_session as session:
-            clients
             users
             contracts
             events
