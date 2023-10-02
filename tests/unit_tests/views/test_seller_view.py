@@ -27,8 +27,8 @@ class TestSellerView:
         mocker.patch("crm.view.generic_view.GenericView.header")
         event_restriction = [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-            {"attribute_name": "date_start", "parametre": {"type": "datetime", "max": None}},
-            {"attribute_name": "date_end", "parametre": {"type": "datetime", "max": None}},
+            {"attribute_name": "date_start", "parametre": {"type": "date", "max": None}},
+            {"attribute_name": "date_end", "parametre": {"type": "date", "max": None}},
             {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
         ]

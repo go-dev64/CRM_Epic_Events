@@ -130,31 +130,32 @@ class SellerController:
             _type_: element selected. (customer)
         """
         choice_list = ["Select all customers", "Select yours customers", "Back to previous menu"]
-        choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
-        attribute_to_display = Customer().availables_attribue_list()
-        match choice:
-            case 0:
-                customer_list = Seller().get_all_customers(session=session)
-                return self.generic_view.display_table_of_elements(
-                    section="Display Customers",
-                    department=session.current_user_department,
-                    current_user_name=session.current_user.name,
-                    restrictions=attribute_to_display,
-                    list_element=customer_list,
-                    title_table="Table of all customers",
-                )
-            case 1:
-                yours_customers_list = Seller().get_all_clients_of_user(session)
-                return self.generic_view.display_table_of_elements(
-                    section="Display Customers",
-                    department=session.current_user_department,
-                    current_user_name=session.current_user.name,
-                    restrictions=attribute_to_display,
-                    list_element=yours_customers_list,
-                    title_table="Table of yours customers",
-                )
-            case 2:
-                pass
+        while True:
+            choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
+            attribute_to_display = Customer().availables_attribue_list()
+            match choice:
+                case 0:
+                    customer_list = Seller().get_all_customers(session=session)
+                    return self.generic_view.display_table_of_elements(
+                        section="Display Customers",
+                        department=session.current_user_department,
+                        current_user_name=session.current_user.name,
+                        restrictions=attribute_to_display,
+                        list_element=customer_list,
+                        title_table="Table of all customers",
+                    )
+                case 1:
+                    yours_customers_list = Seller().get_all_clients_of_user(session)
+                    return self.generic_view.display_table_of_elements(
+                        section="Display Customers",
+                        department=session.current_user_department,
+                        current_user_name=session.current_user.name,
+                        restrictions=attribute_to_display,
+                        list_element=yours_customers_list,
+                        title_table="Table of yours customers",
+                    )
+                case 2:
+                    break
 
     @auth.is_authenticated
     def select_contract_type_to_display(self, session):

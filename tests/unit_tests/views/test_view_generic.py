@@ -405,9 +405,7 @@ class TestGenericView:
             )
             assert result == "value"
 
-    @pytest.mark.parametrize(
-        "attribute", [("name"), ("email_address"), ("phone_number"), ("postal_code"), ("company")]
-    )
+    @pytest.mark.parametrize("attribute", [("name"), ("email_address"), ("phone_number"), ("company")])
     def test_get_new_value_of_attribute_for_customer(
         self, mocker, db_session, users, current_user_is_manager, clients, attribute
     ):

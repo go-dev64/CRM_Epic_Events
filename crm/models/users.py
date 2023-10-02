@@ -477,7 +477,7 @@ class Seller(User):
         """
         Function updates an attribute of Customer.
         If attribute update is in the forbidden attribut, the function pass and customer will be bot updated.
-        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
+        forbidden_attribut = ["created_date", "events", "contracts"]
 
         Args:
             session (_type_): _description_

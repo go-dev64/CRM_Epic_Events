@@ -4,6 +4,19 @@ from crm.controller.supporter_controller import SupporterController
 
 
 class TestSupportController:
+    @pytest.mark.parametrize("choice", [(0), (1), (2)])
+    def test_display_event(self, db_session, users, current_user_is_supporter, events, mocker, choice):
+        with db_session as session:
+            users
+            events
+            current_user_is_supporter
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.display_elements", return_value=choice)
+            if choice == 0:
+                assert SupporterController().display_event(session=session) == choice
+            elif choice == 1:
+                assert SupporterController().display_event(session=session) == choice
+
     def test_select_event(self, db_session, events, users, current_user_is_supporter, mocker):
         with db_session as session:
             users

@@ -1,2 +1,2 @@
 [run]
-omit = conftest.py,tests/*
+omit = conftest.py,tests/*, crm\database\migrations\*

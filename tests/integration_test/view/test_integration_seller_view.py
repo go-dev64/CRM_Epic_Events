@@ -16,7 +16,6 @@ class TestIntSellerView:
 
     def test_get_event_info_view(self, mocker):
         # test valid if dict returned is correct.
-
         mocker.patch("crm.view.generic_view.GenericView.string_form", return_value="a string")
         mocker.patch("crm.view.generic_view.GenericView.integer_form", return_value=1234)
         mocker.patch("crm.view.generic_view.GenericView.date_form", return_value="a date")

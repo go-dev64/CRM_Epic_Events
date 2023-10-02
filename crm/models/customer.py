@@ -36,6 +36,7 @@ class Customer(Base):
             {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
             {"attribute_name": "phone_number", "parametre": {"type": str, "max": 12}},
             {"attribute_name": "company", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "seller_contact", "parametre": {"type": object}},
         ]
 
     def attribute_to_display(self) -> list:

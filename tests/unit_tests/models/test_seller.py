@@ -71,22 +71,6 @@ class TestSeller:
             assert len(customer_list) == 3
             assert new_customer.seller_contact == current_user
 
-    """def test_create_new_customer_with_bad_data(self, db_session, clients, current_user_is_seller):
-        # test should return a new customer in customers list.
-        with db_session as session:
-            clients
-            current_user = current_user_is_seller
-            customer_info = {
-                "name": "new_user",
-                "email_address": None,
-                "phone_number": "1235465",
-                "company": "the Company",
-            }
-            new_customer = current_user.create_new_customer(session=session, customer_info=customer_info)
-            customer_list = session.scalars(select(Customer)).all()
-            assert len(customer_list) == 2
-            assert new_customer == None"""
-
     def test_create_new_event(self, db_session, contracts, address, current_user_is_seller):
         # test should return a new event in event list.
         with db_session as session:
@@ -129,20 +113,18 @@ class TestSeller:
         "attribute_update, new_value",
         [
             ("created_date", "toto"),
-            ("seller_contact", "234"),
-            ("seller_contact_id", "1616686"),
             ("events", "the company"),
             ("contracts", "the company"),
         ],
     )
-    def test_update_customer_with_bad_attribute(
+    def test_update_customer_with_forbidden_atribute_attribute(
         self, db_session, clients, current_user_is_seller, attribute_update, new_value
     ):
         # Test dhould return a customer updated.
         with db_session as session:
             customer = clients[0]
-            current_user = current_user_is_seller
-            current_user.update_customer(
+            current_user_is_seller
+            Seller().update_customer(
                 session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
             )
             assert getattr(customer, attribute_update) != new_value
