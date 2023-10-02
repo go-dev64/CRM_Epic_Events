@@ -231,46 +231,51 @@ class TestManagerController:
             )
             assert getattr(users[2], choice) == new_value
 
+    def test_change_password(self, db_session, users, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.user_view.UserView._get_user_password", return_value="password")
+            ManagerController().change_password(session=session, collaborator_selected=users[2])
+            assert users[2].password == "password"
+
     @pytest.mark.parametrize(
-        "choice, new_value",
-        [
-            ("name", "toto"),
-            ("email_address", "email@dfkjnekr"),
-            ("phone_number", "12351"),
-            ("password", "passwrgeord"),
-        ],
+        "choice",
+        [("name"), ("email_address"), ("phone_number"), ("password"), ("department")],
     )
-    def test_update_collaborator(self, db_session, users, current_user_is_manager, mocker, choice, new_value):
+    def test_update_collaborator(self, db_session, users, current_user_is_manager, mocker, choice):
         # test should return a updated attribute of user selected.
         with db_session as session:
-            user = users[1]
+            users
             current_user_is_manager
             manager = ManagerController()
             mocker.patch(
-                "crm.models.utils.Utils._select_element_in_list",
-                return_value=user,
-            )
-            mocker.patch(
-                "crm.view.generic_view.GenericView.get_new_value_of_attribute",
-                return_value=new_value,
+                "crm.controller.manager_controller.ManagerController.select_collaborator",
+                return_value=users[1],
             )
             mocker.patch(
                 "crm.models.utils.Utils._select_attribut_of_element",
                 return_value=choice,
             )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.change_collaborator_department",
+                return_value="change_collaborator_department",
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.change_password",
+                return_value="change_password",
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.change_collaborator_attribute",
+                return_value="change_collaborator_attribute",
+            )
 
-            if choice == "name":
-                manager.update_collaborator(session=session)
-                assert user.name == new_value
-            elif choice == "email_addres":
-                manager.update_collaborator(session=session)
-                assert user.email_address == new_value
-            elif choice == "phone_number":
-                manager.update_collaborator(session=session)
-                assert user.phone_number == new_value
-            elif choice == "paassword":
-                manager.update_collaborator(session=session)
-                assert user.password == new_value
+            if choice == "department":
+                assert manager.update_collaborator(session=session) == "change_collaborator_department"
+            elif choice == "password":
+                assert manager.update_collaborator(session=session) == "change_password"
+            else:
+                assert manager.update_collaborator(session=session) == "change_collaborator_attribute"
 
     def test_change_user_departement(self, db_session, users, current_user_is_manager, mocker):
         # Test should change user of department. the number of User is the same.
