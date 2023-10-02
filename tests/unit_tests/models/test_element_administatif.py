@@ -19,8 +19,8 @@ class TestElementAdministratif:
     def test_event_availables_attribue_list(self):
         assert Event().availables_attribue_list() == [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-            {"attribute_name": "date_start", "parametre": {"type": "datetime", "max": None}},
-            {"attribute_name": "date_end", "parametre": {"type": "datetime", "max": None}},
+            {"attribute_name": "date_start", "parametre": {"type": "date", "max": None}},
+            {"attribute_name": "date_end", "parametre": {"type": "date", "max": None}},
             {"attribute_name": "address", "parametre": {"type": object, "max": None}},
             {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
@@ -34,7 +34,6 @@ class TestElementAdministratif:
             {"attribute_name": "total_amount", "parametre": {"type": int, "max": None}},
             {"attribute_name": "remaining", "parametre": {"type": int, "max": None}},
             {"attribute_name": "signed_contract", "parametre": {"type": bool, "max": None}},
-            {"attribute_name": "event", "parametre": "Event"},
         ]
 
     def test_contract_attribute_to_display(self):

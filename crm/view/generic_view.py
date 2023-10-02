@@ -1,5 +1,4 @@
-from datetime import datetime
-from operator import index
+from datetime import date, datetime
 from rich import print
 from rich.console import Console, Group
 from rich.columns import Columns
@@ -402,3 +401,33 @@ class GenericView:
             else:
                 break
         return password
+
+    def get_new_value_of_attribute(
+        self, section: str, department: str, current_user: str, element, attribute_selected: str
+    ):
+        """The function is used to get a new value of attribute.
+
+        Args:
+            section (str): Section information to be displayed in header.
+            department (_type_): department information to be displayed in header.
+            current_user (_type_): current_user information to be displayed in header.
+            element (_type_): Element to be updated.
+            attribute_selected (_type_): Attribute to be updated.
+
+        Returns:
+            _type_: New value of attribute selected.
+        """
+        self.header(section=section, department=department, current_user=current_user)
+        attribute_dict = [x for x in element.availables_attribue_list() if x["attribute_name"] == attribute_selected][
+            0
+        ]
+        if attribute_dict["parametre"]["type"] == str:
+            new_value = self.string_form(restriction=attribute_dict)
+        elif attribute_dict["parametre"]["type"] == int:
+            new_value = self.integer_form(restriction=attribute_dict)
+        elif attribute_dict["parametre"]["type"] == bool:
+            new_value = self.bool_form(restriction=attribute_dict)
+        elif attribute_dict["parametre"]["type"] == "date":
+            new_value = self.date_form(restriction=attribute_dict)
+
+        return new_value

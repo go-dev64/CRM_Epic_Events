@@ -41,30 +41,14 @@ class SellerController:
                 list_element=list_of_choice,
             )
             match choice:
-                case 1:
+                case 0:
                     return self.create_new_customer(session=session)
-                case 2:
+                case 1:
                     return self.create_new_event(session=session)
-                case 3:
+                case 2:
                     return self.utils.create_new_address(session=session)
-                case 4:
+                case 3:
                     break
-
-    @auth.is_authenticated
-    def get_info_customer(self, session) -> dict:
-        """Function is used to get a customer info by user.
-        Seller of customer is current user.
-
-        Args:
-            session (_type_): Sqlalchemay actual session.
-
-        Returns:
-            dict: {"name: str,"email_address":str,"phone_number":str,"company" : str}
-        """
-        customer_info = self.seller_view.get_info_customer_view(
-            department=session.current_user_department, current_user_name=session.current_user.name
-        )
-        return customer_info
 
     @auth.is_authenticated
     def create_new_customer(self, session) -> Customer:
@@ -77,7 +61,9 @@ class SellerController:
         Returns:
             _type_: a new instance of Customer class.
         """
-        customer_info = self.get_info_customer()
+        customer_info = self.seller_view.get_info_customer_view(
+            department=session.current_user_department, current_user_name=session.current_user.name
+        )
         new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
         return new_customer
 
@@ -144,31 +130,32 @@ class SellerController:
             _type_: element selected. (customer)
         """
         choice_list = ["Select all customers", "Select yours customers", "Back to previous menu"]
-        choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
-        attribute_to_display = Customer().availables_attribue_list()
-        match choice:
-            case 0:
-                customer_list = Seller().get_all_customers(session=session)
-                return self.generic_view.display_table_of_elements(
-                    section="Display Customers",
-                    department=session.current_user_department,
-                    current_user_name=session.current_user.name,
-                    restrictions=attribute_to_display,
-                    list_element=customer_list,
-                    title_table="Table of all customers",
-                )
-            case 1:
-                yours_customers_list = Seller().get_all_clients_of_user(session)
-                return self.generic_view.display_table_of_elements(
-                    section="Display Customers",
-                    department=session.current_user_department,
-                    current_user_name=session.current_user.name,
-                    restrictions=attribute_to_display,
-                    list_element=yours_customers_list,
-                    title_table="Table of yours customers",
-                )
-            case 2:
-                pass
+        while True:
+            choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
+            attribute_to_display = Customer().availables_attribue_list()
+            match choice:
+                case 0:
+                    customer_list = Seller().get_all_customers(session=session)
+                    return self.generic_view.display_table_of_elements(
+                        section="Display Customers",
+                        department=session.current_user_department,
+                        current_user_name=session.current_user.name,
+                        restrictions=attribute_to_display,
+                        list_element=customer_list,
+                        title_table="Table of all customers",
+                    )
+                case 1:
+                    yours_customers_list = Seller().get_all_clients_of_user(session)
+                    return self.generic_view.display_table_of_elements(
+                        section="Display Customers",
+                        department=session.current_user_department,
+                        current_user_name=session.current_user.name,
+                        restrictions=attribute_to_display,
+                        list_element=yours_customers_list,
+                        title_table="Table of yours customers",
+                    )
+                case 2:
+                    break
 
     @auth.is_authenticated
     def select_contract_type_to_display(self, session):
@@ -247,37 +234,93 @@ class SellerController:
                     break
 
     @auth.is_authenticated
+    def select_customer(self, session) -> Customer:
+        """The function is used to select a Customer.
+
+        Returns:
+            Customer: Customer selected.
+        """
+        customers = Seller().get_all_clients_of_user(session=session)
+        customer_selected = self.utils._select_element_in_list(
+            session=session, section="Update your Customer/Select Customer", element_list=customers
+        )
+        return customer_selected
+
+    @auth.is_authenticated
     def update_seller_customer(self, session):
+        """The function is used to update the customers managed by the current user.
+
+        Args:
+            session (_type_): _description_
         """
-        Function make update of customer of seller.
-        """
-        user_customer_list = session.current_user.get_all_clients_of_user(session=session)
-        customer = self.utils._select_element_in_list(element_list=user_customer_list)
-        attribute_selected = self.utils._select_attribut_of_element(element=customer)
-        new_value = self.utils._get_new_value_of_attribut(element=customer, attribute_to_updated=attribute_selected)
-        session.current_user.update_customer(
+        customer = self.select_customer(session=session)
+        attribute_selected = self.utils._select_attribut_of_element(
+            session=session, section="Update your Customer/Select Attribute", element=customer
+        )
+        new_value = self.generic_view.get_new_value_of_attribute(
+            section=f"New Value of {attribute_selected}",
+            department=session.current_user_department,
+            current_user=session.current_user.name,
+            element=customer,
+            attribute_selected=attribute_selected,
+        )
+        Seller().update_customer(
             session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value
         )
+
+    @auth.is_authenticated
+    def select_contract(self, session) -> Contract:
+        """The function is used to select a Contract.
+
+        Returns:
+            Contract: Contract selected.
+        """
+        contracts = Seller().get_all_contracts_of_user(session=session)
+        contract_selected = self.utils._select_element_in_list(
+            session=session, section="Update your Contract/Select Contract", element_list=contracts
+        )
+        return contract_selected
 
     @auth.is_authenticated
     def update_seller_contract(self, session):
         """
         Function make update of contract of seller.
         """
-        contracts_of_seller = session.current_user.get_all_contracts_of_user(session=session)
-        contract = self.utils._select_element_in_list(element_list=contracts_of_seller)
-        attribute_to_update = self.utils._select_attribut_of_element(element=contract)
-        new_value = self.utils._get_new_value_of_attribut(element=contract, attribute_to_updated=attribute_to_update)
-        session.current_user.update_contract(
-            session=session, contract=contract, attribute_update=attribute_to_update, new_value=new_value
+        contract = self.select_contract(session=session)
+        attribute_selected = self.utils._select_attribut_of_element(
+            session=session, section="Update your Contract/Select Attribute", element=contract
+        )
+        new_value = self.generic_view.get_new_value_of_attribute(
+            section=f"New Value of {attribute_selected}",
+            department=session.current_user_department,
+            current_user=session.current_user.name,
+            element=contract,
+            attribute_selected=attribute_selected,
+        )
+        Seller().update_contract(
+            session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
         )
 
     @auth.is_authenticated
     def select_element_type_to_be_updated(self, session):
-        # select element type in list an retrun fuction to updated element.
+        """The function is used to select an action in menu list.
+        Choices are differents type of element to update.
+        Retrun fuction to updated element
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            _type_: Uppdate function for element choosen.
+        """
         element_list = ["Update your customer", "Update your contracts", "Back"]
         while True:
-            element_selected = self.generic_view.select_element_in_menu_view(element_list)
+            element_selected = self.generic_view.select_element_in_menu_view(
+                section="Update/Select element to be updated",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=element_list,
+            )
             match element_selected:
                 case 0:
                     # Update a user's customers.
@@ -286,6 +329,7 @@ class SellerController:
                     # update a user's contract.
                     return self.update_seller_contract(session=session)
                 case 2:
+                    # update address
                     return self.utils.update_address(session=session)
                 case 3:
                     break

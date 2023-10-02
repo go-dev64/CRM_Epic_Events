@@ -27,8 +27,8 @@ class TestSellerView:
         mocker.patch("crm.view.generic_view.GenericView.header")
         event_restriction = [
             {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-            {"attribute_name": "date_start", "parametre": {"type": "datetime", "max": None}},
-            {"attribute_name": "date_end", "parametre": {"type": "datetime", "max": None}},
+            {"attribute_name": "date_start", "parametre": {"type": "date", "max": None}},
+            {"attribute_name": "date_end", "parametre": {"type": "date", "max": None}},
             {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
             {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
         ]
@@ -44,26 +44,3 @@ class TestSellerView:
         assert result.get("note") == "a string"
 
         assert len(result.keys()) == len(event_restriction)
-
-    def test_display_custmer(self, mocker, db_session, clients, current_user_is_user, capsys):
-        # test dislpay customer details.
-        with db_session as session:
-            clients
-            current_user_is_user
-            attributes = [
-                "name",
-                "email_address",
-                "phone_number",
-                "company",
-                "seller_contact",
-                "events",
-                "contracts",
-                "created_date",
-                "updated_date",
-            ]
-            mocker.patch("crm.view.generic_view.GenericView.header")
-            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
-            SellerView().display_customer(session=session, customer=clients[0])
-            out, err = capsys.readouterr()
-            for i in attributes:
-                assert i in out

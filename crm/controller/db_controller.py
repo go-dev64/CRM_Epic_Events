@@ -28,8 +28,7 @@ class Database:
     def create_session(self):
         engine = self.database_engine()
         Session = sessionmaker(bind=engine)
-        session = Session()
-        return session
+        return Session
 
     def create_tables(self):
         engine = self.database_engine()

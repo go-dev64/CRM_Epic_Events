@@ -8,7 +8,7 @@ from crm.models.users import Seller
 
 
 class TestSellerController:
-    @pytest.mark.parametrize("choice", [(1), (2)])
+    @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test_create_new_element(self, db_session, users, current_user_is_seller, mocker, choice):
         with db_session as session:
             users
@@ -23,10 +23,13 @@ class TestSellerController:
             mocker.patch(
                 "crm.controller.seller_controller.SellerController.create_new_event", return_value="create_new_event"
             )
-            if choice == 1:
+            mocker.patch("crm.models.utils.Utils.create_new_address", return_value="create_new_address")
+            if choice == 0:
                 assert seller_ctrl.create_new_element(session=session) == "create_new_customer"
-            elif choice == 2:
+            elif choice == 1:
                 assert seller_ctrl.create_new_element(session=session) == "create_new_event"
+            elif choice == 2:
+                assert seller_ctrl.create_new_element(session=session) == "create_new_address"
             else:
                 pass
 
@@ -41,9 +44,7 @@ class TestSellerController:
                 "phone_number": "+516184684",
                 "company": "une company",
             }
-            mocker.patch(
-                "crm.controller.seller_controller.SellerController.get_info_customer", return_value=customer_info
-            )
+            mocker.patch("crm.view.seller_view.SellerView.get_info_customer_view", return_value=customer_info)
             new_customer = SellerController().create_new_customer(session=session)
             list_customer = session.scalars(select(Customer)).all()
             assert len(list_customer) == 3
@@ -76,12 +77,13 @@ class TestSellerController:
                 "signed_contract": True,
                 "customer": "",
             }
-            mocker.patch("crm.view.seller_view.SellerView.get_event_info_view", return_value=info_event)
-            info_event["customer"] = mocker.patch(
+            info = mocker.patch("crm.view.seller_view.SellerView.get_event_info_view", return_value=info_event)
+            mocker.patch(
                 "crm.controller.seller_controller.SellerController.select_contract_of_event", return_value="toto"
             )
             result = Seller().get_event_info(session=session)
-            assert result == info_event
+            assert result == info
+            assert result["contract"] == "toto"
 
     def test_create_new_event(self, db_session, contracts, address, current_user_is_seller, mocker):
         # test should return a new event in event list.
@@ -165,9 +167,22 @@ class TestSellerController:
             elif choice == 2:
                 assert seller_ctrl.select_element_type_to_be_updated(session=session) == "update_address"
 
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_customer(self, db_session, users, clients, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            clients
+            current_user_is_seller
+            mocker.patch(
+                "crm.view.generic_view.GenericView.select_element_in_menu_view",
+                return_value=choice,
+            )
+            result = SellerController().select_customer(session=session)
+            assert result == clients[choice]
+
     @pytest.mark.parametrize(
         "attribute,new_value",
-        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test"), ("password", "test")],
+        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
     )
     def test_update_seller_customer(
         self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
@@ -180,14 +195,27 @@ class TestSellerController:
             seller = SellerController()
             mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=clients[0])
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
-            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             seller.update_seller_customer(session=session)
             assert getattr(clients[0], attribute) == new_value
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_contract(self, db_session, users, contracts, current_user_is_seller, mocker, choice):
+        with db_session as session:
+            users
+            contracts
+            current_user_is_seller
+            mocker.patch(
+                "crm.view.generic_view.GenericView.select_element_in_menu_view",
+                return_value=choice,
+            )
+            result = SellerController().select_contract(session=session)
+            assert result == contracts[choice]
 
     @pytest.mark.parametrize(
         "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]
     )
-    def test_update_seller_customer(
+    def test_update_seller_contract(
         self, db_session, clients, users, contracts, current_user_is_seller, mocker, attribute, new_value
     ):
         # Test should retrun a event with supporter updated.
@@ -199,6 +227,6 @@ class TestSellerController:
             seller = SellerController()
             mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=contracts[0])
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
-            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             seller.update_seller_contract(session=session)
             assert getattr(contracts[0], attribute) == new_value

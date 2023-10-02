@@ -78,20 +78,19 @@ class TestManagerController:
             manager = ManagerController()
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=0)
             if choice == 0:
-                assert manager._select_new_department(user) == "Seller"
+                assert manager.select_new_department(section="", session=session, collaborator=user) == "Seller"
             elif choice == 1:
-                assert manager._select_new_department(user) == "Manager"
+                assert manager.select_new_department(session=session, section="", collaborator=user) == "Manager"
             elif choice == 2:
-                assert manager._select_new_department(user) == "Manager"
+                assert manager.select_new_department(session=session, section="", collaborator=user) == "Manager"
 
     def test_select_customer_of_contract(self, db_session, clients, current_user_is_manager, mocker):
         # test should return customer of index list 1.
         with db_session as session:
             clients
             current_user_is_manager
-            manager = ManagerController()
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
-            result = manager.select_customer_of_contract(session=session)
+            result = ManagerController().select_customer_of_contract(session=session)
 
             assert result == clients[1]
 
@@ -112,7 +111,7 @@ class TestManagerController:
                 "crm.models.utils.Utils._select_attribut_of_element",
                 return_value=old_attribute,
             )
-            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             manager.update_contract(session=session)
             if old_attribute == "total_amount":
                 assert getattr(contract, old_attribute) == new_value
@@ -120,27 +119,6 @@ class TestManagerController:
                 assert getattr(contract, old_attribute) == new_value
             elif old_attribute == "signed_contract":
                 assert getattr(contract, old_attribute) == new_value
-
-    def test_update_contract_to_customer_attribute(
-        self, db_session, users, current_user_is_manager, contracts, clients, mocker
-    ):
-        with db_session as session:
-            users
-            current_user_is_manager
-            client = clients[0]
-            contract = contracts[0]
-            manager = ManagerController()
-            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=contract)
-            mocker.patch(
-                "crm.models.utils.Utils._select_attribut_of_element",
-                return_value="customer",
-            )
-            mocker.patch(
-                "crm.models.utils.Utils._select_element_in_list",
-                return_value=client,
-            )
-            manager.update_contract(session=session)
-            assert contract.customer == client
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test__select_supporter(self, db_session, users, current_user_is_manager, mocker, choice):
@@ -156,9 +134,9 @@ class TestManagerController:
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
 
             if choice == 0:
-                assert manager._select_supporter(session=session) == users[2]
+                assert manager.select_supporter(session=session) == users[2]
             elif choice == 1:
-                assert manager._select_supporter(session=session) == supporter_2
+                assert manager.select_supporter(session=session) == supporter_2
 
     def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
         # Test should retrun a user less one.

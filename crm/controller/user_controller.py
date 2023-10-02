@@ -201,11 +201,14 @@ class UserController:
         Returns:
             _type_: display events functions of department.
         """
-        user_type = session.current_user_department
+
         event_list = User().get_all_events(session=session)
         attributes_displayed = Event().availables_attribue_list()
-        if user_type == "Supporter":
-            return self.supporter_controller.display_event_of_user(session=session)
+        if session.current_user_department == "Supporter":
+            return self.supporter_controller.display_event(session=session)
+
+        elif session.current_user_department == "Manager":
+            return self.manager_controller.display_event(session=session)
         else:
             return self.generic_view.display_elements(
                 session=session,

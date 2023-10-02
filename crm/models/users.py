@@ -477,7 +477,7 @@ class Seller(User):
         """
         Function updates an attribute of Customer.
         If attribute update is in the forbidden attribut, the function pass and customer will be bot updated.
-        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
+        forbidden_attribut = ["created_date", "events", "contracts"]
 
         Args:
             session (_type_): _description_
@@ -485,7 +485,7 @@ class Seller(User):
             attribute_update (str): Attribute of Instance to be updated.
             new_value (_type_): New value of attribute to be updated.
         """
-        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
+        forbidden_attribut = ["created_date", "events", "contracts"]
         if attribute_update not in forbidden_attribut:
             setattr(customer, attribute_update, new_value)
             customer.set_updated_date()
