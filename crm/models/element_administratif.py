@@ -31,14 +31,27 @@ class Event(Base):
     address: Mapped["Address"] = relationship(back_populates="event")
 
     def availables_attribue_list(self) -> dict:
-        return {
-            "name": {"type": int, "max": 50},
-            "date_start": {"type": datetime, "max": None},
-            "date_end": {"type": datetime, "max": None},
-            "attendees": {"type": int, "max": None},
-            "note": {"type": str, "max": 2048},
-            "address": {"type": object, "max": None},
-        }
+        return [
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "date_start", "parametre": {"type": "date", "max": None}},
+            {"attribute_name": "date_end", "parametre": {"type": "date", "max": None}},
+            {"attribute_name": "address", "parametre": {"type": object, "max": None}},
+            {"attribute_name": "attendees", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
+            {"attribute_name": "contract", "parametre": {"type": object, "max": None}},
+            {"attribute_name": "supporter", "parametre": {"type": object, "max": None}},
+        ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+        ["name", "customer", "date_start", "date_end", "attendees", "address", "note", "contract", "supporter"]
+
+        Returns:
+            list: List of attribute name.
+        """
+        attribut = [x["attribute_name"] for x in self.availables_attribue_list()]
+        attribut.insert(1, "customer")
+        return attribut
 
 
 class Contract(Base):
@@ -60,15 +73,27 @@ class Contract(Base):
     customer = relationship("Customer", back_populates="contracts")
 
     def availables_attribue_list(self) -> dict:
-        return {
-            "total_amount": {"type": int, "max": None},
-            "remaining": {"type": int, "max": None},
-            "signed_contract": {"type": bool, "max": None},
-            "customer": "Customer",
-        }
+        return [
+            {"attribute_name": "customer", "parametre": "Customer"},
+            {"attribute_name": "total_amount", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "remaining", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "signed_contract", "parametre": {"type": bool, "max": None}},
+        ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+        list[id, customer, total_amount, remaining, signed_contract, event, seller]
+
+        Returns:
+            list: List of attribute name.
+        """
+        list_attribute = [x["attribute_name"] for x in self.availables_attribue_list()]
+        list_attribute.insert(0, "id")
+        add_attribute = ["event", "seller"]
+        return list_attribute + add_attribute
 
     def __repr__(self) -> str:
-        return f"Contrant N°:{self.id} -Client: {self.customer.name} - created: {self.created_date} - signed:{self.signed_contract}"
+        return f"Contrat N°:{self.id}"
 
 
 class Address(Base):
@@ -85,11 +110,19 @@ class Address(Base):
     event = relationship("Event", back_populates="address")
 
     def availables_attribue_list(self) -> dict:
-        return {
-            "number": {"type": int, "max": None},
-            "street": {"type": str, "max": 500},
-            "city": {"type": str, "max": 100},
-            "postal_code": {"type": int, "max": None},
-            "country": {"type": str, "max": 50},
-            "note": {"type": str, "max": 2048},
-        }
+        return [
+            {"attribute_name": "number", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "street", "parametre": {"type": str, "max": 500}},
+            {"attribute_name": "city", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "postal_code", "parametre": {"type": int, "max": None}},
+            {"attribute_name": "country", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "note", "parametre": {"type": str, "max": 2048}},
+        ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed.
+                [number, street, city,postal_code,country, note]
+        [        Returns:
+                    list: List of attribute name.
+        """
+        return [x["attribute_name"] for x in self.availables_attribue_list()]

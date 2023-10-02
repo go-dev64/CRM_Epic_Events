@@ -4,6 +4,7 @@ from crm.controller.manager_controller import ManagerController
 from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
+import argon2
 
 
 class TestManagerController:
@@ -20,16 +21,19 @@ class TestManagerController:
                 "phone_number": "+064849",
                 "password": "password",
             }
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=department)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
             mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
 
             if department == 0:
                 new_user = manager_ctrl.create_new_user(session=session)
-                print(new_user)
                 list_manager = session.scalars(select(Manager)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_manager) == 2
                 assert len(list_user) == 4
+                assert new_user.name == "toto"
+                assert new_user.email_address == "email@fr"
+                assert new_user.phone_number == "+064849"
+                assert new_user.password == "password"
 
             elif department == 1:
                 new_user = manager_ctrl.create_new_user(session=session)
@@ -37,30 +41,20 @@ class TestManagerController:
                 list_user = session.scalars(select(User)).all()
                 assert len(list_seller) == 2
                 assert len(list_user) == 4
+                assert new_user.name == "toto"
+                assert new_user.email_address == "email@fr"
+                assert new_user.phone_number == "+064849"
+                assert new_user.password == "password"
             elif department == 2:
                 new_user = manager_ctrl.create_new_user(session=session)
                 list_supporter = session.scalars(select(Supporter)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_supporter) == 2
                 assert len(list_user) == 4
-
-    def test_create_new_contract(self, db_session, users, clients, contracts, current_user_is_manager, mocker):
-        # test should return a new contract.
-        with db_session as session:
-            contracts
-            current_user_is_manager
-            manager_ctrl = ManagerController()
-            contract_info = {
-                "total_amount": 1000,
-                "remaining": 0,
-                "signed_contract": True,
-                "customer": clients[0],
-                "seller": users[1],
-            }
-            mocker.patch("crm.view.contract_view.ContractView.get_info_contract", return_value=contract_info)
-            new_contract = manager_ctrl.create_new_contract(session=session)
-            list_contract = session.scalars(select(Contract)).all()
-            assert len(list_contract) == 3
+                assert new_user.name == "toto"
+                assert new_user.email_address == "email@fr"
+                assert new_user.phone_number == "+064849"
+                assert new_user.password == "password"
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, choice):
@@ -83,13 +77,23 @@ class TestManagerController:
             user = users[choice]
             current_user_is_manager
             manager = ManagerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=0)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=0)
             if choice == 0:
-                assert manager._select_new_department(user) == "Seller"
+                assert manager.select_new_department(section="", session=session, collaborator=user) == "Seller"
             elif choice == 1:
-                assert manager._select_new_department(user) == "Manager"
+                assert manager.select_new_department(session=session, section="", collaborator=user) == "Manager"
             elif choice == 2:
-                assert manager._select_new_department(user) == "Manager"
+                assert manager.select_new_department(session=session, section="", collaborator=user) == "Manager"
+
+    def test_select_customer_of_contract(self, db_session, clients, current_user_is_manager, mocker):
+        # test should return customer of index list 1.
+        with db_session as session:
+            clients
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
+            result = ManagerController().select_customer_of_contract(session=session)
+
+            assert result == clients[1]
 
     @pytest.mark.parametrize(
         "old_attribute, new_value",
@@ -108,7 +112,7 @@ class TestManagerController:
                 "crm.models.utils.Utils._select_attribut_of_element",
                 return_value=old_attribute,
             )
-            mocker.patch("crm.models.utils.Utils._get_new_value_of_attribut", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             manager.update_contract(session=session)
             if old_attribute == "total_amount":
                 assert getattr(contract, old_attribute) == new_value
@@ -116,27 +120,6 @@ class TestManagerController:
                 assert getattr(contract, old_attribute) == new_value
             elif old_attribute == "signed_contract":
                 assert getattr(contract, old_attribute) == new_value
-
-    def test_update_contract_to_customer_attribute(
-        self, db_session, users, current_user_is_manager, contracts, clients, mocker
-    ):
-        with db_session as session:
-            users
-            current_user_is_manager
-            client = clients[0]
-            contract = contracts[0]
-            manager = ManagerController()
-            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=contract)
-            mocker.patch(
-                "crm.models.utils.Utils._select_attribut_of_element",
-                return_value="customer",
-            )
-            mocker.patch(
-                "crm.models.utils.Utils._select_element_in_list",
-                return_value=client,
-            )
-            manager.update_contract(session=session)
-            assert contract.customer == client
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test__select_supporter(self, db_session, users, current_user_is_manager, mocker, choice):
@@ -149,12 +132,12 @@ class TestManagerController:
             session.add(supporter_2)
             current_user_is_manager
             manager = ManagerController()
-            mocker.patch("crm.view.generic_view.GenericView.select_element_view", return_value=choice)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
 
             if choice == 0:
-                assert manager._select_supporter(session=session) == users[2]
+                assert manager.select_supporter(session=session) == users[2]
             elif choice == 1:
-                assert manager._select_supporter(session=session) == supporter_2
+                assert manager.select_supporter(session=session) == supporter_2
 
     def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
         # Test should retrun a user less one.
@@ -172,3 +155,47 @@ class TestManagerController:
             seller_list = session.scalars(select(Seller)).all()
             assert len(user_list) == 2
             assert len(seller_list) == 0
+
+    def test_update_collaborator_with_department(self, db_session, users, current_user_is_manager, mocker):
+        # test should return a updated attribute of user selected.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[1],
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_new_department",
+                return_value="Supporter",
+            )
+            mocker.patch(
+                "crm.models.utils.Utils._select_attribut_of_element",
+                return_value="department",
+            )
+            ManagerController().update_collaborator(session=session)
+            user_list = session.scalars(select(User)).all()
+            seller_list = session.scalars(select(Supporter)).all()
+            assert len(user_list) == 3
+            assert len(seller_list) == 2
+
+    def test_update_collaborator_with_password(self, db_session, users, current_user_is_manager, mocker):
+        # test should return a updated attribute of user selected.
+        with db_session as session:
+            user = users[1]
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=user,
+            )
+            mocker.patch(
+                "rich.prompt.Prompt.ask",
+                return_value="Abcdefgh@45",
+            )
+            mocker.patch(
+                "crm.models.utils.Utils._select_attribut_of_element",
+                return_value="password",
+            )
+            ph = argon2.PasswordHasher()
+            ManagerController().update_collaborator(session=session)
+            assert ph.verify(user.password, "Abcdefgh@45") == True

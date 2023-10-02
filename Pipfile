@@ -17,6 +17,11 @@ passlib = "*"
 argon2-cffi = "*"
 pyjwt = {extras = ["crypto"], version = "*"}
 mypy = "*"
+rich = "*"
+install = "*"
+curses-menu = "*"
+coverage = "*"
+pytest-cov = "*"
 
 [dev-packages]
 

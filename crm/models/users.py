@@ -25,24 +25,32 @@ class User(Base):
         "polymorphic_on": "department",
     }
 
-    def get_all_customers(self, session) -> list:
-        # Function return all Custumers.
+    def get_all_customers(self, session) -> list[Customer]:
+        """The function return all customers in list."""
+
         customers = session.scalars(select(Customer)).all()
         return customers
 
-    def get_all_contracts(self, session) -> list:
-        # Function return all Contracts.
+    def get_all_contracts(self, session) -> list[Contract]:
+        """The function return all contracts in list."""
+
         contracts = session.scalars(select(Contract)).all()
         return contracts
 
-    def get_all_events(self, session) -> list:
-        # Function return all Events.
+    def get_all_events(self, session) -> list[Event]:
+        """Function return all events in list"""
+
         events = session.scalars(select(Event)).all()
         return events
 
+    def get_all_adress(self, session) -> list[Address]:
+        """The function return all addresses in list."""
+
+        addresses = session.scalars(select(Address)).all()
+        return addresses
+
     def create_new_address(self, session, address_info: dict):
-        """
-        Function add a new Address to database.
+        """Function add a new Address.
 
         Args:
             session (_type_): database session
@@ -66,16 +74,35 @@ class User(Base):
             return new_address
 
     def __repr__(self):
-        return f"User {self.name} - team:{self.department}"
+        return f"User {self.name}"
 
-    def availables_attribue_list(self) -> dict:
-        return {
-            "name": {"type": str, "max": None},
-            "email_address": {"type": str, "max": 100},
-            "phone_number": {"type": str, "max": 10},
-            "password": {"type": str, "max": None},
-            "department": {"type": object, "max": None},
-        }
+    def availables_attribue_list(self) -> list[dict]:
+        """Fuction return a list od dict of attribut availables for creation and update user.
+
+        Returns:
+            list[dict]: exemeple:[
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            ]
+        """
+        return [
+            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
+            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
+            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
+            {"attribute_name": "password", "parametre": {"type": str, "max": None}},
+            {"attribute_name": "department", "parametre": {"type": object, "max": None}},
+        ]
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute availble to be displayed(reading).
+
+        Returns:
+            list: List  of attribute name.
+        """
+        attribute_list = [
+            x["attribute_name"] for x in self.availables_attribue_list() if x["attribute_name"] != "password"
+        ]
+        add_attribute = ["created_date"]
+        return attribute_list + add_attribute
 
 
 class Supporter(User):
@@ -87,6 +114,12 @@ class Supporter(User):
     events: Mapped[list["Event"]] = relationship(back_populates="supporter")
 
     __mapper_args__ = {"polymorphic_identity": "supporter_table"}
+
+    def attribute_to_display(self) -> list:
+        """Function return all attribute available to be displayed(reading)."""
+        list_attributes = super().attribute_to_display()
+        add_attributes = ["events"]
+        return list_attributes + add_attributes
 
     def get_event_of_supporter(self, session) -> list:
         # Function return all contracts of user.
@@ -124,27 +157,45 @@ class Manager(User):
 
     __mapper_args__ = {"polymorphic_identity": "manager_table"}
 
-    def get_all_users(self, session):
-        # Function return all User.
+    def get_all_users(self, session) -> list[User]:
+        """Function return all collaborator.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            list[User]: List of all collaboraotor.
+        """
         users = session.scalars(select(User)).all()
         return users
 
-    def get_all_supporter(self, session):
-        # Function returns all Supporter.
+    def get_all_supporter(self, session) -> list[Supporter]:
+        """Function returns all Supporter.
+        Args:
+            session (_type_): actual Session.
+        Returns:
+            list[Supporter]: list of Suppotrer.
+        """
         return session.scalars(select(Supporter)).all()
 
-    def get_all_event_without_support(self, session):
-        # Function return all evant without supporter.
+    def get_all_event_without_support(self, session) -> list[Event]:
+        """Function return all event without supporter.
+        Args:
+            session (_type_):  actual Session
+        Returns:
+            list[Event]: Event list without Supporter.
+        """
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
         return event_without_supporter
 
-    def create_new_manager(self, session, user_info: dict):
-        """
-        Function add a new Manager to database.
+    def create_new_manager(self, session, user_info: dict) -> "Manager":
+        """Function add a new Manager to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
+
+        Return Manager created.
         """
         try:
             new_manager = Manager(
@@ -161,12 +212,13 @@ class Manager(User):
             return new_manager
 
     def create_new_seller(self, session, user_info: dict):
-        """
-        Function add a new Seller to database.
+        """Function add a new Seller to database.
 
         Args:
             session (_type_): database session
             user_info (dict): user info.
+
+        Retrun Seller created.
         """
         try:
             new_seller = Seller(
@@ -336,6 +388,12 @@ class Seller(User):
     # listes des contrats gerer( one-to-many)
     contracts: Mapped[list["Contract"]] = relationship(back_populates="seller")
 
+    def attribute_to_display(self) -> list:
+        """Function return all attribute available to be displayed, including additional attributes."""
+        list_attributes = super().attribute_to_display()
+        add_attributes = ["customers", "contracts"]
+        return list_attributes + add_attributes
+
     def get_all_clients_of_user(self, session) -> list:
         # Function return all clients of user.
         customers_list = session.scalars(select(Customer).where(Customer.seller_contact == session.current_user)).all()
@@ -386,14 +444,11 @@ class Seller(User):
 
     def create_new_event(self, session, event_info: dict) -> Event:
         """
-        Function add a new eventto database.
+        Function add a new event to database.
 
         Args:
             session (_type_): _description_
             event_info (_type_): _description_
-
-        Returns:
-            _type_: _description_
         """
         try:
             # get customer of new event.
@@ -422,7 +477,7 @@ class Seller(User):
         """
         Function updates an attribute of Customer.
         If attribute update is in the forbidden attribut, the function pass and customer will be bot updated.
-        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
+        forbidden_attribut = ["created_date", "events", "contracts"]
 
         Args:
             session (_type_): _description_
@@ -430,7 +485,7 @@ class Seller(User):
             attribute_update (str): Attribute of Instance to be updated.
             new_value (_type_): New value of attribute to be updated.
         """
-        forbidden_attribut = ["created_date", "seller_contact", "seller_contact_id", "events", "contracts"]
+        forbidden_attribut = ["created_date", "events", "contracts"]
         if attribute_update not in forbidden_attribut:
             setattr(customer, attribute_update, new_value)
             customer.set_updated_date()

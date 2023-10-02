@@ -22,14 +22,13 @@ URL_OBJECT = URL.create(
 
 class Database:
     def database_engine(self):
-        engine = create_engine(URL_OBJECT, echo=True)
+        engine = create_engine(URL_OBJECT)
         return engine
 
     def create_session(self):
         engine = self.database_engine()
         Session = sessionmaker(bind=engine)
-        session = Session()
-        return session
+        return Session
 
     def create_tables(self):
         engine = self.database_engine()
