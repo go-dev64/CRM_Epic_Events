@@ -85,7 +85,6 @@ class TestGenericView:
                 attributes=attributes,
             )
             out, err = capsys.readouterr()
-            print(out)
             assert "test_title" and "name" and "email_address" and "phone_number" and "N°" in out
 
     @pytest.mark.parametrize("result", [(1), (2)])

@@ -5,6 +5,9 @@ from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
 import argon2
+from rich.console import Console
+
+from crm.view.generic_view import GenericView
 
 
 class TestManagerController:
@@ -25,36 +28,47 @@ class TestManagerController:
             mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
 
             if department == 0:
-                new_user = manager_ctrl.create_new_user(session=session)
+                manager_ctrl.create_new_user(session=session)
                 list_manager = session.scalars(select(Manager)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_manager) == 2
                 assert len(list_user) == 4
-                assert new_user.name == "toto"
-                assert new_user.email_address == "email@fr"
-                assert new_user.phone_number == "+064849"
-                assert new_user.password == "password"
+                assert list_manager[1].name == "toto"
+                assert list_manager[1].email_address == "email@fr"
+                assert list_manager[1].phone_number == "+064849"
+                assert list_manager[1].password == "password"
 
             elif department == 1:
-                new_user = manager_ctrl.create_new_user(session=session)
+                manager_ctrl.create_new_user(session=session)
                 list_seller = session.scalars(select(Seller)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_seller) == 2
                 assert len(list_user) == 4
-                assert new_user.name == "toto"
-                assert new_user.email_address == "email@fr"
-                assert new_user.phone_number == "+064849"
-                assert new_user.password == "password"
+                assert list_seller[1].name == "toto"
+                assert list_seller[1].email_address == "email@fr"
+                assert list_seller[1].phone_number == "+064849"
+                assert list_seller[1].password == "password"
             elif department == 2:
-                new_user = manager_ctrl.create_new_user(session=session)
+                manager_ctrl.create_new_user(session=session)
                 list_supporter = session.scalars(select(Supporter)).all()
                 list_user = session.scalars(select(User)).all()
                 assert len(list_supporter) == 2
                 assert len(list_user) == 4
-                assert new_user.name == "toto"
-                assert new_user.email_address == "email@fr"
-                assert new_user.phone_number == "+064849"
-                assert new_user.password == "password"
+                assert list_supporter[1].name == "toto"
+                assert list_supporter[1].email_address == "email@fr"
+                assert list_supporter[1].phone_number == "+064849"
+                assert list_supporter[1].password == "password"
+
+    def test_select_customer_of_contract(self, db_session, users, clients, current_user_is_manager, mocker):
+        # test should return clients of index list 1.
+        with db_session as session:
+            users
+            clients
+            current_user_is_manager
+            manager = ManagerController()
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
+            result = manager.select_customer_of_contract(session=session)
+            assert result == clients[1]
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, choice):
