@@ -191,7 +191,12 @@ class ManagerController:
             "Back to previous menu",
         ]
         while True:
-            element = self.generic_view.select_element_in_menu_view(list_of_choice)
+            element = self.generic_view.select_element_in_menu_view(
+                section="Update/ Select element to Update",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=list_of_choice,
+            )
             match element:
                 case 0:
                     return self.update_collaborator(session=session)

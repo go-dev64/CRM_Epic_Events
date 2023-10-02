@@ -8,7 +8,10 @@ def main():
     db = Database()
     # db.create_tables()
     db_session = db.create_session()
-    with db_session as session:
+    with db_session.begin() as session:
+        """db.create_popultaes(session=session)
+        session.commit()"""
+
         while True:
             user = LoginController().user_login(session=session)
             session.current_user = user
@@ -18,7 +21,7 @@ def main():
             session.current_user = None
             session.current_user_department = None
             session.commit()
-            session.close()
+            break
 
 
 if __name__ == "__main__":

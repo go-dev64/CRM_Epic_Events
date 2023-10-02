@@ -64,11 +64,7 @@ class TestGenericView:
             assert i in out
 
     def test__set_table(self, capsys):
-        attributes = [
-            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
-            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
-        ]
+        attributes = ["name", "email_address", "phone_number"]
         result = GenericView()._set_table(title_table="test", attributes=attributes)
         assert len(result.columns) == len(attributes) + 1  # +1 is column of numero of row.
         assert "N°" == result.columns[0].header
@@ -79,11 +75,7 @@ class TestGenericView:
     def test_display_table_of_elements(self, capsys, mocker, db_session, users):
         with db_session as session:
             users
-            attributes = [
-                {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-                {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
-                {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
-            ]
+            attributes = users[0].attribute_to_display()
             toto = GenericView().display_table_of_elements(
                 section="",
                 department="",
@@ -93,6 +85,7 @@ class TestGenericView:
                 attributes=attributes,
             )
             out, err = capsys.readouterr()
+            print(out)
             assert "test_title" and "name" and "email_address" and "phone_number" and "N°" in out
 
     @pytest.mark.parametrize("result", [(1), (2)])
