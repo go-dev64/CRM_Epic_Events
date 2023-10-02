@@ -4,6 +4,7 @@ from crm.controller.manager_controller import ManagerController
 from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
+import argon2
 
 
 class TestManagerController:
@@ -154,3 +155,47 @@ class TestManagerController:
             seller_list = session.scalars(select(Seller)).all()
             assert len(user_list) == 2
             assert len(seller_list) == 0
+
+    def test_update_collaborator_with_department(self, db_session, users, current_user_is_manager, mocker):
+        # test should return a updated attribute of user selected.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[1],
+            )
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_new_department",
+                return_value="Supporter",
+            )
+            mocker.patch(
+                "crm.models.utils.Utils._select_attribut_of_element",
+                return_value="department",
+            )
+            ManagerController().update_collaborator(session=session)
+            user_list = session.scalars(select(User)).all()
+            seller_list = session.scalars(select(Supporter)).all()
+            assert len(user_list) == 3
+            assert len(seller_list) == 2
+
+    def test_update_collaborator_with_password(self, db_session, users, current_user_is_manager, mocker):
+        # test should return a updated attribute of user selected.
+        with db_session as session:
+            user = users[1]
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=user,
+            )
+            mocker.patch(
+                "rich.prompt.Prompt.ask",
+                return_value="Abcdefgh@45",
+            )
+            mocker.patch(
+                "crm.models.utils.Utils._select_attribut_of_element",
+                return_value="password",
+            )
+            ph = argon2.PasswordHasher()
+            ManagerController().update_collaborator(session=session)
+            assert ph.verify(user.password, "Abcdefgh@45") == True

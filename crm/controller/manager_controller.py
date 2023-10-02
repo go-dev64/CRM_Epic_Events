@@ -204,28 +204,28 @@ class ManagerController:
                 case 4:
                     break
 
-    def _get_department_list(self, collaborator):
+    def _get_department_list(self, collaborator: User) -> list:
         """
         Function defines the departments available for a user to change department.
 
         Returns:
-            _type_: available department list.
+            list: available department list.
         """
         department_list = ["Manager", "Seller", "Supporter"]
         user_type = self.utils.get_type_of_user(collaborator)
         department_list.remove(user_type)
         return department_list
 
-    def select_new_department(self, session, section, collaborator):
+    def select_new_department(self, session, section, collaborator: User) -> str:
         """Function is used to select the new department, in list, for the selected collaborator.
 
         Args:
             session (_type_): session sqlalchemy
             section (str): Section information to be displayed in header
-            collaborator (_type_): collaborator selected
+            collaborator (User): collaborator selected.
 
         Returns:
-            _type_: _description_
+            str: new department of collaborator selected selected by user.
         """
         department_list = self._get_department_list(collaborator=collaborator)
         user_choice = self.generic_view.select_element_in_menu_view(
@@ -250,7 +250,7 @@ class ManagerController:
         return collaborator_selected
 
     @auth.is_authenticated
-    def change_collaborator_department(self, session, collaborator_selected: User):
+    def change_collaborator_department(self, session, collaborator_selected: User) -> User:
         """The function is used to change department of collaborator selected.
         User select a new department for a collaborator selected.
 
@@ -259,7 +259,7 @@ class ManagerController:
             collaborator_selected (User): Collbaorator to be udpated.
 
         Returns:
-            _type_: Collaborator Updated.
+            User: Collaborator Updated.
         """
         new_department = self.select_new_department(
             session=session,
@@ -270,7 +270,8 @@ class ManagerController:
             session=session, collaborator=collaborator_selected, new_department=new_department
         )
 
-    def change_collaborator_attribute(self, session, collaborator_selected: User, attribute_selected: str):
+    @auth.is_authenticated
+    def change_collaborator_attribute(self, session, collaborator_selected: User, attribute_selected: str) -> User:
         """The function is used to update an attribute of collaborator.
         After inut new value by user , the fucntion update attrubite.
 
@@ -280,7 +281,7 @@ class ManagerController:
             attribute_selected (str): attribute to be updated.
 
         Returns:
-            _type_: User updated.
+            User: User updated.
         """
         new_value = self.generic_view.get_new_value_of_attribute(
             section=f"New Value of {attribute_selected}",
@@ -297,7 +298,29 @@ class ManagerController:
         )
 
     @auth.is_authenticated
-    def update_collaborator(self, session):
+    def change_password(self, session, collaborator_selected: User) -> User:
+        """The function is used to change password of collaborator selected.
+
+        Args:
+            session (_type_): _description_
+            collaborator_selected (User):Collaborator selected.
+        Returns:
+            User: Collaborator with new password.
+        """
+        section = f"Update/Changing the {collaborator_selected} password"
+        self.generic_view.header(
+            section=section, department=session.current_user_department, current_user=session.current_user.name
+        )
+        password = self.user_view._get_user_password()
+        return Manager().update_user(
+            session=session,
+            collaborator=collaborator_selected,
+            update_attribute="password",
+            new_value=password,
+        )
+
+    @auth.is_authenticated
+    def update_collaborator(self, session) -> User:
         """Function updates a collaborator.
 
         Returns:
@@ -309,6 +332,8 @@ class ManagerController:
         )
         if attribute_selected == "department":
             return self.change_collaborator_department(session=session, collaborator_selected=collaborator_selected)
+        elif attribute_selected == "password":
+            return self.change_password(session=session, collaborator_selected=collaborator_selected)
         else:
             return self.change_collaborator_attribute(
                 session=session, collaborator_selected=collaborator_selected, attribute_selected=attribute_selected
@@ -400,7 +425,10 @@ class ManagerController:
 
     @auth.is_authenticated
     def delete_collaborator(self, session):
+        """The function is used to delete a collaborator."""
         collaborator_list = Manager().get_all_users(session=session)
         collaborator_list.remove(session.current_user)
-        collaborator_selected = self.utils._select_element_in_list(element_list=collaborator_list)
+        collaborator_selected = self.utils._select_element_in_list(
+            session=session, section="Delete/ Select collobarator", element_list=collaborator_list
+        )
         Manager().delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)

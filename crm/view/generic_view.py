@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import time
 from rich import print
 from rich.console import Console, Group
 from rich.columns import Columns
@@ -58,7 +59,7 @@ class GenericView:
             current_user (str, optional): User connected. Defaults to "".
             section (str, optional): Section (exemple :Home page, Creating Contract). Defaults to "".
         """
-        self.console.print("\033c", end="")  # Efface la page précédente
+        self.console.clear()
         app = Panel(Text("CRM Epic Event", style="Bold italic", justify="center"), border_style="blue")
         elements_renderables = self.set_element_renderable(
             department=department, current_user=current_user, section=section
@@ -431,3 +432,21 @@ class GenericView:
             new_value = self.date_form(restriction=attribute_dict)
 
         return new_value
+
+    def forbidden_acces(self, session, section):
+        """Display forbidden acces message."""
+        self.header(
+            section=section, department=session.current_user_department, current_user=session.current_user.name
+        )
+        msg = Panel(Text(":cross: You have not permission for that! Sorry :cross:"), style="red")
+        self.console.print(msg)
+        time.sleep(3)
+
+    def confirmation_msg(self, session, section, msg):
+        """Display aConfirmation message"""
+        self.header(
+            section=section, department=session.current_user_department, current_user=session.current_user.name
+        )
+        messsage = Panel(Text(f"✅ {msg} ✅"))
+        self.console.print(messsage)
+        time.sleep(3)

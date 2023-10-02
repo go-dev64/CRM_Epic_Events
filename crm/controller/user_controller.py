@@ -136,9 +136,9 @@ class UserController:
             case "Manager":
                 return self.manager_controller.delete_collaborator(session=session)
             case "Seller":
-                return None
+                return self.generic_view.forbidden_acces(session=session, section="Delele view/ Forbidden Acces")
             case "Supporter":
-                return None
+                return self.generic_view.forbidden_acces(session=session, section="Delele view/ Forbidden Acces")
 
     @auth.is_authenticated
     def get_customer_list(self, session):
