@@ -141,6 +141,7 @@ class UserController:
     @auth.is_authenticated
     def get_customer_list(self, session):
         """Function redirect to the display customer functions of user's department.
+        if len(list) < 0: no data message to displyed.
 
         Args:
             session (_type_): _description_
@@ -154,17 +155,22 @@ class UserController:
 
         else:
             customer_list = User().get_all_customers(session=session)
-            self.generic_view.display_elements(
-                session=session,
-                section="Display Customers",
-                elements_list=customer_list,
-                title_table="Table of all customers",
-            )
+            if len(customer_list) > 0:
+                self.generic_view.display_elements(
+                    session=session,
+                    section="Display Customers",
+                    elements_list=customer_list,
+                    title_table="Table of all customers",
+                )
+            else:
+                self.generic_view.no_data_message(
+                    session=session, section="Display all Customers", msg="for this section"
+                )
 
     @auth.is_authenticated
     def get_contract_list(self, session):
         """Function redirect to the display contracts functions of user's department.
-
+        if len(list) < 0: no data message to displyed.
         Args:
             session (_type_): _description_
 
@@ -176,17 +182,22 @@ class UserController:
             self.seller_controller.select_contract_type_to_display(session=session)
         else:
             contract_list = User().get_all_contracts(session=session)
-            self.generic_view.display_elements(
-                session=session,
-                section="Display Contracts",
-                title_table="All Contracts",
-                elements_list=contract_list,
-            )
+            if len(contract_list) > 0:
+                self.generic_view.display_elements(
+                    session=session,
+                    section="Display Contracts",
+                    title_table="All Contracts",
+                    elements_list=contract_list,
+                )
+            else:
+                self.generic_view.no_data_message(
+                    session=session, section="Display all Contract", msg="for this section"
+                )
 
     @auth.is_authenticated
     def get_events_list(self, session):
         """Function redirect to the display events functions of user's department.
-
+        if len(list) < 0: no data message to displyed.
         Args:
             session (_type_): _description_
 
@@ -201,12 +212,17 @@ class UserController:
             self.manager_controller.display_event(session=session)
         else:
             event_list = User().get_all_events(session=session)
-            self.generic_view.display_elements(
-                session=session,
-                section="Display Events",
-                title_table="All Event",
-                elements_list=event_list,
-            )
+            if len(event_list) > 0:
+                self.generic_view.display_elements(
+                    session=session,
+                    section="Display Events",
+                    title_table="All Event",
+                    elements_list=event_list,
+                )
+            else:
+                self.generic_view.no_data_message(
+                    session=session, section="Display all Events", msg="for this section"
+                )
 
     @auth.is_authenticated
     def get_address_list(self, session):
@@ -216,9 +232,12 @@ class UserController:
             _type_: display address list.
         """
         address_list = User().get_all_adress(session=session)
-        self.generic_view.display_elements(
-            session=session,
-            section="Display Address",
-            title_table="All Address",
-            elements_list=address_list,
-        )
+        if len(address_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section="Display Address",
+                title_table="All Address",
+                elements_list=address_list,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section="Display all Address", msg="for this section")

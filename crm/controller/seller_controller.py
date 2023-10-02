@@ -131,7 +131,12 @@ class SellerController:
         """
         choice_list = ["Select all customers", "Select yours customers", "Back to previous menu"]
         while True:
-            choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
+            choice = self.generic_view.select_element_in_menu_view(
+                section="Display Customer/ Select elment to displayed",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=choice_list,
+            )
             attribute_to_display = Customer().availables_attribue_list()
             match choice:
                 case 0:
@@ -182,8 +187,12 @@ class SellerController:
             "Back to previous menu",
         ]
         while True:
-            choice = self.generic_view.select_element_in_menu_view(list_element=choice_list)
-            attributes_displayed = Contract().availables_attribue_list()
+            choice = self.generic_view.select_element_in_menu_view(
+                section="Display Contract/Select element to displayed",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=choice_list,
+            )
             match choice:
                 case 0:
                     contract_list = Seller().get_all_contracts(session=session)
@@ -192,7 +201,6 @@ class SellerController:
                         section="Display Contracts",
                         title_table="All Contracts",
                         elements_list=contract_list,
-                        attributes=attributes_displayed,
                     )
                 case 1:
                     yours_contract_list = Seller().get_all_contracts_of_user(session)
@@ -201,7 +209,6 @@ class SellerController:
                         section="Display Contracts",
                         title_table="All Yours Contracts",
                         elements_list=yours_contract_list,
-                        attributes=attributes_displayed,
                     )
                 case 2:
                     unpayed_contracts_list = Seller().get_unpayed_contracts(session)
@@ -210,7 +217,6 @@ class SellerController:
                         section="Display Contracts",
                         title_table="All Yours Unpayed Contracts",
                         elements_list=unpayed_contracts_list,
-                        attributes=attributes_displayed,
                     )
                 case 3:
                     unsigned_contracts_list = Seller().get_unsigned_contracts(session)
@@ -219,7 +225,6 @@ class SellerController:
                         section="Display Contracts",
                         title_table="All Yours Unsigned Contracts",
                         elements_list=unsigned_contracts_list,
-                        attributes=attributes_displayed,
                     )
                 case 4:
                     element_list = Seller().get_all_contracts_of_user_without_event(session)
@@ -228,7 +233,6 @@ class SellerController:
                         section="Display Contracts",
                         title_table="All Yours signed Contracts availabes for events",
                         elements_list=element_list,
-                        attributes=attributes_displayed,
                     )
                 case 5:
                     break
