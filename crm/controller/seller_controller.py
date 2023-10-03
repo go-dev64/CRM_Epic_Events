@@ -1,7 +1,7 @@
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
-from crm.models.element_administratif import Contract, Event
-from crm.models.users import Seller
+from crm.models.element_administratif import Address, Contract, Event
+from crm.models.users import Seller, User
 from crm.models.utils import Utils
 from crm.view.seller_view import SellerView
 from crm.view.event_view import EventView
@@ -42,11 +42,11 @@ class SellerController:
             )
             match choice:
                 case 0:
-                    return self.create_new_customer(session=session)
+                    self.create_new_customer(session=session)
                 case 1:
-                    return self.create_new_event(session=session)
+                    self.create_new_event(session=session)
                 case 2:
-                    return self.utils.create_new_address(session=session)
+                    self.utils.create_new_address(session=session)
                 case 3:
                     break
 
@@ -64,9 +64,9 @@ class SellerController:
         customer_info = self.seller_view.get_info_customer_view(
             department=session.current_user_department, current_user_name=session.current_user.name
         )
-        new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
-        return new_customer
+        Seller().create_new_customer(session=session, customer_info=customer_info)
 
+    @auth.is_authenticated
     def select_contract_of_event(self, session) -> Contract:
         """The function is used to select a contract in contract list for event.
 
@@ -77,13 +77,57 @@ class SellerController:
             Contract: contract selected by user.
         """
         contract_list = Seller().get_all_contracts_of_user_without_event(session=session)
+        if len(contract_list) > 0:
+            choice = self.generic_view.select_element_in_menu_view(
+                section="Select Contract of Event",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=contract_list,
+            )
+            return contract_list[choice]
+        else:
+            return None
+
+    @auth.is_authenticated
+    def select_address_of_event(self, session) -> Address:
+        """The function is used to select an address in address list for event.
+
+        Args:
+            session (_type_): Actual sqlalchemy session.
+
+        Returns:
+            Address: Address selected by user.
+        """
+        section = "Select Address of Event"
+        addrress_list = Seller().get_all_adress(session=session)
+        if len(addrress_list) > 0:
+            choice = self.generic_view.select_element_in_menu_view(
+                section=section,
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=addrress_list,
+            )
+            return addrress_list[choice]
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=section, msg="no address available, redirect to address creation"
+            )
+            new_address = self.utils.create_new_address(session=session)
+            return new_address
+
+    def get_address_of_event(self, session):
+        choice_list = ["Select address", "Create new address"]
         choice = self.generic_view.select_element_in_menu_view(
-            section="Select Contract of Event",
+            section="Select Address of Event",
             department=session.current_user_department,
             current_user_name=session.current_user.name,
-            list_element=contract_list,
+            list_element=choice_list,
         )
-        return contract_list[choice]
+        match choice:
+            case 0:
+                self.select_address_of_event(session=session)
+            case 1:
+                self.utils.create_new_address(session=session)
 
     @auth.is_authenticated
     def get_event_info(self, session) -> dict:
@@ -96,8 +140,11 @@ class SellerController:
             dict: event_info
         """
         event_info = self.seller_view.get_event_info_view(
-            department=session.current_user_department, current_user_name=session.current_user.name
+            section="Create New event",
+            department=session.current_user_department,
+            current_user_name=session.current_user.name,
         )
+        event_info["address"] = self.get_address_of_event(session=session)
         event_info["contract"] = self.select_contract_of_event(session=session)
         return event_info
 
@@ -113,8 +160,56 @@ class SellerController:
         """
 
         event_info = self.get_event_info()
-        new_event = session.current_user.create_new_event(session=session, event_info=event_info)
-        return new_event
+        if event_info["contract"] != None:
+            Seller().create_new_event(session=session, event_info=event_info)
+        else:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Create New event",
+                msg="There are no availble cintract. Create new Event is not possible!",
+            )
+
+    @auth.is_authenticated
+    def display_all_customers(self, session):
+        """The funtion is used to display all customers.
+        display msg no data if there are no customers to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display Customers"
+        title_table = "Table of all customers"
+        customer_list = Seller().get_all_customers(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
+
+    @auth.is_authenticated
+    def display_all_customersof_user(self, session):
+        """The funtion is used to display all customers.
+        display msg no data if there are no customers to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display your Customers"
+        title_table = "Table of all your customers"
+        customer_list = Seller().get_all_clients_of_user(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
 
     @auth.is_authenticated
     def select_customer_type_to_display(self, session):
@@ -137,30 +232,118 @@ class SellerController:
                 current_user_name=session.current_user.name,
                 list_element=choice_list,
             )
-            attribute_to_display = Customer().availables_attribue_list()
             match choice:
                 case 0:
-                    customer_list = Seller().get_all_customers(session=session)
-                    return self.generic_view.display_table_of_elements(
-                        section="Display Customers",
-                        department=session.current_user_department,
-                        current_user_name=session.current_user.name,
-                        restrictions=attribute_to_display,
-                        list_element=customer_list,
-                        title_table="Table of all customers",
-                    )
+                    self.display_all_customers(session=session)
                 case 1:
-                    yours_customers_list = Seller().get_all_clients_of_user(session)
-                    return self.generic_view.display_table_of_elements(
-                        section="Display Customers",
-                        department=session.current_user_department,
-                        current_user_name=session.current_user.name,
-                        restrictions=attribute_to_display,
-                        list_element=yours_customers_list,
-                        title_table="Table of yours customers",
-                    )
+                    self.display_all_customersof_user(session=session)
                 case 2:
                     break
+
+    @auth.is_authenticated
+    def display_all_contracts(self, session):
+        """The funtion is used to display all contracts.
+        display msg no data if there are no contract to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display Contracts"
+        title_table = "Table of all contracts"
+        customer_list = Seller().get_all_contracts(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
+
+    @auth.is_authenticated
+    def display_all_contracts_of_user(self, session):
+        """The funtion is used to display all contracts managed by user.
+        display msg no data if there are no contract to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display Contracts"
+        title_table = "Table of all contracts"
+        customer_list = Seller().get_all_contracts_of_user(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
+
+    @auth.is_authenticated
+    def display_all_unpayed_contracts_of_user(self, session):
+        """The funtion is used to display all unpayed contracts managed by current user.
+        display msg no data if there are no contract to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display Contracts"
+        title_table = "Table of All Yours Unpayed Contracts"
+        customer_list = Seller().get_unpayed_contracts(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
+
+    @auth.is_authenticated
+    def display_all_unsigned_contracts_of_user(self, session):
+        """The funtion is used to display all unsigned contracts managed by user.
+        display msg no data if there are no contract to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display Contracts"
+        title_table = "All Yours Unsigned Contracts"
+        customer_list = Seller().get_unsigned_contracts(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
+
+    @auth.is_authenticated
+    def display_all_contracts_of_user_without_event(self, session):
+        """The funtion is used to display all contracts without event managed by user.
+        display msg no data if there are no contract to display.
+
+        Args:
+            session (_type_): _description_
+        """
+        section = "Display Contracts"
+        title_table = "All Yours signed Contracts availabes for events"
+        customer_list = Seller().get_all_contracts_of_user_without_event(session=session)
+        if len(customer_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section=section,
+                elements_list=customer_list,
+                title_table=title_table,
+            )
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg=f"No data for {title_table}")
 
     @auth.is_authenticated
     def select_contract_type_to_display(self, session):
@@ -195,45 +378,15 @@ class SellerController:
             )
             match choice:
                 case 0:
-                    contract_list = Seller().get_all_contracts(session=session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Contracts",
-                        title_table="All Contracts",
-                        elements_list=contract_list,
-                    )
+                    self.display_all_contracts(session=session)
                 case 1:
-                    yours_contract_list = Seller().get_all_contracts_of_user(session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Contracts",
-                        title_table="All Yours Contracts",
-                        elements_list=yours_contract_list,
-                    )
+                    self.display_all_contracts_of_user(session=session)
                 case 2:
-                    unpayed_contracts_list = Seller().get_unpayed_contracts(session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Contracts",
-                        title_table="All Yours Unpayed Contracts",
-                        elements_list=unpayed_contracts_list,
-                    )
+                    self.display_all_unpayed_contracts_of_user(session=session)
                 case 3:
-                    unsigned_contracts_list = Seller().get_unsigned_contracts(session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Contracts",
-                        title_table="All Yours Unsigned Contracts",
-                        elements_list=unsigned_contracts_list,
-                    )
+                    self.display_all_unsigned_contracts_of_user(session=session)
                 case 4:
-                    element_list = Seller().get_all_contracts_of_user_without_event(session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Contracts",
-                        title_table="All Yours signed Contracts availabes for events",
-                        elements_list=element_list,
-                    )
+                    self.display_all_contracts_of_user_without_event(session=session)
                 case 5:
                     break
 
@@ -244,11 +397,15 @@ class SellerController:
         Returns:
             Customer: Customer selected.
         """
+        section = "Update your Customer/Select Customer"
         customers = Seller().get_all_clients_of_user(session=session)
-        customer_selected = self.utils._select_element_in_list(
-            session=session, section="Update your Customer/Select Customer", element_list=customers
-        )
-        return customer_selected
+        if len(customers) > 0:
+            customer_selected = self.utils._select_element_in_list(
+                session=session, section=section, element_list=customers
+            )
+            return customer_selected
+        else:
+            return None
 
     @auth.is_authenticated
     def update_seller_customer(self, session):
@@ -257,33 +414,44 @@ class SellerController:
         Args:
             session (_type_): _description_
         """
+
         customer = self.select_customer(session=session)
-        attribute_selected = self.utils._select_attribut_of_element(
-            session=session, section="Update your Customer/Select Attribute", element=customer
-        )
-        new_value = self.generic_view.get_new_value_of_attribute(
-            section=f"New Value of {attribute_selected}",
-            department=session.current_user_department,
-            current_user=session.current_user.name,
-            element=customer,
-            attribute_selected=attribute_selected,
-        )
-        Seller().update_customer(
-            session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value
-        )
+        if customer != None:
+            attribute_selected = self.utils._select_attribut_of_element(
+                session=session, section="Update your Customer/Select Attribute", element=customer
+            )
+            new_value = self.generic_view.get_new_value_of_attribute(
+                section=f"New Value of {attribute_selected}",
+                department=session.current_user_department,
+                current_user=session.current_user.name,
+                element=customer,
+                attribute_selected=attribute_selected,
+            )
+            Seller().update_customer(
+                session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section="Update your Customer", msg="No customer available to updating!"
+            )
 
     @auth.is_authenticated
     def select_contract(self, session) -> Contract:
         """The function is used to select a Contract.
+        return None if contracts list is empty.
 
         Returns:
             Contract: Contract selected.
         """
+        section = "Update your Contract/Select Contract"
         contracts = Seller().get_all_contracts_of_user(session=session)
-        contract_selected = self.utils._select_element_in_list(
-            session=session, section="Update your Contract/Select Contract", element_list=contracts
-        )
-        return contract_selected
+        if len(contracts) > 0:
+            contract_selected = self.utils._select_element_in_list(
+                session=session, section=section, element_list=contracts
+            )
+            return contract_selected
+        else:
+            return None
 
     @auth.is_authenticated
     def update_seller_contract(self, session):
@@ -328,12 +496,12 @@ class SellerController:
             match element_selected:
                 case 0:
                     # Update a user's customers.
-                    return self.update_seller_customer(session=session)
+                    self.update_seller_customer(session=session)
                 case 1:
                     # update a user's contract.
-                    return self.update_seller_contract(session=session)
+                    self.update_seller_contract(session=session)
                 case 2:
                     # update address
-                    return self.utils.update_address(session=session)
+                    self.utils.update_address(session=session)
                 case 3:
                     break

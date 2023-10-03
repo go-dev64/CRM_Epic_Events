@@ -452,6 +452,6 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        messsage = Panel(Text(f"No data to display!{msg}"))
+        messsage = Panel(Text(f"{msg}"))
         self.console.print(messsage)
         time.sleep(3)

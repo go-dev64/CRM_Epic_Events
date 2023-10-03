@@ -154,18 +154,7 @@ class UserController:
             self.seller_controller.select_customer_type_to_display(session=session)
 
         else:
-            customer_list = User().get_all_customers(session=session)
-            if len(customer_list) > 0:
-                self.generic_view.display_elements(
-                    session=session,
-                    section="Display Customers",
-                    elements_list=customer_list,
-                    title_table="Table of all customers",
-                )
-            else:
-                self.generic_view.no_data_message(
-                    session=session, section="Display all Customers", msg="for this section"
-                )
+            self.seller_controller.display_all_customers(session=session)
 
     @auth.is_authenticated
     def get_contract_list(self, session):

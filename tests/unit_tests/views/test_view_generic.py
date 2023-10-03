@@ -75,14 +75,12 @@ class TestGenericView:
     def test_display_table_of_elements(self, capsys, mocker, db_session, users):
         with db_session as session:
             users
-            attributes = users[0].attribute_to_display()
             toto = GenericView().display_table_of_elements(
                 section="",
                 department="",
                 current_user_name="",
                 title_table="test_title",
                 list_element=users,
-                attributes=attributes,
             )
             out, err = capsys.readouterr()
             assert "test_title" and "name" and "email_address" and "phone_number" and "N°" in out
@@ -135,7 +133,7 @@ class TestGenericView:
             mocker.patch("crm.view.generic_view.GenericView.display_detail_element")
             mocker.patch("crm.view.generic_view.GenericView.choice_display_details_of_element", return_value=1)
             result = GenericView().display_elements(
-                session, elements_list=clients, session=session, title_table="", attributes="", msg=""
+                session, elements_list=clients, session=session, title_table="", msg=""
             )
             assert result == 1
 
