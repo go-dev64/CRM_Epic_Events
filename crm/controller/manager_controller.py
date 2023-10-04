@@ -56,27 +56,35 @@ class ManagerController:
         Returns:
             User: A new instance of Manager class , or Seller class or Supporter class.
         """
+        section = "Create new collaborator"
         department_list = ["Manager", "Seller", "Supporter"]
         user_info = self.user_view.get_user_info_view(
-            section="Create new collaborator",
+            section=section,
             department=session.current_user_department,
             current_user_name=session.current_user.name,
         )
         department = self.generic_view.select_element_in_menu_view(
-            section="Create new Collaborator",
+            section=section,
             department=session.current_user_department,
             current_user_name=session.current_user.name,
             list_element=department_list,
         )
-        match department:
-            case 0:
-                Manager().create_new_manager(session=session, user_info=user_info)
-
-            case 1:
-                Manager().create_new_seller(session=session, user_info=user_info)
-
-            case 2:
-                Manager().create_new_supporter(session=session, user_info=user_info)
+        if self.generic_view.ask_comfirmation(message=section):
+            match department:
+                case 0:
+                    new_collaborator = Manager().create_new_manager(session=session, user_info=user_info)
+                    self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                    return new_collaborator
+                case 1:
+                    new_collaborator = Manager().create_new_seller(session=session, user_info=user_info)
+                    self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                    return new_collaborator
+                case 2:
+                    new_collaborator = Manager().create_new_supporter(session=session, user_info=user_info)
+                    self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                    return new_collaborator
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def get_info_contract(self, session) -> dict:
@@ -97,23 +105,28 @@ class ManagerController:
         return contract_info
 
     @auth.is_authenticated
-    def select_customer_of_contract(self, session) -> Customer:
+    def select_customer_of_contract(self, session) -> Customer or None:
         """The function is used to select a customer in customers list.
+
 
         Args:
             session (_type_): actual Sqlalchemy session.
 
         Returns:
-            Customer: Customer selected by user.
+            Customer: Customer selected by user or None if customer list is empty.
+
         """
         customers_list = Manager().get_all_customers(session=session)
-        choice = self.generic_view.select_element_in_menu_view(
-            section="Select Customer of contract",
-            department=session.current_user_department,
-            current_user_name=session.current_user.name,
-            list_element=customers_list,
-        )
-        return customers_list[choice]
+        if len(customers_list) > 0:
+            choice = self.generic_view.select_element_in_menu_view(
+                section="Select Customer of contract",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=customers_list,
+            )
+            return customers_list[choice]
+        else:
+            return None
 
     @auth.is_authenticated
     def create_new_contract(self, session) -> Contract:
@@ -125,8 +138,19 @@ class ManagerController:
         Returns:
             Contract: new contract created.
         """
+        section = "Create new Contract"
         contract_info = self.get_info_contract(session=session)
-        Manager().create_new_contract(session=session, contract_info=contract_info)
+        if contract_info["customer"] != None:
+            if self.generic_view.ask_comfirmation(message=section):
+                Manager().create_new_contract(session=session, contract_info=contract_info)
+            else:
+                self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+        else:
+            self.generic_view.no_data_message(
+                session=session,
+                section=section,
+                msg="There are no availble customer. Create new Contract is not possible!",
+            )
 
     @auth.is_authenticated
     def display_all_event(self, session):
@@ -353,16 +377,25 @@ class ManagerController:
             _type_: collaborator updated.
         """
         collaborator_selected = self.select_collaborator(session=session)
-        attribute_selected = self.utils._select_attribut_of_element(
-            session=session, section="Update Collaborator/Select Attribute to updated", element=collaborator_selected
-        )
-        if attribute_selected == "department":
-            self.change_collaborator_department(session=session, collaborator_selected=collaborator_selected)
-        elif attribute_selected == "password":
-            self.change_password(session=session, collaborator_selected=collaborator_selected)
+        if collaborator_selected != None:
+            attribute_selected = self.utils._select_attribut_of_element(
+                session=session,
+                section="Update Collaborator/Select Attribute to updated",
+                element=collaborator_selected,
+            )
+            if attribute_selected == "department":
+                self.change_collaborator_department(session=session, collaborator_selected=collaborator_selected)
+            elif attribute_selected == "password":
+                self.change_password(session=session, collaborator_selected=collaborator_selected)
+            else:
+                self.change_collaborator_attribute(
+                    session=session, collaborator_selected=collaborator_selected, attribute_selected=attribute_selected
+                )
         else:
-            self.change_collaborator_attribute(
-                session=session, collaborator_selected=collaborator_selected, attribute_selected=attribute_selected
+            self.generic_view.no_data_message(
+                session=session,
+                section="Upadte Collaborator",
+                msg="There are no availble Collaborator. Update is not possible!",
             )
 
     @auth.is_authenticated
@@ -392,9 +425,16 @@ class ManagerController:
             Contract: Contract updated.
         """
         new_customer = self.select_customer_of_contract(session=session)
-        Manager().update_contract(
-            session=session, contract=contract_selected, attribute_update="customer", new_value=new_customer
-        )
+        if new_customer is None:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Update Contract",
+                msg="There are no availble Customer. Update Contract is not possible!",
+            )
+        else:
+            Manager().update_contract(
+                session=session, contract=contract_selected, attribute_update="customer", new_value=new_customer
+            )
 
     @auth.is_authenticated
     def update_contract(self, session) -> Contract:
@@ -407,21 +447,28 @@ class ManagerController:
             Contract: Contract updated.
         """
         contract = self.select_contract(session=session)
-        attribute_selected = self.utils._select_attribut_of_element(
-            session=session, section=" Update Contract/Select Attribute to updated", element=contract
-        )
-        if attribute_selected == "customer":
-            self.change_customer_of_contract(session=session, contract_selected=contract)
-        else:
-            new_value = self.generic_view.get_new_value_of_attribute(
-                section=f"New Value of {attribute_selected}",
-                department=session.current_user_department,
-                current_user=session.current_user.name,
-                element=contract,
-                attribute_selected=attribute_selected,
+        if contract != None:
+            attribute_selected = self.utils._select_attribut_of_element(
+                session=session, section=" Update Contract/Select Attribute to updated", element=contract
             )
-            Manager().update_contract(
-                session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
+            if attribute_selected == "customer":
+                self.change_customer_of_contract(session=session, contract_selected=contract)
+            else:
+                new_value = self.generic_view.get_new_value_of_attribute(
+                    section=f"New Value of {attribute_selected}",
+                    department=session.current_user_department,
+                    current_user=session.current_user.name,
+                    element=contract,
+                    attribute_selected=attribute_selected,
+                )
+                Manager().update_contract(
+                    session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
+                )
+        else:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Update Contract",
+                msg="There are no availble contract. Update is not possible!",
             )
 
     @auth.is_authenticated
@@ -471,14 +518,29 @@ class ManagerController:
         """
         event = self.select_event(session=session)
         supporter = self.select_supporter(session=session)
-        Manager().change_supporter_of_event(session=session, event=event, new_supporter=supporter)
+        if event or supporter is None:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Upadate event",
+                msg="There are no available Event or Supporter. Update Event is not possible!",
+            )
+        else:
+            Manager().change_supporter_of_event(session=session, event=event, new_supporter=supporter)
 
     @auth.is_authenticated
     def delete_collaborator(self, session):
         """The function is used to delete a collaborator."""
         collaborator_list = Manager().get_all_users(session=session)
         collaborator_list.remove(session.current_user)
-        collaborator_selected = self.utils._select_element_in_list(
-            session=session, section="Delete/ Select collobarator", element_list=collaborator_list
-        )
-        Manager().delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)
+        if collaborator_list > 0:
+            collaborator_selected = self.utils._select_element_in_list(
+                session=session, section="Delete/ Select collobarator", element_list=collaborator_list
+            )
+
+            Manager().delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)
+        else:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Delete collaborator",
+                msg="There are no available collaborator. Delete is not possible!",
+            )

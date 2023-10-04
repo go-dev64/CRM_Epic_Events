@@ -11,6 +11,13 @@ from crm.view.generic_view import GenericView
 
 
 class TestManagerController:
+    def _count_number_of_user(self, session):
+        number_manager = len(session.scalars(select(Manager)).all())
+        number_seller = len(session.scalars(select(Seller)).all())
+        number_supporter = len(session.scalars(select(Supporter)).all())
+        number_user = len(session.scalars(select(User)).all())
+        return number_user, number_manager, number_seller, number_supporter
+
     @pytest.mark.parametrize("department", [(0), (1), (2)])
     def test_create_new_user(self, db_session, users, current_user_is_manager, mocker, department):
         # test should return a new user.
@@ -24,40 +31,77 @@ class TestManagerController:
                 "phone_number": "+064849",
                 "password": "password",
             }
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
             mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            number_user_before = self._count_number_of_user(session=session)
 
             if department == 0:
-                manager_ctrl.create_new_user(session=session)
-                list_manager = session.scalars(select(Manager)).all()
-                list_user = session.scalars(select(User)).all()
-                assert len(list_manager) == 2
-                assert len(list_user) == 4
-                assert list_manager[1].name == "toto"
-                assert list_manager[1].email_address == "email@fr"
-                assert list_manager[1].phone_number == "+064849"
-                assert list_manager[1].password == "password"
+                user = manager_ctrl.create_new_user(session=session)
+                number_user = self._count_number_of_user(session=session)
+                assert number_user[0] == number_user_before[0] + 1
+                assert number_user[1] == number_user_before[1] + 1
+                assert user.name == "toto"
+                assert user.email_address == "email@fr"
+                assert user.phone_number == "+064849"
+                assert user.password == "password"
+                mock_confirm.assert_called_once_with(
+                    section="Create new collaborator", session=session, msg="Operation succesfull!"
+                )
 
             elif department == 1:
-                manager_ctrl.create_new_user(session=session)
-                list_seller = session.scalars(select(Seller)).all()
-                list_user = session.scalars(select(User)).all()
-                assert len(list_seller) == 2
-                assert len(list_user) == 4
-                assert list_seller[1].name == "toto"
-                assert list_seller[1].email_address == "email@fr"
-                assert list_seller[1].phone_number == "+064849"
-                assert list_seller[1].password == "password"
+                user = manager_ctrl.create_new_user(session=session)
+                number_user = self._count_number_of_user(session=session)
+                assert number_user[0] == number_user_before[0] + 1
+                assert number_user[2] == number_user_before[2] + 1
+                assert user.name == "toto"
+                assert user.email_address == "email@fr"
+                assert user.phone_number == "+064849"
+                assert user.password == "password"
+                mock_confirm.assert_called_once_with(
+                    section="Create new collaborator", session=session, msg="Operation succesfull!"
+                )
             elif department == 2:
-                manager_ctrl.create_new_user(session=session)
-                list_supporter = session.scalars(select(Supporter)).all()
-                list_user = session.scalars(select(User)).all()
-                assert len(list_supporter) == 2
-                assert len(list_user) == 4
-                assert list_supporter[1].name == "toto"
-                assert list_supporter[1].email_address == "email@fr"
-                assert list_supporter[1].phone_number == "+064849"
-                assert list_supporter[1].password == "password"
+                user = manager_ctrl.create_new_user(session=session)
+                number_user = self._count_number_of_user(session=session)
+                assert number_user[0] == number_user_before[0] + 1
+                assert number_user[3] == number_user_before[3] + 1
+                assert user.name == "toto"
+                assert user.email_address == "email@fr"
+                assert user.phone_number == "+064849"
+                assert user.password == "password"
+                mock_confirm.assert_called_once_with(
+                    section="Create new collaborator", session=session, msg="Operation succesfull!"
+                )
+
+    @pytest.mark.parametrize("department", [(0), (1), (2)])
+    def test_create_new_user_with_no_confirm(self, db_session, users, current_user_is_manager, mocker, department):
+        # test should return a new user.
+        with db_session as session:
+            users
+            current_user_is_manager
+            manager_ctrl = ManagerController()
+            user_info = {
+                "name": "toto",
+                "email_address": "email@fr",
+                "phone_number": "+064849",
+                "password": "password",
+            }
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
+            mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_no_confirm = mocker.patch.object(GenericView, "no_data_message")
+            number_user_before = self._count_number_of_user(session=session)
+            manager_ctrl.create_new_user(session=session)
+            number_user = self._count_number_of_user(session=session)
+            assert number_user_before[0] == number_user[0]
+            assert number_user_before[1] == number_user[1]
+            assert number_user_before[2] == number_user[2]
+            assert number_user_before[3] == number_user[3]
+            mock_no_confirm.assert_called_once_with(
+                session=session, section="Create new collaborator", msg="Operation Cancelled!"
+            )
 
     def test_select_customer_of_contract(self, db_session, users, clients, current_user_is_manager, mocker):
         # test should return clients of index list 1.

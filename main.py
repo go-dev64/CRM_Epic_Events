@@ -9,8 +9,7 @@ def main():
     # db.create_tables()
     db_session = db.create_session()
     with db_session.begin() as session:
-        """db.create_popultaes(session=session)
-        session.commit()"""
+        # db.create_popultaes(session=session)
 
         while True:
             user = LoginController().user_login(session=session)

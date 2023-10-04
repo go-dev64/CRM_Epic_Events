@@ -401,7 +401,7 @@ class TestGenericView:
     ):
         with db_session as session:
             users
-            clients
+            client = clients[0]
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.string_form", return_value="value")
             mocker.patch("crm.view.generic_view.GenericView.integer_form", return_value="value")
@@ -409,6 +409,14 @@ class TestGenericView:
             mocker.patch("crm.view.generic_view.GenericView.date_form", return_value="value")
 
             result = GenericView().get_new_value_of_attribute(
-                section="", department="", current_user="", element=clients[0], attribute_selected=attribute
+                section="", department="", current_user="", element=client, attribute_selected=attribute
             )
             assert result == "value"
+
+    def test_ask_confirmation_yes(self, db_session, current_user_is_user, mocker, capsys):
+        with db_session as session:
+            users
+            current_user_is_user
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            mock_display_message = mocker.patch.object(GenericView, "confirmation_msg")
+            assert result == True

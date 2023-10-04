@@ -39,13 +39,40 @@ class TestManagerController:
             mock_new_manager = mocker.patch.object(Manager, "create_new_manager")
             mock_new_seller = mocker.patch.object(Manager, "create_new_seller")
             mock_new_supporter = mocker.patch.object(Manager, "create_new_supporter")
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
             ManagerController().create_new_user(session=session)
             if department == 0:
                 mock_new_manager.assert_called_once()
+                mock_confirm.assert_called_once_with(
+                    section="Create new collaborator", session=session, msg="Operation succesfull!"
+                )
             elif department == 1:
                 mock_new_seller.assert_called_once()
+                mock_confirm.assert_called_once_with(
+                    section="Create new collaborator", session=session, msg="Operation succesfull!"
+                )
+
             elif department == 2:
                 mock_new_supporter.assert_called_once()
+                mock_confirm.assert_called_once_with(
+                    section="Create new collaborator", session=session, msg="Operation succesfull!"
+                )
+
+    @pytest.mark.parametrize("department", [(0), (1), (2)])
+    def test_create_new_user_with_no_confirm(self, db_session, users, current_user_is_manager, mocker, department):
+        # test should return a good function of creating user according to user's choice..
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
+            mocker.patch("crm.view.user_view.UserView.get_user_info_view")
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_no_confirm = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().create_new_user(session=session)
+            mock_no_confirm.assert_called_once_with(
+                session=session, section="Create new collaborator", msg="Operation Cancelled!"
+            )
 
     def test_get_contract_info(self, db_session, clients, current_user_is_manager, mocker):
         # test should return a info of contract.

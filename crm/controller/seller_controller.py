@@ -166,7 +166,7 @@ class SellerController:
             self.generic_view.no_data_message(
                 session=session,
                 section="Create New event",
-                msg="There are no availble cintract. Create new Event is not possible!",
+                msg="There are no available contract. Create new Event is not possible!",
             )
 
     @auth.is_authenticated

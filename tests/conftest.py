@@ -41,14 +41,12 @@ def db_session():
 @pytest.fixture(scope="function")
 def users(db_session):
     password_manager = ph.hash("password_manager")
-    manager = Manager(
-        name="manager", email_address="manager@gmail.com", phone_number="+0335651", password=password_manager
-    )
+    manager = Manager(name="manager", email_address="m@gmail.com", phone_number="+0335651", password=password_manager)
     password_seller = ph.hash("password_seller")
-    seller = Seller(name="seller", email_address="seller@gmail.com", phone_number="+0335651", password=password_seller)
+    seller = Seller(name="seller", email_address="s@gmail.com", phone_number="+0335651", password=password_seller)
     password_supporter = ph.hash("password_supporter")
     supporter = Supporter(
-        name="supporter", email_address="supporter@gmail.com", phone_number="+0335651", password=password_supporter
+        name="supporter", email_address="su@gmail.com", phone_number="+0335651", password=password_supporter
     )
     db_session.add_all([manager, seller, supporter])
     db_session.commit()
@@ -61,14 +59,14 @@ def clients(db_session, users):
     db_session.commit()
     client_1 = Customer(
         name="client_1",
-        email_address="clien_1@123.com",
+        email_address="c_1@123.com",
         phone_number="123456",
         company="7eme_company",
         seller_contact=users[1],
     )
     client_2 = Customer(
         name="client_2",
-        email_address="clien_2@123.com",
+        email_address="c_2@123.com",
         phone_number="123456",
         company="7eme_company",
         seller_contact=users[1],

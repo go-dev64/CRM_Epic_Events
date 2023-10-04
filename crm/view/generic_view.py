@@ -439,7 +439,7 @@ class GenericView:
         time.sleep(3)
 
     def confirmation_msg(self, session, section, msg):
-        """Display aConfirmation message"""
+        """Display Confirmation message"""
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
@@ -455,3 +455,9 @@ class GenericView:
         messsage = Panel(Text(f"{msg}"))
         self.console.print(messsage)
         time.sleep(3)
+
+    def ask_comfirmation(self, message: str) -> True or False:
+        if Confirm.ask(f"Do you want {message}?", default=True):
+            return True
+        else:
+            return False
