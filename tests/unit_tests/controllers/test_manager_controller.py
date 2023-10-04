@@ -350,8 +350,7 @@ class TestManagerController:
                 session=session, collaborator_selected=users[2], attribute_selected=choice
             )
             assert getattr(users[2], choice) == new_value
-        
-        
+
     def test_change_collaborator_attribute(
         self, db_session, users, current_user_is_manager, mocker, choice, new_value
     ):
@@ -360,6 +359,7 @@ class TestManagerController:
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
             ManagerController().change_collaborator_attribute(
                 session=session, collaborator_selected=users[2], attribute_selected=choice
             )
