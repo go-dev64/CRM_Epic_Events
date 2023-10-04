@@ -142,7 +142,9 @@ class ManagerController:
         contract_info = self.get_info_contract(session=session)
         if contract_info["customer"] != None:
             if self.generic_view.ask_comfirmation(message=section):
-                Manager().create_new_contract(session=session, contract_info=contract_info)
+                new_contract = Manager().create_new_contract(session=session, contract_info=contract_info)
+                self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                return new_contract
             else:
                 self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
         else:

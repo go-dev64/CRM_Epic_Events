@@ -8,6 +8,8 @@ from crm.view.generic_view import GenericView
 
 
 class TestManagerController:
+    info_contract = {"total_amount": 2133333, "remaining": 123, "signed_contract": True}
+
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test_create_new_element(self, db_session, users, current_user_is_manager, mocker, choice):
         # test check if the wright function is returned according to user's choise.
@@ -108,24 +110,40 @@ class TestManagerController:
         # test should return a new contract.
         with db_session as session:
             users
-            clients
+            client = clients[0]
             current_user_is_manager
-            info_contract = {
-                "total_amount": 2133333,
-                "remaining": 123,
-                "signed_contract": True,
-                "customer": clients[0],
-            }
+            self.info_contract["customer"] = client
+
             mocker.patch(
-                "crm.controller.manager_controller.ManagerController.get_info_contract", return_value=info_contract
+                "crm.controller.manager_controller.ManagerController.get_info_contract",
+                return_value=self.info_contract,
             )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_contract = mocker.patch.object(Manager, "create_new_contract")
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            result = ManagerController().create_new_contract(session=session)
+            mock_contract.assert_called_once_with(session=session, contract_info=self.info_contract)
+            mock_confirm.assert_called_once_with(
+                section="Create new Contract", session=session, msg="Operation succesfull!"
+            )
+
+    def test_create_new_contract_with_no_comfirm(self, db_session, users, clients, current_user_is_manager, mocker):
+        # test should return a msg cncelled and same len of contract list..
+        with db_session as session:
+            users
+            client = clients[0]
+            current_user_is_manager
+            self.info_contract["customer"] = client
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.get_info_contract",
+                return_value=self.info_contract,
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
             ManagerController().create_new_contract(session=session)
-            number_of_contract = session.scalars(select(Contract)).all()
-            assert len(number_of_contract) == 1
-            assert number_of_contract[0].total_amount == 2133333
-            assert number_of_contract[0].remaining == 123
-            assert number_of_contract[0].signed_contract == True
-            assert number_of_contract[0].customer == clients[0]
+            mock_confirm.assert_called_once_with(
+                section="Create new Contract", session=session, msg="Operation Cancelled!"
+            )
 
     def test_display_all_event(self, db_session, users, current_user_is_manager, mocker):
         # test should call a display_element.

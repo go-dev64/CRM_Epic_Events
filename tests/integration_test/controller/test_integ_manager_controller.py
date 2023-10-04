@@ -11,6 +11,14 @@ from crm.view.generic_view import GenericView
 
 
 class TestManagerController:
+    user_info = {
+        "name": "toto",
+        "email_address": "email@fr",
+        "phone_number": "+064849",
+        "password": "password",
+    }
+    info_contract = {"total_amount": 2133333, "remaining": 123, "signed_contract": True}
+
     def _count_number_of_user(self, session):
         number_manager = len(session.scalars(select(Manager)).all())
         number_seller = len(session.scalars(select(Seller)).all())
@@ -25,15 +33,10 @@ class TestManagerController:
             users
             current_user_is_manager
             manager_ctrl = ManagerController()
-            user_info = {
-                "name": "toto",
-                "email_address": "email@fr",
-                "phone_number": "+064849",
-                "password": "password",
-            }
+
             mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
-            mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
+            mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=self.user_info)
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             number_user_before = self._count_number_of_user(session=session)
 
@@ -81,19 +84,12 @@ class TestManagerController:
         with db_session as session:
             users
             current_user_is_manager
-            manager_ctrl = ManagerController()
-            user_info = {
-                "name": "toto",
-                "email_address": "email@fr",
-                "phone_number": "+064849",
-                "password": "password",
-            }
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=department)
-            mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=user_info)
+            mocker.patch("crm.view.user_view.UserView.get_user_info_view", return_value=self.user_info)
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
             mock_no_confirm = mocker.patch.object(GenericView, "no_data_message")
             number_user_before = self._count_number_of_user(session=session)
-            manager_ctrl.create_new_user(session=session)
+            ManagerController().create_new_user(session=session)
             number_user = self._count_number_of_user(session=session)
             assert number_user_before[0] == number_user[0]
             assert number_user_before[1] == number_user[1]
@@ -107,12 +103,59 @@ class TestManagerController:
         # test should return clients of index list 1.
         with db_session as session:
             users
-            clients
+            client = clients[1]
             current_user_is_manager
             manager = ManagerController()
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
             result = manager.select_customer_of_contract(session=session)
-            assert result == clients[1]
+            assert result == client
+
+    def test_create_new_contract(self, db_session, users, clients, current_user_is_manager, mocker):
+        # test should return a new contract.
+        with db_session as session:
+            users
+            client = clients[0]
+            current_user_is_manager
+            self.info_contract["customer"] = client
+
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.get_info_contract",
+                return_value=self.info_contract,
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            number_of_contract_before = len(session.scalars(select(Contract)).all())
+            result = ManagerController().create_new_contract(session=session)
+            number_of_contract = len(session.scalars(select(Contract)).all())
+            assert number_of_contract == number_of_contract_before + 1
+            assert result.total_amount == 2133333
+            assert result.remaining == 123
+            assert result.signed_contract == True
+            assert result.customer == client
+            mock_confirm.assert_called_once_with(
+                section="Create new Contract", session=session, msg="Operation succesfull!"
+            )
+
+    def test_create_new_contract_with_no_comfirm(self, db_session, users, clients, current_user_is_manager, mocker):
+        # test should return a msg cncelled and same len of contract list..
+        with db_session as session:
+            users
+            client = clients[0]
+            current_user_is_manager
+            self.info_contract["customer"] = client
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.get_info_contract",
+                return_value=self.info_contract,
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            number_of_contract_before = len(session.scalars(select(Contract)).all())
+            ManagerController().create_new_contract(session=session)
+            number_of_contract = len(session.scalars(select(Contract)).all())
+            assert number_of_contract == number_of_contract_before
+            mock_confirm.assert_called_once_with(
+                section="Create new Contract", session=session, msg="Operation Cancelled!"
+            )
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, choice):
