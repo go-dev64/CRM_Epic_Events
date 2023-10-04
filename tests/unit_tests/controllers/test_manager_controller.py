@@ -346,32 +346,64 @@ class TestManagerController:
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_update = mocker.patch.object(Manager, "update_user")
             ManagerController().change_collaborator_attribute(
                 session=session, collaborator_selected=users[2], attribute_selected=choice
             )
-            assert getattr(users[2], choice) == new_value
+            mock_update.assert_called_once()
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation succesfull!"
+            )
 
-    def test_change_collaborator_attribute(
-        self, db_session, users, current_user_is_manager, mocker, choice, new_value
+    def test_change_collaborator_attribute_with_no_confirm(
+        self,
+        db_session,
+        users,
+        current_user_is_manager,
+        mocker,
     ):
         with db_session as session:
             users
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
-            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value="name")
             mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Manager, "update_user")
             ManagerController().change_collaborator_attribute(
-                session=session, collaborator_selected=users[2], attribute_selected=choice
+                session=session, collaborator_selected=users[2], attribute_selected="name"
             )
-            assert getattr(users[2], choice) == new_value
+            mock_update.assert_not_called()
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation Cancelled!"
+            )
 
     def test_change_password(self, db_session, users, current_user_is_manager, mocker):
         with db_session as session:
             users
             current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
             mocker.patch("crm.view.user_view.UserView._get_user_password", return_value="password")
             ManagerController().change_password(session=session, collaborator_selected=users[2])
             assert users[2].password == "password"
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation succesfull!"
+            )
+
+    def test_change_password_with_no_confirm(self, db_session, users, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Manager, "update_user")
+            mocker.patch("crm.view.user_view.UserView._get_user_password", return_value="password")
+            ManagerController().change_password(session=session, collaborator_selected=users[2])
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation Cancelled!"
+            )
+            mock_update.assert_not_called()
 
     @pytest.mark.parametrize(
         "choice",
@@ -380,11 +412,11 @@ class TestManagerController:
     def test_update_collaborator(self, db_session, users, current_user_is_manager, mocker, choice):
         # test should return a updated attribute of user selected.
         with db_session as session:
-            users
+            user = users[1]
             current_user_is_manager
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.select_collaborator",
-                return_value=users[1],
+                return_value=user,
             )
             mocker.patch(
                 "crm.models.utils.Utils._select_attribut_of_element",
@@ -400,31 +432,6 @@ class TestManagerController:
                 mock_password.assert_called_once()
             else:
                 mock_attribute.assert_called_once()
-
-    """def test_change_user_departement(self, db_session, users, current_user_is_manager, mocker):
-        # Test should change user of department. the number of User is the same.
-        with db_session as session:
-            user = users[1]
-            current_user_is_manager
-            manager = ManagerController()
-            mocker.patch(
-                "crm.controller.manager_controller.ManagerController.select_collaborator",
-                return_value=user,
-            )
-            mocker.patch(
-                "crm.models.utils.Utils._select_attribut_of_element",
-                return_value="department",
-            )
-            mocker.patch(
-                "crm.controller.manager_controller.ManagerController.select_new_department",
-                return_value="Supporter",
-            )
-            manager.update_collaborator(session=session)
-            list_user = session.scalars(select(User)).all()
-            list_supporter = session.scalars(select(Supporter)).all()
-            assert new_user.department == "supporter_table"
-            assert len(list_user) == 3
-            assert len(list_supporter) == 2"""
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_contract(self, db_session, contracts, users, current_user_is_manager, mocker, choice):
@@ -463,42 +470,147 @@ class TestManagerController:
             clients
             contracts
             current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_update = mocker.patch.object(Manager, "update_contract")
             mocker.patch(
                 "crm.view.generic_view.GenericView.select_element_in_menu_view",
                 return_value=choice,
             )
             ManagerController().change_customer_of_contract(session=session, contract_selected=contracts[0])
-            assert contracts[0].customer == clients[choice]
+            mock_update.assert_called_once()
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Update Contract", msg="Operation succesfull!"
+            )
+
+    def test_change_customer_contract_no_confirm(
+        self, db_session, contracts, clients, users, current_user_is_manager, mocker
+    ):
+        # test should return msg cancellation..
+        with db_session as session:
+            users
+            clients
+            contracts
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Manager, "update_contract")
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_customer_of_contract",
+                return_value="choice",
+            )
+            ManagerController().change_customer_of_contract(session=session, contract_selected=contracts[0])
+            mock_update.assert_not_called()
+            mock_confirm.assert_called_once_with(
+                section=" Update Contract", session=session, msg="Operation Cancelled!"
+            )
+            mock_update.assert_not_called()
 
     @pytest.mark.parametrize(
-        "choice, name,new_value",
+        " name,new_value",
         [
-            (1, "total_amount", 15),
-            (2, "remaining", 1),
-            (3, "signed_contract", True),
+            ("total_amount", 15),
+            ("remaining", 1),
+            ("signed_contract", True),
         ],
     )
-    def test_update_contract(
-        self, db_session, contracts, clients, users, current_user_is_manager, mocker, choice, new_value, name
+    def test_change_attribute_contract(
+        self, db_session, contracts, users, current_user_is_manager, mocker, name, new_value
     ):
+        # test should change attribute of contracts.
+        with db_session as session:
+            users
+            contracts
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_update = mocker.patch.object(Manager, "update_contract")
+            mocker.patch(
+                "crm.view.generic_view.GenericView.get_new_value_of_attribute",
+                return_value=new_value,
+            )
+            ManagerController().change_attribute_contract(
+                session=session, attribute_selected=name, contract_selected=contracts[0]
+            )
+            mock_update.assert_called_once_with(
+                session=session, contract=contracts[0], attribute_update=name, new_value=new_value
+            )
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Update Contract", msg="Operation succesfull!"
+            )
+
+    def test_change_attribute_contract_no_confirm(
+        self, db_session, contracts, clients, users, current_user_is_manager, mocker
+    ):
+        # test should return msg cancellation..
+        with db_session as session:
+            users
+            clients
+            contracts
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Manager, "update_contract")
+            mocker.patch(
+                "crm.view.generic_view.GenericView.get_new_value_of_attribute",
+                return_value="choice",
+            )
+            ManagerController().change_attribute_contract(
+                session=session, attribute_selected="signed_contract", contract_selected=contracts[0]
+            )
+            mock_update.assert_not_called()
+            mock_confirm.assert_called_once_with(
+                section=" Update Contract", session=session, msg="Operation Cancelled!"
+            )
+
+    def test_update_contract_with_none(self, db_session, contracts, clients, users, current_user_is_manager, mocker):
+        # test should return message error with empty contract list.
         with db_session as session:
             users
             clients
             contracts
             current_user_is_manager
             mocker.patch(
-                "crm.models.utils.Utils._select_element_in_list",
-                return_value=contracts[0],
+                "crm.controller.manager_controller.ManagerController.select_contract",
+                return_value=None,
             )
-            mocker.patch(
-                "crm.view.generic_view.GenericView.select_element_in_menu_view",
-                return_value=choice,
-            )
-            mocker.patch("crm.view.generic_view.GenericView.string_form", return_value=new_value)
-            mocker.patch("crm.view.generic_view.GenericView.integer_form", return_value=new_value)
-            mocker.patch("crm.view.generic_view.GenericView.bool_form", return_value=new_value)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
             ManagerController().update_contract(session=session)
-            assert getattr(contracts[0], name) == new_value
+            mock_confirm.assert_called_once_with(
+                session=session,
+                section="Update Contract",
+                msg="There are no availble contract. Update is not possible!",
+            )
+
+    def test_update_contract_with_attribute_is_customer(
+        self, db_session, contracts, clients, users, current_user_is_manager, mocker
+    ):
+        # test should call wright function with customer like attribute to updated.
+        with db_session as session:
+            users
+            clients
+            contract = contracts[0]
+            current_user_is_manager
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_contract", return_value=contract)
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value="customer")
+            mock_change_customer_of_contract = mocker.patch.object(ManagerController, "change_customer_of_contract")
+            ManagerController().update_contract(session=session)
+            mock_change_customer_of_contract.assert_called_once()
+
+    def test_update_contract_other_attribute_customer(
+        self, db_session, contracts, clients, users, current_user_is_manager, mocker
+    ):
+        # test should return message error with empty contract list.
+        with db_session as session:
+            users
+            clients
+            contract = contracts[0]
+            current_user_is_manager
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_contract", return_value=contract)
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value="total_amount")
+            mock_change = mocker.patch.object(ManagerController, "change_attribute_contract")
+            ManagerController().update_contract(session=session)
+            mock_change.assert_called_once()
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_supporter(self, db_session, users, current_user_is_manager, mocker, choice):
@@ -544,38 +656,132 @@ class TestManagerController:
             result = ManagerController().select_event(session=session)
             assert result == None
 
-    def test_update_event(self, db_session, events, users, current_user_is_manager, mocker):
+    def test_update_event_with_no_event(self, db_session, users, current_user_is_manager, mocker):
         # Test should retrun a event with supporter updated.
         with db_session as session:
             users
-            events
             current_user_is_manager
-            supporter_2 = Supporter(
-                name="supporter_2", email_address="email_supporter2", phone_number="023153", password="35516"
-            )
-            session.add(supporter_2)
-            manager = ManagerController()
-            mocker.patch("crm.controller.manager_controller.ManagerController.select_event", return_value=events[0])
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_event", return_value=None)
             mocker.patch(
-                "crm.controller.manager_controller.ManagerController.select_supporter", return_value=supporter_2
+                "crm.controller.manager_controller.ManagerController.select_supporter", return_value="supporter_2"
             )
-            manager.update_event(session=session)
-            assert events[0].supporter == supporter_2
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().update_event(session=session)
+            mock_confirm.assert_called_once_with(
+                session=session,
+                section=" Update event",
+                msg="There are no available Event or Supporter. Update Event is not possible!",
+            )
+
+    def test_update_event_with_no_supporter(self, db_session, users, current_user_is_manager, mocker):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_event", return_value="event")
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_supporter", return_value=None)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().update_event(session=session)
+            mock_confirm.assert_called_once_with(
+                session=session,
+                section=" Update event",
+                msg="There are no available Event or Supporter. Update Event is not possible!",
+            )
+
+    def test_update_event_with_confirm(self, db_session, users, events, current_user_is_manager, mocker):
+        # test should return a call of update function of event.
+        with db_session as session:
+            user = users[2]
+            current_user_is_manager
+            event = events[1]
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_event", return_value=event)
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_supporter", return_value=user)
+            mock_update = mocker.patch.object(Manager, "change_supporter_of_event")
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+
+            ManagerController().update_event(session=session)
+            mock_update.assert_called_once()
+            mock_confirm.assert_called_once_with(session=session, section=" Update event", msg="Operation succesfull!")
+
+    def test_update_event_with_no_confirm(self, db_session, users, events, current_user_is_manager, mocker):
+        # test should return a call of update function of event.
+        with db_session as session:
+            user = users[2]
+            current_user_is_manager
+            event = events[1]
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_event", return_value=event)
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_supporter", return_value=user)
+            mock_update = mocker.patch.object(Manager, "change_supporter_of_event")
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+
+            ManagerController().update_event(session=session)
+            mock_update.assert_not_called()
+            mock_confirm.assert_called_once_with(session=session, section=" Update event", msg="Operation Cancelled!")
+
+    def test_select_and_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
+        # test should call delete function after confirm.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value="user",
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_delete = mocker.patch.object(Manager, "delete_collaborator")
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            ManagerController().select_and_delete_collaborator(
+                session=session, section=" Delete collaborator", collaborator_list=users
+            )
+            mock_delete.assert_called_once()
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Delete collaborator", msg="Operation succesfull!"
+            )
+
+    def test_select_and_delete_collaborator_with_no_confirm(self, db_session, users, current_user_is_manager, mocker):
+        # test should call delete function after confirm.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value="user",
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_delete = mocker.patch.object(Manager, "delete_collaborator")
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().select_and_delete_collaborator(
+                session=session, section=" Delete collaborator", collaborator_list=users
+            )
+            mock_delete.assert_not_called()
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Delete collaborator", msg="Operation Cancelled!"
+            )
 
     def test_delete_collaborator(self, db_session, users, current_user_is_manager, mocker):
         # Test should retrun a user less one.
         with db_session as session:
             users
-            current_user_is_manager
-            manager = ManagerController()
-            mocker.patch("crm.models.users.Manager.get_all_users", return_value=[x for x in users])
-            mocker.patch(
-                "crm.models.utils.Utils._select_element_in_list",
-                return_value=users[1],
-            )
+            user = current_user_is_manager
+            mocker.patch("crm.models.users.Manager.get_all_users", return_value=[user, users[0], users[1], users[2]])
+            mock_delete = mocker.patch.object(ManagerController, "select_and_delete_collaborator")
+            ManagerController().delete_collaborator(session=session)
+            mock_delete.assert_called_once()
 
-            manager.delete_collaborator(session=session)
-            user_list = session.scalars(select(User)).all()
-            seller_list = session.scalars(select(Seller)).all()
-            assert len(user_list) == 2
-            assert len(seller_list) == 0
+    def test_delete_collaborator_with_no_data(self, db_session, users, current_user_is_manager, mocker):
+        # Test should retrun a user less one.
+        with db_session as session:
+            users
+            user = current_user_is_manager
+            mocker.patch("crm.models.users.Manager.get_all_users", return_value=[user])
+            mock_delete = mocker.patch.object(ManagerController, "select_and_delete_collaborator")
+            mock_msg = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().delete_collaborator(session=session)
+            mock_delete.assert_not_called()
+            mock_msg.assert_called_once_with(
+                session=session,
+                section="Delete collaborator",
+                msg="There are no available collaborator. Delete is not possible!",
+            )
