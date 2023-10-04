@@ -8,6 +8,13 @@ from crm.view.generic_view import GenericView
 
 
 class TestManagerController:
+    def _count_number_of_user(self, session):
+        number_manager = len(session.scalars(select(Manager)).all())
+        number_seller = len(session.scalars(select(Seller)).all())
+        number_supporter = len(session.scalars(select(Supporter)).all())
+        number_user = len(session.scalars(select(User)).all())
+        return number_user, number_manager, number_seller, number_supporter
+
     info_contract = {"total_amount": 2133333, "remaining": 123, "signed_contract": True}
 
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
@@ -298,14 +305,29 @@ class TestManagerController:
             mocker.patch(
                 "crm.controller.manager_controller.ManagerController.select_new_department", return_value="Supporter"
             )
-            list_suppoter_before = session.scalars(select(Supporter)).all()
-            list_user_before = session.scalars(select(User)).all()
-            ManagerController().change_collaborator_department(session=session, collaborator_selected=users[1])
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_update = mocker.patch.object(Manager, "change_user_department")
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
 
-            list_suppoter_after = session.scalars(select(Supporter)).all()
-            list_user_after = session.scalars(select(User)).all()
-            assert len(list_suppoter_after) == len(list_suppoter_before) + 1
-            assert len(list_user_before) == len(list_user_after)
+            ManagerController().change_collaborator_department(session=session, collaborator_selected=users[1])
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation succesfull!"
+            )
+            mock_update.assert_called_once()
+
+    def test_change_collaborator_department_with_no_confirm(self, db_session, users, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_new_department", return_value="Supporter"
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().change_collaborator_department(session=session, collaborator_selected=users[1])
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation Cancelled!"
+            )
 
     @pytest.mark.parametrize(
         "choice, new_value",
@@ -322,8 +344,23 @@ class TestManagerController:
         with db_session as session:
             users
             current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
-            result = ManagerController().change_collaborator_attribute(
+            ManagerController().change_collaborator_attribute(
+                session=session, collaborator_selected=users[2], attribute_selected=choice
+            )
+            assert getattr(users[2], choice) == new_value
+        
+        
+    def test_change_collaborator_attribute(
+        self, db_session, users, current_user_is_manager, mocker, choice, new_value
+    ):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            ManagerController().change_collaborator_attribute(
                 session=session, collaborator_selected=users[2], attribute_selected=choice
             )
             assert getattr(users[2], choice) == new_value

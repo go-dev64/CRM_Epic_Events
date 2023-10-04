@@ -313,14 +313,23 @@ class ManagerController:
         Returns:
             User: Collaborator Updated.
         """
+        section = " Update Collaborator/Select new department"
         new_department = self.select_new_department(
             session=session,
-            section="Update Collaborator/Select new department",
+            section=" Update Collaborator/Select new department",
             collaborator=collaborator_selected,
         )
-        Manager().change_user_department(
-            session=session, collaborator=collaborator_selected, new_department=new_department
-        )
+        if self.generic_view.ask_comfirmation(message=section):
+            Manager().change_user_department(
+                session=session, collaborator=collaborator_selected, new_department=new_department
+            )
+            self.generic_view.confirmation_msg(
+                session=session, section=" Update Collaborator", msg="Operation succesfull!"
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
 
     @auth.is_authenticated
     def change_collaborator_attribute(self, session, collaborator_selected: User, attribute_selected: str) -> User:
@@ -342,12 +351,20 @@ class ManagerController:
             element=collaborator_selected,
             attribute_selected=attribute_selected,
         )
-        Manager().update_user(
-            session=session,
-            collaborator=collaborator_selected,
-            update_attribute=attribute_selected,
-            new_value=new_value,
-        )
+        if self.generic_view.ask_comfirmation(message="Upadte Callaborator"):
+            Manager().update_user(
+                session=session,
+                collaborator=collaborator_selected,
+                update_attribute=attribute_selected,
+                new_value=new_value,
+            )
+            self.generic_view.confirmation_msg(
+                session=session, section=" Update Collaborator", msg="Operation succesfull!"
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
 
     @auth.is_authenticated
     def change_password(self, session, collaborator_selected: User) -> User:

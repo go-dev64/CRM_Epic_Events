@@ -19,7 +19,15 @@ class TestManagerController:
     }
     info_contract = {"total_amount": 2133333, "remaining": 123, "signed_contract": True}
 
-    def _count_number_of_user(self, session):
+    def _count_number_of_user(self, session) -> tuple:
+        """the function count number of users in session.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            tuple: (number_user, number_manager, number_seller, number_supporter)
+        """
         number_manager = len(session.scalars(select(Manager)).all())
         number_seller = len(session.scalars(select(Seller)).all())
         number_supporter = len(session.scalars(select(Supporter)).all())
@@ -186,22 +194,115 @@ class TestManagerController:
             elif choice == 2:
                 assert manager.select_new_department(session=session, section="", collaborator=user) == "Manager"
 
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_collaborator(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return a wright user selected.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.models.utils.Utils._select_element_in_list",
+                return_value=users[choice],
+            )
+            result = ManagerController().select_collaborator(session=session)
+            assert result == users[choice]
+
+    def test_change_collaborator_department(self, db_session, users, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_new_department", return_value="Supporter"
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+
+            number_before = self._count_number_of_user(session=session)
+            ManagerController().change_collaborator_department(session=session, collaborator_selected=users[1])
+            number_after = self._count_number_of_user(session=session)
+            assert number_after[2] == number_before[2] - 1
+            assert number_after[0] == number_before[0]
+            assert number_after[3] == number_before[3] + 1
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation succesfull!"
+            )
+
+    def test_change_collaborator_department_with_no_confirm(self, db_session, users, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_new_department", return_value="Supporter"
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            number_before = self._count_number_of_user(session=session)
+            ManagerController().change_collaborator_department(session=session, collaborator_selected=users[1])
+            number_after = self._count_number_of_user(session=session)
+            assert number_before == number_after
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation Cancelled!"
+            )
+
     def test_select_customer_of_contract(self, db_session, clients, current_user_is_manager, mocker):
         # test should return customer of index list 1.
         with db_session as session:
-            clients
+            client = clients[1]
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
             result = ManagerController().select_customer_of_contract(session=session)
 
-            assert result == clients[1]
+            assert result == client
+
+    @pytest.mark.parametrize(
+        "choice, new_value",
+        [
+            ("name", "toto"),
+            ("email_address", "email@dfkjnekr"),
+            ("phone_number", "12351"),
+            ("password", "passwrgeord"),
+        ],
+    )
+    def test_change_collaborator_attribute(
+        self, db_session, users, current_user_is_manager, mocker, choice, new_value
+    ):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            ManagerController().change_collaborator_attribute(
+                session=session, collaborator_selected=users[2], attribute_selected=choice
+            )
+            assert getattr(users[2], choice) == new_value
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation succesfull!"
+            )
+
+    @pytest.mark.parametrize("choice", [("name"), ("email_address"), ("phone_number"), ("password")])
+    def test_change_collaborator_attribute(self, db_session, users, current_user_is_manager, mocker, choice):
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value="new_value")
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            value = getattr(users[2], choice)
+            ManagerController().change_collaborator_attribute(
+                session=session, collaborator_selected=users[2], attribute_selected=choice
+            )
+            assert getattr(users[2], choice) == value
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
 
     @pytest.mark.parametrize(
         "old_attribute, new_value",
         [("total_amount", 123), ("remaining", 12), ("signed_contract", True)],
     )
     def test_update_contract(
-        self, db_session, users, current_user_is_manager, contracts, clients, mocker, old_attribute, new_value
+        self, db_session, users, current_user_is_manager, contracts, mocker, old_attribute, new_value
     ):
         with db_session as session:
             users
