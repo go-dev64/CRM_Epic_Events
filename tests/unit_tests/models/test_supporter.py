@@ -1,6 +1,5 @@
 from datetime import datetime
 import pytest
-
 from crm.models.users import Supporter
 
 

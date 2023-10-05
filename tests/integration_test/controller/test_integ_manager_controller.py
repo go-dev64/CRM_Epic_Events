@@ -359,14 +359,18 @@ class TestManagerController:
             assert getattr(event, "supporter") == users[2]
             mock_confirm.assert_called_once()
 
-    def test_select_and_delete(self, db_session, users, current_user_is_manager, mocker):
+    def test_select_and_delete(self, db_session, users, clients, contracts, current_user_is_manager, mocker):
         with db_session as session:
             users
+            clients
+            contracts
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
-            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=users[2])
+            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=users[1])
             number_before = self._count_number_of_user(session=session)
             ManagerController().select_and_delete_collaborator(session=session, section="", collaborator_list=users)
             number = self._count_number_of_user(session=session)
-            assert number_before[3] == number[3] + 1
+            assert number_before[2] == number[2] + 1
+            assert clients[0].seller_contact == None
+            assert clients[0].contracts[0].seller == None

@@ -61,10 +61,16 @@ class SellerController:
         Returns:
             _type_: a new instance of Customer class.
         """
+        section = " Create new Customer"
         customer_info = self.seller_view.get_info_customer_view(
             department=session.current_user_department, current_user_name=session.current_user.name
         )
-        Seller().create_new_customer(session=session, customer_info=customer_info)
+        if self.generic_view.ask_comfirmation(message=section):
+            new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
+            self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+            return new_customer
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def select_contract_of_event(self, session) -> Contract:
@@ -91,6 +97,7 @@ class SellerController:
     @auth.is_authenticated
     def select_address_of_event(self, session) -> Address:
         """The function is used to select an address in address list for event.
+        if no addres available is redireted to address creation function.
 
         Args:
             session (_type_): Actual sqlalchemy session.
@@ -99,21 +106,15 @@ class SellerController:
             Address: Address selected by user.
         """
         section = "Select Address of Event"
-        addrress_list = Seller().get_all_adress(session=session)
-        if len(addrress_list) > 0:
-            choice = self.generic_view.select_element_in_menu_view(
-                section=section,
-                department=session.current_user_department,
-                current_user_name=session.current_user.name,
-                list_element=addrress_list,
-            )
-            return addrress_list[choice]
-        else:
+        address_selected = self.utils.select_address(session=session)
+        if address_selected is None:
             self.generic_view.no_data_message(
                 session=session, section=section, msg="no address available, redirect to address creation"
             )
             new_address = self.utils.create_new_address(session=session)
             return new_address
+        else:
+            return address_selected
 
     def get_address_of_event(self, session):
         choice_list = ["Select address", "Create new address"]
@@ -158,14 +159,19 @@ class SellerController:
         Returns:
             _type_: a new instance of Event class.
         """
-
-        event_info = self.get_event_info()
+        section = " Create New event"
+        event_info = self.get_event_info(session=session)
         if event_info["contract"] != None:
-            Seller().create_new_event(session=session, event_info=event_info)
+            if self.generic_view.ask_comfirmation(message=section):
+                new_event = Seller().create_new_event(session=session, event_info=event_info)
+                self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+                return new_event
+            else:
+                self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
         else:
             self.generic_view.no_data_message(
                 session=session,
-                section="Create New event",
+                section=section,
                 msg="There are no available contract. Create new Event is not possible!",
             )
 
@@ -408,28 +414,53 @@ class SellerController:
             return None
 
     @auth.is_authenticated
+    def change_attribute_of_customer(
+        self, session, section: str, attribute_selected: str, customer_selected: Customer
+    ) -> None:
+        """The function is used to change attribute of customer selected.
+
+        Args:
+            session (_type_): Sqlalchemy session.
+            section (str): section information to displayed in headers.
+            attribute_selected (str): Attribute to be updated.
+            customer_selected (Customer): Customer selected.
+        """
+
+        new_value = self.generic_view.get_new_value_of_attribute(
+            section=f"New Value of {attribute_selected}",
+            department=session.current_user_department,
+            current_user=session.current_user.name,
+            element=customer_selected,
+            attribute_selected=attribute_selected,
+        )
+        if self.generic_view.ask_comfirmation(message=section):
+            Seller().update_customer(
+                session=session, customer=customer_selected, attribute_update=attribute_selected, new_value=new_value
+            )
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+
+    @auth.is_authenticated
     def update_seller_customer(self, session):
         """The function is used to update the customers managed by the current user.
 
         Args:
             session (_type_): _description_
         """
-
+        section = " Update your Customer "
         customer = self.select_customer(session=session)
         if customer != None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session, section="Update your Customer/Select Attribute", element=customer
             )
-            new_value = self.generic_view.get_new_value_of_attribute(
-                section=f"New Value of {attribute_selected}",
-                department=session.current_user_department,
-                current_user=session.current_user.name,
-                element=customer,
-                attribute_selected=attribute_selected,
-            )
-            Seller().update_customer(
-                session=session, customer=customer, attribute_update=attribute_selected, new_value=new_value
-            )
+            if attribute_selected == "seller_contact":
+                self.generic_view.forbidden_acces(session=session, section=" Update your Customer")
+            else:
+                self.change_attribute_of_customer(
+                    session=session, section=section, attribute_selected=attribute_selected, customer_selected=customer
+                )
         else:
             self.generic_view.no_data_message(
                 session=session, section="Update your Customer", msg="No customer available to updating!"
@@ -454,24 +485,40 @@ class SellerController:
             return None
 
     @auth.is_authenticated
-    def update_seller_contract(self, session):
-        """
-        Function make update of contract of seller.
-        """
-        contract = self.select_contract(session=session)
+    def change_attribute_of_contract(self, session, contract_selected):
+        section = " Upadte Contract"
         attribute_selected = self.utils._select_attribut_of_element(
-            session=session, section="Update your Contract/Select Attribute", element=contract
+            session=session, section="Update your Contract/Select Attribute", element=contract_selected
         )
         new_value = self.generic_view.get_new_value_of_attribute(
             section=f"New Value of {attribute_selected}",
             department=session.current_user_department,
             current_user=session.current_user.name,
-            element=contract,
+            element=contract_selected,
             attribute_selected=attribute_selected,
         )
-        Seller().update_contract(
-            session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
-        )
+        if self.generic_view.ask_comfirmation(message=section):
+            Seller().update_contract(
+                session=session, contract=contract_selected, attribute_update=attribute_selected, new_value=new_value
+            )
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+
+    @auth.is_authenticated
+    def update_seller_contract(self, session):
+        """
+        Function make update of contract of seller.
+        """
+        section = " Upadte Contract"
+        contract = self.select_contract(session=session)
+        if contract != None:
+            self.change_attribute_of_contract(session=session, contract_selected=contract)
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=section, msg="No contract available to updating!"
+            )
 
     @auth.is_authenticated
     def select_element_type_to_be_updated(self, session):

@@ -51,6 +51,7 @@ class TestAuthentication:
     def test_get_user_with_wright_email(self, db_session, users, email, user_name, password):
         # Test should return User.name.
         with db_session as session:
+            users
             oassword = password
             user = self._get_user(session, users, email)
             assert user.name == user_name
@@ -58,15 +59,19 @@ class TestAuthentication:
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_get_user_with_bad_email(self, db_session, users, email, user_name, password):
         # Test should return User.name.
-        oassword = password
-        user = self._get_user(db_session, users, email)
-        assert user == None
+        with db_session as session:
+            users
+            oassword = password
+            user = self._get_user(db_session, users, email)
+            assert user == None
 
     @pytest.mark.parametrize("email, user_name, password", wright_parametre)
     def test_login_with_right_data(self, db_session, users, email, user_name, password):
         # Test login should return User connected.
-        user = self._login(db_session, users, email, password)
-        assert user.name == user_name
+        with db_session as session:
+            users
+            user = self._login(db_session, users, email, password)
+            assert user.name == user_name
 
     def test_get_token_after_login(self):
         # Test should return user with token which representing his information id, name and department.

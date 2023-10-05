@@ -413,10 +413,18 @@ class TestGenericView:
             )
             assert result == "value"
 
-    def test_ask_confirmation_yes(self, db_session, current_user_is_user, mocker, capsys):
+    def test_ask_confirmation_yes(self, db_session, current_user_is_user, mocker):
         with db_session as session:
             users
             current_user_is_user
             mocker.patch("rich.prompt.Confirm.ask", return_value=True)
-            mock_display_message = mocker.patch.object(GenericView, "confirmation_msg")
+            result = GenericView().ask_comfirmation(message="")
             assert result == True
+
+    def test_ask_confirmation_no(self, db_session, current_user_is_user, mocker):
+        with db_session as session:
+            users
+            current_user_is_user
+            mocker.patch("rich.prompt.Confirm.ask", return_value=False)
+            result = GenericView().ask_comfirmation(message="")
+            assert result == False

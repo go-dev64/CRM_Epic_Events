@@ -23,10 +23,23 @@ class Utils:
         return user_type
 
     @auth.is_authenticated
-    def create_new_address(self, session):
+    def create_new_address(self, session) -> Address:
+        """The function is used to create a new address.
+
+        Args:
+            session (_type_): session sqlalachemy.
+
+        Returns:
+            Address: address created.
+        """
+        section = " Create new address"
         address_info = self.generic_view.get_address_info_view()
-        new_address = session.current_user.create_new_address(session=session, address_info=address_info)
-        return new_address
+        if self.generic_view.ask_comfirmation(message=section):
+            new_address = session.current_user.create_new_address(session=session, address_info=address_info)
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+            return new_address
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def select_address(self, session) -> Address:
@@ -39,10 +52,13 @@ class Utils:
             Address: address selected.
         """
         address_list = session.scalars(select(Address)).all()
-        address = self._select_element_in_list(
-            session=session, section="Update/ Select Address", element_list=address_list
-        )
-        return address
+        if len(address_list) > 0:
+            address = self._select_element_in_list(
+                session=session, section=" Select Address", element_list=address_list
+            )
+            return address
+        else:
+            return None
 
     @auth.is_authenticated
     def update_address(self, session):

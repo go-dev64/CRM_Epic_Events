@@ -3,13 +3,28 @@ import pytest
 from sqlalchemy import select
 from crm.controller.seller_controller import SellerController
 from crm.models.customer import Customer
-from crm.models.element_administratif import Event
+from crm.models.element_administratif import Address, Contract, Event
 from crm.models.users import Seller
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
 
 
 class TestSellerController:
+    def _count_number_of_element(self, session) -> tuple():
+        """the function count number of element in session.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            tuple(int,int,int,int): number_customer, number_contract, number_event, number_address
+        """
+        number_contract = len(session.scalars(select(Contract)).all())
+        number_customer = len(session.scalars(select(Customer)).all())
+        number_event = len(session.scalars(select(Event)).all())
+        number_address = len(session.scalars(select(Address)).all())
+        return number_customer, number_contract, number_event, number_address
+
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test_create_new_element(self, db_session, users, current_user_is_seller, mocker, choice):
         # test check if the wright function is returned according to user's choise.
@@ -35,21 +50,30 @@ class TestSellerController:
         with db_session as session:
             users
             current_user_is_seller
-            customer_info = {
-                "name": "toto le client",
-                "email_address": "email@com",
-                "phone_number": "+516184684",
-                "company": "une company",
-            }
-            mocker.patch("crm.view.seller_view.SellerView.get_info_customer_view", return_value=customer_info)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mocker.patch("crm.view.seller_view.SellerView.get_info_customer_view", return_value="customer_info")
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_create = mocker.patch.object(Seller, "create_new_customer")
             SellerController().create_new_customer(session=session)
-            list_customer = session.scalars(select(Customer)).all()
-            assert len(list_customer) == 1
-            assert list_customer[0].name == customer_info["name"]
-            assert list_customer[0].email_address == customer_info["email_address"]
-            assert list_customer[0].phone_number == customer_info["phone_number"]
-            assert list_customer[0].company == customer_info["company"]
-            assert list_customer[0].seller_contact == session.current_user
+            mock_confirm.assert_called_once_with(
+                section=" Create new Customer", session=session, msg="Operation succesfull!"
+            )
+            mock_create.assert_called_once()
+
+    def test_create_new_costumer_with_no_confirm(self, db_session, users, current_user_is_seller, mocker):
+        # test should return a new customer.
+        with db_session as session:
+            users
+            current_user_is_seller
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.view.seller_view.SellerView.get_info_customer_view", return_value="customer_info")
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_create = mocker.patch.object(Seller, "create_new_customer")
+            SellerController().create_new_customer(session=session)
+            mock_confirm.assert_called_once_with(
+                section=" Create new Customer", session=session, msg="Operation Cancelled!"
+            )
+            mock_create.assert_not_called()
 
     def test_select_contract_of_event(self, db_session, users, current_user_is_seller, mocker):
         # test should return element of index list 1.
@@ -80,7 +104,7 @@ class TestSellerController:
             current_user_is_seller
             seller = SellerController()
             element_list = ["A", "B", "C"]
-            mocker.patch("crm.models.users.Seller.get_all_adress", return_value=element_list)
+            mocker.patch("crm.models.utils.Utils.select_address", return_value=element_list[1])
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=1)
             result = seller.select_address_of_event(session=session)
             assert result == element_list[1]
@@ -91,12 +115,13 @@ class TestSellerController:
             users
             current_user_is_seller
             seller = SellerController()
-            element_list = []
+            element_list = None
             mocker.patch("crm.models.users.Seller.get_all_adress", return_value=element_list)
-            mocker.patch("crm.view.generic_view.GenericView.no_data_message", return_value=element_list)
             mocker.patch("crm.models.utils.Utils.create_new_address", return_value="toto")
+            mock_message = mocker.patch.object(GenericView, "no_data_message")
             result = seller.select_address_of_event(session=session)
             assert result == "toto"
+            mock_message.assert_called_once()
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_get_addess_of_event(self, db_session, users, current_user_is_seller, mocker, choice):
@@ -137,11 +162,12 @@ class TestSellerController:
             assert result["contract"] == "contract"
             assert result["address"] == "address"
 
-    def test_create_new_event(self, db_session, contracts, address, current_user_is_seller, mocker):
+    def test_create_new_event(self, db_session, contracts, address, events, current_user_is_seller, mocker):
         # test should return a new event in event list.
         with db_session as session:
             contract = contracts[0]
             address
+            events
             current_user_is_seller
             event_info = {
                 "name": "new_event",
@@ -153,17 +179,44 @@ class TestSellerController:
                 "supporter": None,
                 "address": address,
             }
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mocker.patch("crm.controller.seller_controller.SellerController.get_event_info", return_value=event_info)
-
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_create = mocker.patch.object(Seller, "create_new_event")
             SellerController().create_new_event(session=session)
-            list_event = session.scalars(select(Event)).all()
-            assert len(list_event) == 1
-            assert list_event[0].name == event_info["name"]
-            assert isinstance(list_event[0].date_start, datetime)
-            assert isinstance(list_event[0].date_end, datetime)
-            assert list_event[0].attendees == event_info["attendees"]
-            assert list_event[0].note == event_info["note"]
-            assert list_event[0].address == address
+            mock_confirm.assert_called_once_with(
+                section=" Create New event", session=session, msg="Operation succesfull!"
+            )
+            mock_create.assert_called_once()
+
+    def test_create_new_event_no_comfirme(
+        self, db_session, contracts, address, events, current_user_is_seller, mocker
+    ):
+        # test should return a new event in event list.
+        with db_session as session:
+            contract = contracts[0]
+            address
+            events
+            current_user_is_seller
+            event_info = {
+                "name": "new_event",
+                "date_start": datetime.now(),
+                "date_end": datetime.now(),
+                "attendees": 20,
+                "note": "queles notes",
+                "contract": contract,
+                "supporter": None,
+                "address": address,
+            }
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.controller.seller_controller.SellerController.get_event_info", return_value=event_info)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_create = mocker.patch.object(Seller, "create_new_event")
+            SellerController().create_new_event(session=session)
+            mock_confirm.assert_called_once_with(
+                section=" Create New event", session=session, msg="Operation Cancelled!"
+            )
+            mock_create.assert_not_called()
 
     def test_display_all_customers(self, db_session, users, current_user_is_seller, mocker):
         # test should display customers elements.
@@ -418,6 +471,75 @@ class TestSellerController:
         "attribute,new_value",
         [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
     )
+    def test_change_attribute_customer(
+        self, db_session, users, clients, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # test should to call a upadte function.
+        with db_session as session:
+            users
+            clients
+            current_user_is_seller
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_update = mocker.patch.object(Seller, "update_customer")
+            SellerController().change_attribute_of_customer(
+                session=session,
+                section=" Create new Customer",
+                attribute_selected=attribute,
+                customer_selected=clients[0],
+            )
+            mock_confirm.assert_called_once_with(
+                section=" Create new Customer", session=session, msg="Operation succesfull!"
+            )
+            mock_update.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "attribute,new_value",
+        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
+    )
+    def test_change_attribute_customer_no_confirm(
+        self, db_session, users, clients, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # test should to return a confirm message to canceled operation..
+        with db_session as session:
+            users
+            clients
+            current_user_is_seller
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Seller, "update_customer")
+            SellerController().change_attribute_of_customer(
+                session=session,
+                section=" Create new Customer",
+                attribute_selected=attribute,
+                customer_selected=clients[0],
+            )
+            mock_confirm.assert_called_once_with(
+                section=" Create new Customer", session=session, msg="Operation Cancelled!"
+            )
+            mock_update.assert_not_called()
+
+    def test_update_seller_customer_with_no_data(self, db_session, users, current_user_is_seller, mocker):
+        # Test should retrun a msg no data.
+        with db_session as session:
+            users
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch("crm.controller.seller_controller.SellerController.select_customer", return_value=None)
+            mock_mesage = mocker.patch.object(GenericView, "no_data_message")
+            mock_change_attribute = mocker.patch.object(SellerController, "change_attribute_of_customer")
+            seller.update_seller_customer(session=session)
+            mock_mesage.assert_called_once_with(
+                session=session, section="Update your Customer", msg="No customer available to updating!"
+            )
+            mock_change_attribute.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "attribute,new_value",
+        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
+    )
     def test_update_seller_customer(
         self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
     ):
@@ -427,23 +549,12 @@ class TestSellerController:
             users
             current_user_is_seller
             seller = SellerController()
-            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=clients[0])
+            mocker.patch("crm.controller.seller_controller.SellerController.select_customer", return_value=clients[0])
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mock_change_attribute = mocker.patch.object(SellerController, "change_attribute_of_customer")
             seller.update_seller_customer(session=session)
-            assert getattr(clients[0], attribute) == new_value
-
-    def test_update_seller_customer_with_no_data(self, db_session, users, current_user_is_seller, mocker):
-        # Test should retrun a msg no data.
-        with db_session as session:
-            users
-            current_user_is_seller
-            seller = SellerController()
-            element_list = []
-            mocker.patch("crm.models.users.Seller.get_all_clients_of_user", return_value=element_list)
-            mock_display_elements = mocker.patch.object(GenericView, "no_data_message")
-            seller.update_seller_customer(session=session)
-            mock_display_elements.assert_called_once()
+            mock_change_attribute.assert_called_once()
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_contract(self, db_session, users, clients, current_user_is_seller, mocker, choice):
@@ -460,10 +571,9 @@ class TestSellerController:
             result = SellerController().select_contract(session=session)
             assert result == element_list[choice]
 
-    def test_select_contract_with_no_data(self, db_session, users, clients, current_user_is_seller, mocker):
+    def test_select_contract_with_no_data(self, db_session, users, current_user_is_seller, mocker):
         with db_session as session:
             users
-            clients
             current_user_is_seller
             element_list = []
             mocker.patch("crm.models.users.Seller.get_all_contracts_of_user", return_value=element_list)
@@ -473,18 +583,69 @@ class TestSellerController:
     @pytest.mark.parametrize(
         "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]
     )
-    def test_update_seller_contract(
-        self, db_session, clients, users, contracts, current_user_is_seller, mocker, attribute, new_value
+    def test_change_attribute_contract(
+        self, db_session, users, contracts, current_user_is_seller, attribute, new_value, mocker
     ):
         # Test should retrun a event with supporter updated.
         with db_session as session:
-            clients
+            users
+            contract = contracts[0]
+            current_user_is_seller
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_update = mocker.patch.object(Seller, "update_contract")
+            SellerController().change_attribute_of_contract(session=session, contract_selected=contract)
+            mock_update.assert_called_once()
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Upadte Contract", msg="Operation succesfull!"
+            )
+
+    @pytest.mark.parametrize(
+        "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]
+    )
+    def test_change_attribute_contract_no_confirm(
+        self, db_session, users, contracts, current_user_is_seller, attribute, new_value, mocker
+    ):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            users
+            contract = contracts[0]
+            current_user_is_seller
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Seller, "update_contract")
+            SellerController().change_attribute_of_contract(session=session, contract_selected=contract)
+            mock_update.assert_not_called()
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Upadte Contract", msg="Operation Cancelled!"
+            )
+
+    def test_update_seller_contract_with_no_data(self, db_session, users, contracts, current_user_is_seller, mocker):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
             users
             contracts
             current_user_is_seller
             seller = SellerController()
-            mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=contracts[0])
-            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
-            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mocker.patch("crm.controller.seller_controller.SellerController.select_contract", return_value=None)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
             seller.update_seller_contract(session=session)
-            assert getattr(contracts[0], attribute) == new_value
+            mock_confirm.assert_called_once_with(
+                session=session, section=" Upadte Contract", msg="No contract available to updating!"
+            )
+
+    def test_update_seller_contract(self, db_session, users, contracts, current_user_is_seller, mocker):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            users
+            contract = contracts[0]
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch("crm.controller.seller_controller.SellerController.select_contract", return_value=contract)
+            mock_update = mocker.patch.object(SellerController, "change_attribute_of_contract")
+            seller.update_seller_contract(session=session)
+            mock_update.assert_called_once()

@@ -143,9 +143,8 @@ def current_user_is_user(db_session):
 
 
 @pytest.fixture(scope="function")
-def current_user_is_manager(db_session):
-    users
-    user = db_session.scalars(select(Manager)).first()
+def current_user_is_manager(db_session, users):
+    user = users[0]
     user = Authentication.get_token(user)
     db_session.current_user = user
     db_session.current_user_department = Utils().get_type_of_user(user)
@@ -153,9 +152,8 @@ def current_user_is_manager(db_session):
 
 
 @pytest.fixture(scope="function")
-def current_user_is_seller(db_session):
-    users
-    user = db_session.scalars(select(Seller)).first()
+def current_user_is_seller(db_session, users):
+    user = users[1]
     user = Authentication.get_token(user)
     db_session.current_user = user
     db_session.current_user_department = Utils().get_type_of_user(user)
@@ -163,9 +161,8 @@ def current_user_is_seller(db_session):
 
 
 @pytest.fixture(scope="function")
-def current_user_is_supporter(db_session):
-    users
-    user = db_session.scalars(select(Supporter)).first()
+def current_user_is_supporter(db_session, users):
+    user = users[2]
     user = Authentication.get_token(user)
     db_session.current_user = user
     db_session.current_user_department = Utils().get_type_of_user(user)

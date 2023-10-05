@@ -66,9 +66,10 @@ class TestSeller:
                 "phone_number": "1235465",
                 "company": "the Company",
             }
+            customer_list_before = len(session.scalars(select(Customer)).all())
             new_customer = current_user.create_new_customer(session=session, customer_info=customer_info)
-            customer_list = session.scalars(select(Customer)).all()
-            assert len(customer_list) == 3
+            customer_list = len(session.scalars(select(Customer)).all())
+            assert customer_list == customer_list_before + 1
             assert new_customer.seller_contact == current_user
 
     def test_create_new_event(self, db_session, contracts, address, current_user_is_seller):
@@ -87,9 +88,10 @@ class TestSeller:
                 "supporter": None,
                 "address": address,
             }
+            event_list_before = len(session.scalars(select(Event)).all())
             new_event = current_user.create_new_event(session=session, event_info=event_info)
-            event_list = session.scalars(select(Event)).all()
-            assert len(event_list) == 1
+            event_list = len(session.scalars(select(Event)).all())
+            assert event_list == event_list_before + 1
             assert new_event.customer == contract.customer
 
     # ------------- test update-------------- #
