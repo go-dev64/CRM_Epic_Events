@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy import ForeignKey, String, select
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -9,6 +7,9 @@ from typing import Optional
 from crm.models.base import Base, intpk, required_name, timestamp
 from crm.models.customer import Customer, Event, Contract
 from crm.models.element_administratif import Address
+from crm.models.sentry import Sentry
+
+logger = Sentry().logger()
 
 
 class User(Base):
@@ -208,7 +209,7 @@ class Manager(User):
         except (KeyError, ValueError):
             return None
         else:
-            logging.info(f"Creating a new Manager: {new_manager.name}")
+            logger.info(f"Creating a new Manager: {new_manager.name}")
             return new_manager
 
     def create_new_seller(self, session, user_info: dict):
@@ -231,7 +232,7 @@ class Manager(User):
         except (KeyError, ValueError):
             return None
         else:
-            logging.info(f"Creating a new Seller: {new_seller.name}")
+            logger.info(f"Creating a new Seller: {new_seller.name}")
             return new_seller
 
     def create_new_supporter(self, session, user_info: dict) -> Supporter:
@@ -253,7 +254,7 @@ class Manager(User):
         except (KeyError, ValueError):
             return None
         else:
-            logging.info(f"Creating a new Supporter: {new_supporter.name}")
+            logger.info(f"Creating a new Supporter: {new_supporter.name}")
             return new_supporter
 
     def create_new_contract(self, session, contract_info: dict) -> Contract:
@@ -279,7 +280,7 @@ class Manager(User):
             return None
         else:
             if contract.signed_contract == True:
-                logging.info(f"{contract} has been signed.")
+                logger.info(f"{contract} has been signed.")
             return contract
 
     def update_user(self, collaborator, update_attribute: str, new_value) -> None:
@@ -293,7 +294,7 @@ class Manager(User):
             new_value (_type_): new value of update attribute.
         """
         setattr(collaborator, update_attribute, new_value)
-        logging.info(f"The {update_attribute} of {collaborator} has been updated to {new_value}")
+        logger.info(f"The {update_attribute} of {collaborator} has been updated to {new_value}")
 
     def change_user_department(self, session, collaborator, new_department: str):
         """
@@ -316,7 +317,7 @@ class Manager(User):
             "password": collaborator.password,
         }
         self.delete_collaborator(session=session, collaborator_has_delete=collaborator)
-        logging.info(f"The {collaborator} has been delete and re-create in new department")
+        logger.info(f"The {collaborator} has been delete and re-create in new department")
         match new_department:
             case "Manager":
                 return self.create_new_manager(session=session, user_info=user_info)
@@ -343,7 +344,7 @@ class Manager(User):
 
         setattr(contract, attribute_update, new_value)
         if attribute_update == "signed_contract":
-            logging.info(f"{contract} has been signed!")
+            logger.info(f"{contract} has been signed!")
 
     def update_seller_contact_of_customer(self, customer: Customer, new_seller):
         """
@@ -373,7 +374,7 @@ class Manager(User):
 
     def delete_collaborator(self, session, collaborator_has_delete: User) -> None:
         session.delete(collaborator_has_delete)
-        logging.info(f"The {collaborator_has_delete} has been delete")
+        logger.info(f"The {collaborator_has_delete} has been delete")
 
 
 class Seller(User):
@@ -504,6 +505,6 @@ class Seller(User):
         if attribute_update not in forbidden_attribut:
             setattr(contract, attribute_update, new_value)
             if attribute_update == "signed_contract":
-                logging.info(f"{contract} has been signed!")
+                logger.info(f"{contract} has been signed!")
         else:
             pass
