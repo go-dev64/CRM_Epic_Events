@@ -17,7 +17,6 @@ class LoginController:
         """
         Function enabling to log up a user.
 
-
         Raises:
             EmailError: If email is invalid or unknow.
             PasswordError: Invalid password.

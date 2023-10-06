@@ -2,20 +2,23 @@ from crm.controller.db_controller import Database
 from crm.controller.login_controller import LoginController
 from crm.controller.user_controller import UserController
 from crm.models.utils import Utils
+from crm.models.sentry import Sentry
+
+
+Sentry().sentry_skd()
 
 
 def main():
     db = Database()
-    # db.create_tables()
+
     db_session = db.create_session()
     with db_session.begin() as session:
         # db.create_popultaes(session=session)
-
         user = LoginController().user_login(session=session)
         session.current_user = user
         current_user_department = Utils().get_type_of_user(user=user)
         session.current_user_department = current_user_department
-        foo = UserController().home_page(session=session)
+        UserController().home_page(session=session)
         session.current_user = None
         session.current_user_department = None
         session.commit()

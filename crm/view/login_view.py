@@ -1,7 +1,6 @@
 # View module of user login.
 from rich.console import Console
-from rich import print as pprint
-from rich.prompt import Prompt, IntPrompt
+from rich.prompt import Prompt
 from crm.view.generic_view import GenericView
 from crm.models.authentication import Authentication
 
@@ -20,7 +19,7 @@ class LoginView:
             email = Prompt.ask(":email:   Please enter your Email")
             if 5 < len(email) < 255:
                 break
-            pprint(":warning: [prompt.invalid]Invalid Email")
+            self.console().print(":warning: [prompt.invalid]Invalid Email")
 
         return email
 
@@ -31,8 +30,7 @@ class LoginView:
             )
             if len(password) >= 8:
                 break
-            pprint(":warning: [prompt.invalid]password too short")
-
+            self.console().print(":warning: [prompt.invalid]password too short")
         return password
 
     def get_user_email_and_password(self, msg=None):
