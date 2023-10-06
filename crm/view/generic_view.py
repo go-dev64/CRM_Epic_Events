@@ -442,7 +442,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        messsage = Panel(Text(f"✅ {msg} ✅"))
+        messsage = Panel(Text(f"✅ {msg} ✅", justify="center"))
         self.console.print(messsage)
         time.sleep(3)
 
@@ -451,7 +451,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        messsage = Panel(Text(f"{msg}"))
+        messsage = Panel(Text(f"{msg}", justify="center"))
         self.console.print(messsage)
         time.sleep(3)
 
