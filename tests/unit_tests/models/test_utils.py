@@ -117,3 +117,12 @@ class TestUtils:
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
             result = Utils()._select_attribut_of_element(session=session, section="", element=users[1])
             assert result == updatable_attribute_list[choice]
+
+    def test_check_mail_is_unique(self, db_session, users, current_user_is_user, clients):
+        # test should return False with a existiong email.
+        with db_session as session:
+            users
+            current_user_is_user
+            result = Utils().check_email_is_unique(session=session, email=users[0].email_address)
+            assert result == False
+            result = Utils().check_email_is_unique(session=session, email=clients[0].email_address)

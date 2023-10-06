@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from crm.models.authentication import Authentication
+from crm.models.customer import Customer
 from crm.models.element_administratif import Address
+from crm.models.exceptions import EmailError
 from crm.view.generic_view import GenericView
 
 
@@ -21,6 +23,18 @@ class Utils:
         """
         user_type = type(user).__name__
         return user_type
+
+    @auth.is_authenticated
+    def check_email_is_unique(self, session, email):
+        try:
+            user_mail = Authentication().get_user_with_email(session=session, email=email)
+            customer_mail = session.scalars(select(Customer).where(Customer.email_address == email))
+            if user_mail != None and customer_mail != None:
+                raise EmailError()
+        except EmailError:
+            return False
+        else:
+            return True
 
     @auth.is_authenticated
     def create_new_address(self, session) -> Address:

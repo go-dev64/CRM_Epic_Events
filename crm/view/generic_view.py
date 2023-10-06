@@ -12,6 +12,7 @@ from rich.color import ANSI_COLOR_NAMES
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
 from crm.models.element_administratif import Address
+from crm.models.exceptions import PasswordError
 from crm.models.users import User
 
 
@@ -388,12 +389,12 @@ class GenericView:
             _type_(str): password entered by user if validity is ok.
         """
         while True:
-            password = Prompt.ask("Entrer your password:")
-            if Authentication()._password_validator(password) is None:
-                self.console.print(
-                    "[prompt.invalid]Invalid password, password must contain:\n"
-                    "Minimum 8 characters, one should be of Upper Case, special charatere and number between 0-9"
-                )
+            try:
+                password = Prompt.ask("Entrer your password:", password=True)
+                if Authentication()._password_validator(password) is None:
+                    raise PasswordError()
+            except PasswordError as msg:
+                self.console().print(f"{msg}")
             else:
                 break
         return password
