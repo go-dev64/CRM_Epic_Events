@@ -1,5 +1,7 @@
 import pytest
 from sqlalchemy import select
+from crm.models.customer import Customer
+from crm.models.element_administratif import Address, Event
 from crm.models.users import Manager, Seller, Supporter, User, Contract
 
 
@@ -12,6 +14,36 @@ user_info = {
 
 
 class TestManager:
+    def _count_number_of_element(self, session) -> tuple():
+        """the function count number of element in session.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            tuple(int,int,int,int): number_customer, number_contract, number_event, number_address
+        """
+        number_contract = len(session.scalars(select(Contract)).all())
+        number_customer = len(session.scalars(select(Customer)).all())
+        number_event = len(session.scalars(select(Event)).all())
+        number_address = len(session.scalars(select(Address)).all())
+        return number_customer, number_contract, number_event, number_address
+
+    def _count_number_of_user(self, session) -> tuple:
+        """the function count number of users in session.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            tuple: (number_user, number_manager, number_seller, number_supporter)
+        """
+        number_manager = len(session.scalars(select(Manager)).all())
+        number_seller = len(session.scalars(select(Seller)).all())
+        number_supporter = len(session.scalars(select(Supporter)).all())
+        number_user = len(session.scalars(select(User)).all())
+        return number_user, number_manager, number_seller, number_supporter
+
     """
     READ test function
     """
@@ -22,7 +54,7 @@ class TestManager:
             users
             current_user = current_user_is_manager
             users_list = current_user.get_all_users(session=session)
-            result_excepted = 3
+            result_excepted = self._count_number_of_user(session)[0]
             assert len(users_list) == result_excepted
 
     def test_get_all_supporter(self, db_session, users, current_user_is_manager):
@@ -31,16 +63,16 @@ class TestManager:
             users
             current_user = current_user_is_manager
             supporter_list = current_user.get_all_supporter(session=session)
-            result_excepted = 1
+            result_excepted = self._count_number_of_user(session)[3]
             assert len(supporter_list) == result_excepted
 
     def test_get_all_event_without_support(self, db_session, events, current_user_is_manager):
         # test
         with db_session as session:
             events
-            current_user = current_user_is_manager
-            events_list = current_user.get_all_event_without_support(session=session)
-            result_excepted = 1
+            current_user_is_manager
+            events_list = Manager().get_all_event_without_support(session=session)
+            result_excepted = len(session.scalars(select(Event).where(Event.supporter == None)).all())
             assert result_excepted == len(events_list)
 
     # ------------- Test Create Functions ---------#
@@ -50,68 +82,58 @@ class TestManager:
         with db_session as session:
             users
             current_user = current_user_is_manager
-            result_accepted = 4
+            list_user_before = self._count_number_of_user(session)[0]
+            list_manager_before = self._count_number_of_user(session)[1]
             new_manager = current_user.create_new_manager(session=session, user_info=user_info)
-            list_user = session.scalars(select(User)).all()
-            list_manager = session.scalars(select(Manager)).all()
+            list_user = self._count_number_of_user(session)[0]
+            list_manager = self._count_number_of_user(session)[1]
 
-            assert len(list_user) == result_accepted
-            assert len(list_manager) == 2
-
-    def test_add_new_seller(self, db_session, users, current_user_is_manager):
-        # Test should return a new user in list user(len = 4) and new seller in seller list.
-        with db_session as session:
-            users
-            current_user = current_user_is_manager
-            result_accepted = 4
-            new_seller = current_user.create_new_seller(session=session, user_info=user_info)
-            list_user = session.scalars(select(User)).all()
-            list_seller = session.scalars(select(Seller)).all()
-
-            assert len(list_user) == result_accepted
-            assert len(list_seller) == 2
+            assert list_user_before + 1 == list_user
+            assert list_manager_before + 1 == list_manager
 
     def test_add_new_seller(self, db_session, users, current_user_is_manager):
         # Test should return a new user in list user(len = 4) and new seller in seller list.
         with db_session as session:
             users
             current_user = current_user_is_manager
-            result_accepted = 4
+            list_user_before = self._count_number_of_user(session)[0]
+            list_seller_before = self._count_number_of_user(session)[2]
             new_seller = current_user.create_new_seller(session=session, user_info=user_info)
-            list_user = session.scalars(select(User)).all()
-            list_seller = session.scalars(select(Seller)).all()
+            list_user = self._count_number_of_user(session)[0]
+            list_seller = self._count_number_of_user(session)[2]
 
-            assert len(list_user) == result_accepted
-            assert len(list_seller) == 2
+            assert list_user == list_user_before + 1
+            assert list_seller == list_seller_before + 1
 
     def test_add_new_supporter(self, db_session, users, current_user_is_manager):
         # Test should return a new user in list user(len = 4) and new seller in seller list.
         with db_session as session:
             users
             current_user = current_user_is_manager
-            result_accepted = 4
-            new_supporter = current_user.create_new_supporter(session=session, user_info=user_info)
-            list_user = session.scalars(select(User)).all()
-            list_supporter = session.scalars(select(Supporter)).all()
+            list_user_before = self._count_number_of_user(session)[0]
+            list_supporter_before = self._count_number_of_user(session)[3]
 
-            assert len(list_user) == result_accepted
-            assert len(list_supporter) == 2
+            new_supporter = current_user.create_new_supporter(session=session, user_info=user_info)
+            list_user = self._count_number_of_user(session)[0]
+            list_supporter = self._count_number_of_user(session)[3]
+
+            assert list_user == list_user_before + 1
+            assert list_supporter == list_supporter_before + 1
 
     def test_add_new_user_with_wrong_data(self, db_session, users, current_user_is_manager):
         # Test should return a new user in list user(len = 4) and new seller in seller list.
         with db_session as session:
             users
             current_user = current_user_is_manager
-            result_accepted = 3
             bad_user_info = {
                 "name": "new_user",
                 "phone_number": "1235465",
                 "password": "password",
             }
+            list_user_before = self._count_number_of_user(session)[0]
             new_supporter = current_user.create_new_supporter(session=session, user_info=bad_user_info)
-            list_user = session.scalars(select(User)).all()
-
-            assert len(list_user) == result_accepted
+            list_user = self._count_number_of_user(session)[0]
+            assert list_user == list_user_before
             assert new_supporter == None
 
     def test_create_new_contract(self, db_session, clients, current_user_is_manager):
@@ -120,11 +142,11 @@ class TestManager:
             client = clients[0]
             current_user = current_user_is_manager
             contract_info = {"total_amount": 1000, "remaining": 500, "signed_contract": True, "customer": client}
-            result_accepted = 1
+            contract_list_before = self._count_number_of_element(session)[1]
             contract = current_user.create_new_contract(session=session, contract_info=contract_info)
-            contract_list = session.scalars(select(Contract)).all()
+            contract_list = self._count_number_of_element(session)[1]
 
-            assert len(contract_list) == result_accepted
+            assert contract_list == contract_list_before + 1
             assert contract.seller == client.seller_contact
 
     # -------------- test of update --------------------- #
@@ -150,22 +172,21 @@ class TestManager:
         self, db_session, users, current_user_is_manager, new_department, new_class_department, old_department
     ):
         # Test should change a user of department. Nomber user is same.
-        # The number of user per department changes = 2.
+        # number of new department +1.
 
         with db_session as session:
             user = users[old_department]
             id = user.id
             current_user = current_user_is_manager
-
+            list_user_before = self._count_number_of_user(session)[0]
+            list_of_department_before = len(session.scalars(select(new_class_department)).all())
             new_user = current_user.change_user_department(
                 session=session, collaborator=user, new_department=new_department
             )
-
-            list_of_department = session.scalars(select(new_class_department)).all()
-            list_user = session.scalars(select(User)).all()
-
-            assert len(list_of_department) == 2
-            assert len(list_user) == 3
+            list_user = self._count_number_of_user(session)[0]
+            list_of_department = len(session.scalars(select(new_class_department)).all())
+            assert list_of_department == list_of_department_before + 1
+            assert list_user == list_user_before
 
     def test_update_contract_with_change_customer(self, db_session, contracts, clients, current_user_is_manager):
         # Test should return a updated contract with a same seller for customer and contract.
@@ -226,6 +247,7 @@ class TestManager:
             user = users[user_has_delete]
             events
             current_user = current_user_is_manager
+            list_user_before = self._count_number_of_user(session)[0]
             current_user.delete_collaborator(session=session, collaborator_has_delete=user)
-            list_user = session.scalars(select(User)).all()
-            assert len(list_user) == 2
+            list_user = self._count_number_of_user(session)[0]
+            assert list_user == list_user_before - 1

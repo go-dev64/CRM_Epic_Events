@@ -77,26 +77,25 @@ class GenericView:
             current_user_name (str): function header information. user's connected Name
             list_element (list): list to display.
         """
-        header = self.header(section=section, department=department, current_user=current_user_name)
-        self.console.print(header)
+        self.header(section=section, department=department, current_user=current_user_name)
         for i in range(len(list_element)):
-            self.console.print(Panel(Text(f"{i} - {list_element[i]}", justify="center")))
+            self.console.print(Panel(Text(f"{i + 1} - {list_element[i]}", justify="center"), border_style="blue"))
 
-    def _set_table(self, title_table: str, attributes: list[dict]) -> Table:
+    def _set_table(self, title_table: str, attributes: list) -> Table:
         """The function is used to define table to display.
 
         Args:
             title_table (str): Title of table.
-            attributes (list[dict]): list of attribute to be displayed.
-            [{"atribute_name}:"ex, "parametre":{"type":"ex", "max":"ex"}]
+            attributes (list): list of attribute to be displayed.Element function element.attrbute_to_display().
+
 
         return: Display a rich table.
         """
         color = [x for x in ANSI_COLOR_NAMES.keys() if x != "black"]
-        table = Table(title=title_table, expand=True)
+        table = Table(title=title_table, expand=True, border_style="blue")
         table.add_column("N°", justify="left", no_wrap=True)
         for i in range(len(attributes)):
-            table.add_column(attributes[i]["attribute_name"], justify="center", style=color[i])
+            table.add_column(attributes[i], justify="center", style=color[i])
 
         return table
 
@@ -107,7 +106,6 @@ class GenericView:
         current_user_name: str,
         title_table: str,
         list_element: list,
-        attributes: list[dict],
     ) -> Table:
         """The function is used to display an element list in table and header..
 
@@ -116,17 +114,16 @@ class GenericView:
             department (str): Information on user department to displayed in the header.
             current_user_name (str): User name information to displayed in the header.
             title_table (str): title of table to display
-            list_element (list): elmement list to display
-            attributes (list[dict]): name of columns table. Is attribute name of element in elements list.
-            It a dict with attribute name of each element to be  display.
+            list_element (list): element list to display.
 
         Returns:
             Table: Display header and table.
         """
+        attributes = list_element[0].attribute_to_display()
         self.header(department=department, current_user=current_user_name, section=section)
         table = self._set_table(title_table=title_table, attributes=attributes)
         for i in range(len(list_element)):
-            element_to_display = [str(getattr(list_element[i], x["attribute_name"])) for x in attributes]
+            element_to_display = [str(getattr(list_element[i], x)) for x in attributes]
             element_to_display.insert(0, str(i + 1))
             table.add_row(*element_to_display)
 
@@ -195,7 +192,6 @@ class GenericView:
         session,
         title_table,
         elements_list,
-        attributes,
         msg="Do you want to see details of an element of the list?",
     ):
         """Function is used to displayed a elements list in Table.The user can select an displayed this details.
@@ -217,7 +213,6 @@ class GenericView:
             current_user_name=session.current_user.name,
             list_element=elements_list,
             title_table=title_table,
-            attributes=attributes,
         )
         index_of_element = self.choice_display_details_of_element(element_list=elements_list, msg=msg)
         if index_of_element != False:
@@ -443,10 +438,25 @@ class GenericView:
         time.sleep(3)
 
     def confirmation_msg(self, session, section, msg):
-        """Display aConfirmation message"""
+        """Display Confirmation message"""
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
         messsage = Panel(Text(f"✅ {msg} ✅"))
         self.console.print(messsage)
         time.sleep(3)
+
+    def no_data_message(self, session, section, msg):
+        """Display no data  message"""
+        self.header(
+            section=section, department=session.current_user_department, current_user=session.current_user.name
+        )
+        messsage = Panel(Text(f"{msg}"))
+        self.console.print(messsage)
+        time.sleep(3)
+
+    def ask_comfirmation(self, message: str) -> True or False:
+        if Confirm.ask(f"Do you want {message}?", default=True):
+            return True
+        else:
+            return False

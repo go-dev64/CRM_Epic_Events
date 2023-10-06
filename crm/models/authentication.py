@@ -1,3 +1,4 @@
+import datetime
 import argon2
 import jwt
 import os
@@ -65,7 +66,12 @@ class Authentication:
         Returns:
             _type_ : User wiyhin token.
         """
-        payload_data = {"sub": user.id, "name": user.name, "department": user.department}
+        payload_data = {
+            "sub": user.id,
+            "name": user.name,
+            "department": user.department,
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(seconds=300),
+        }
         token = jwt.encode(payload=payload_data, key=os.getenv("TOKEN_KEY"))
         user.token = token
         return user
@@ -86,7 +92,7 @@ class Authentication:
             headres_token = jwt.get_unverified_header(token)
             token_decoded = jwt.decode(token, key=token_key, algorithms=[headres_token["alg"]])
         except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError):
-            return None
+            return print("totot")
         else:
             return token_decoded
 
@@ -106,13 +112,12 @@ class Authentication:
         def validation_token(*args, **kwargs):
             try:
                 user = kwargs["session"].current_user
-
                 token_decoded = Authentication.decode_token(token=user.token)
             except AttributeError:
-                print("attirubt error")
                 return None
             else:
                 if token_decoded is not None:
+                    kwargs["session"].current_user = Authentication.get_token(user)
                     value = func(*args, **kwargs)
                     return value
                 else:

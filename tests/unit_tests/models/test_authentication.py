@@ -1,4 +1,5 @@
 # utiliser setup et towdnown
+import datetime
 import os
 import jwt
 import pytest
@@ -9,9 +10,9 @@ from crm.models.users import Manager
 load_dotenv()
 
 wright_parametre = [
-    ("manager@gmail.com", "manager", "password_manager"),
-    ("seller@gmail.com", "seller", "password_seller"),
-    ("supporter@gmail.com", "supporter", "password_supporter"),
+    ("m@gmail.com", "manager", "password_manager"),
+    ("s@gmail.com", "seller", "password_seller"),
+    ("su@gmail.com", "supporter", "password_supporter"),
 ]
 bad_email_parametre = [
     ("bad_mail", "manager", "password_manager"),
@@ -20,9 +21,9 @@ bad_email_parametre = [
 ]
 
 bad_password_parametre = [
-    ("manager@gmail.com", "manager", "bad"),
-    ("seller@gmail.com", "seller", "bad"),
-    ("supporter@gmail.com", "supporter", "bad"),
+    ("m@gmail.com", "manager", "bad"),
+    ("s@gmail.com", "seller", "bad"),
+    ("su@gmail.com", "supporter", "bad"),
 ]
 
 bad_data_parametre = [
@@ -51,6 +52,7 @@ class TestAuthentication:
     def test_get_user_with_wright_email(self, db_session, users, email, user_name, password):
         # Test should return User.name.
         with db_session as session:
+            users
             oassword = password
             user = self._get_user(session, users, email)
             assert user.name == user_name
@@ -58,15 +60,19 @@ class TestAuthentication:
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_get_user_with_bad_email(self, db_session, users, email, user_name, password):
         # Test should return User.name.
-        oassword = password
-        user = self._get_user(db_session, users, email)
-        assert user == None
+        with db_session as session:
+            users
+            oassword = password
+            user = self._get_user(db_session, users, email)
+            assert user == None
 
     @pytest.mark.parametrize("email, user_name, password", wright_parametre)
     def test_login_with_right_data(self, db_session, users, email, user_name, password):
         # Test login should return User connected.
-        user = self._login(db_session, users, email, password)
-        assert user.name == user_name
+        with db_session as session:
+            users
+            user = self._login(db_session, users, email, password)
+            assert user.name == user_name
 
     def test_get_token_after_login(self):
         # Test should return user with token which representing his information id, name and department.
@@ -74,10 +80,13 @@ class TestAuthentication:
         auth = Authentication()
         user = auth.get_token(user=user_manager)
         assert user.token is not None
+
         user_token_excepted = {"sub": user.id, "name": user_manager.name, "department": user_manager.department}
         headers = jwt.get_unverified_header(user.token)
         user_token_decoded = jwt.decode(user.token, key=os.getenv("TOKEN_KEY"), algorithms=[headers["alg"]])
-        assert user_token_excepted == user_token_decoded
+        assert user_token_excepted["department"] == user_token_decoded["department"]
+        assert user_token_excepted["sub"] == user_token_decoded["sub"]
+        assert user_token_excepted["name"] == user_token_decoded["name"]
 
     def test_decode_token(self):
         # test valid info of token.

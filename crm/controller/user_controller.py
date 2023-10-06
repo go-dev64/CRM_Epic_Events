@@ -44,13 +44,13 @@ class UserController:
             )
             match choice:
                 case 0:
-                    return self.user_choice_is_creating(session=session)
+                    self.user_choice_is_creating(session=session)
                 case 1:
-                    return self.user_choice_is_reading(session=session)
+                    self.user_choice_is_reading(session=session)
                 case 2:
-                    return self.user_choice_is_updating(session=session)
+                    self.user_choice_is_updating(session=session)
                 case 3:
-                    return self.user_choice_is_deleting(session=session)
+                    self.user_choice_is_deleting(session=session)
                 case 4:
                     break
 
@@ -62,14 +62,13 @@ class UserController:
         Returns:
             _type_: User's function to creating.
         """
-        user_type = session.current_user_department
-        match user_type:
+        match session.current_user_department:
             case "Manager":
-                return self.manager_controller.create_new_element(session=session)
+                self.manager_controller.create_new_element(session=session)
             case "Seller":
-                return self.seller_controller.create_new_element(session=session)
+                self.seller_controller.create_new_element(session=session)
             case "Supporter":
-                return self.utils.create_new_address(session=session)
+                self.utils.create_new_address(session=session)
 
     @auth.is_authenticated
     def user_choice_is_reading(self, session):
@@ -83,7 +82,8 @@ class UserController:
             "Display Customers list ",
             "Display Contracts List",
             "Display Events list",
-            "Display Address" "Back to previous menu",
+            "Display Address",
+            "Back to previous menu",
         ]
         while True:
             choice = self.generic_view.select_element_in_menu_view(
@@ -94,14 +94,13 @@ class UserController:
             )
             match choice:
                 case 0:
-                    return self.get_customer_list(session=session)
+                    self.get_customer_list(session=session)
                 case 1:
-                    return self.get_contract_list(session=session)
+                    self.get_contract_list(session=session)
                 case 2:
-                    return self.get_events_list(session=session)
+                    self.get_events_list(session=session)
                 case 3:
-                    return self.get_address_list(session=session)
-
+                    self.get_address_list(session=session)
                 case 4:
                     break
 
@@ -112,14 +111,13 @@ class UserController:
         Returns:
             _type_: Updating function.
         """
-        user_type = session.current_user_department
-        match user_type:
+        match session.current_user_department:
             case "Manager":
-                return self.manager_controller.update_element(session=session)
+                self.manager_controller.update_element(session=session)
             case "Seller":
-                return self.seller_controller.select_element_type_to_be_updated(session=session)
+                self.seller_controller.select_element_type_to_be_updated(session=session)
             case "Supporter":
-                return self.supporter_controller.update_element(session=session)
+                self.supporter_controller.update_element(session=session)
 
     @auth.is_authenticated
     def user_choice_is_deleting(self, session):
@@ -131,18 +129,19 @@ class UserController:
         Returns:
             _type_: Delete function of department.
         """
-        user_type = session.current_user_department
-        match user_type:
+
+        match session.current_user_department:
             case "Manager":
-                return self.manager_controller.delete_collaborator(session=session)
+                self.manager_controller.delete_collaborator(session=session)
             case "Seller":
-                return self.generic_view.forbidden_acces(session=session, section="Delele view/ Forbidden Acces")
+                self.generic_view.forbidden_acces(session=session, section="Delele view/ Forbidden Acces")
             case "Supporter":
-                return self.generic_view.forbidden_acces(session=session, section="Delele view/ Forbidden Acces")
+                self.generic_view.forbidden_acces(session=session, section="Delele view/ Forbidden Acces")
 
     @auth.is_authenticated
     def get_customer_list(self, session):
         """Function redirect to the display customer functions of user's department.
+        if len(list) < 0: no data message to displyed.
 
         Args:
             session (_type_): _description_
@@ -150,51 +149,44 @@ class UserController:
         Returns:
             _type_: display customer functions of department.
         """
-        user_type = session.current_user_department
-        if user_type == "Seller":
-            return self.seller_controller.select_customer_type_to_display(session=session)
+
+        if session.current_user_department == "Seller":
+            self.seller_controller.select_customer_type_to_display(session=session)
 
         else:
-            customer_list = User().get_all_customers(session=session)
-            attribute_to_display = Customer().availables_attribue_list()
-            return self.generic_view.display_table_of_elements(
-                section="Display Customers",
-                department=session.current_user_department,
-                current_user_name=session.current_user.name,
-                restrictions=attribute_to_display,
-                list_element=customer_list,
-                title_table="Table of all customers",
-            )
+            self.seller_controller.display_all_customers(session=session)
 
     @auth.is_authenticated
     def get_contract_list(self, session):
         """Function redirect to the display contracts functions of user's department.
-
+        if len(list) < 0: no data message to displyed.
         Args:
             session (_type_): _description_
 
         Returns:
             _type_: display custocontractsmer functions of department.
         """
-        user_type = session.current_user_department
-        if user_type == "Seller":
-            return self.seller_controller.select_contract_type_to_display(session=session)
+
+        if session.current_user_department == "Seller":
+            self.seller_controller.select_contract_type_to_display(session=session)
         else:
             contract_list = User().get_all_contracts(session=session)
-            attributes_displayed = Contract().availables_attribue_list()
-            return self.generic_view.display_elements(
-                session=session,
-                section="Display Contracts",
-                title_table="All Contracts",
-                elements_list=contract_list,
-                attributes=attributes_displayed,
-            )
-            r
+            if len(contract_list) > 0:
+                self.generic_view.display_elements(
+                    session=session,
+                    section="Display Contracts",
+                    title_table="All Contracts",
+                    elements_list=contract_list,
+                )
+            else:
+                self.generic_view.no_data_message(
+                    session=session, section="Display all Contract", msg="No data for All Contracts"
+                )
 
     @auth.is_authenticated
     def get_events_list(self, session):
         """Function redirect to the display events functions of user's department.
-
+        if len(list) < 0: no data message to displyed.
         Args:
             session (_type_): _description_
 
@@ -202,21 +194,24 @@ class UserController:
             _type_: display events functions of department.
         """
 
-        event_list = User().get_all_events(session=session)
-        attributes_displayed = Event().availables_attribue_list()
         if session.current_user_department == "Supporter":
-            return self.supporter_controller.display_event(session=session)
+            self.supporter_controller.display_event(session=session)
 
         elif session.current_user_department == "Manager":
-            return self.manager_controller.display_event(session=session)
+            self.manager_controller.display_event(session=session)
         else:
-            return self.generic_view.display_elements(
-                session=session,
-                section="Display Events",
-                title_table="All Event",
-                elements_list=event_list,
-                attributes=attributes_displayed,
-            )
+            event_list = User().get_all_events(session=session)
+            if len(event_list) > 0:
+                self.generic_view.display_elements(
+                    session=session,
+                    section="Display Events",
+                    title_table="All Event",
+                    elements_list=event_list,
+                )
+            else:
+                self.generic_view.no_data_message(
+                    session=session, section="Display all Events", msg="No data for All events"
+                )
 
     @auth.is_authenticated
     def get_address_list(self, session):
@@ -226,11 +221,14 @@ class UserController:
             _type_: display address list.
         """
         address_list = User().get_all_adress(session=session)
-        attributes_displayed = Address().availables_attribue_list()
-        return self.generic_view.display_elements(
-            session=session,
-            section="Display Address",
-            title_table="All Address",
-            elements_list=address_list,
-            attributes=attributes_displayed,
-        )
+        if len(address_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section="Display Address",
+                title_table="All Address",
+                elements_list=address_list,
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section="Display all Address", msg="No data for All Address"
+            )

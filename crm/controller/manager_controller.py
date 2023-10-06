@@ -40,11 +40,11 @@ class ManagerController:
             )
             match choice:
                 case 0:
-                    return self.create_new_user(session=session)
+                    self.create_new_user(session=session)
                 case 1:
-                    return self.create_new_contract(session=session)
+                    self.create_new_contract(session=session)
                 case 2:
-                    return self.utils.create_new_address(session=session)
+                    self.utils.create_new_address(session=session)
                 case 3:
                     break
 
@@ -56,35 +56,39 @@ class ManagerController:
         Returns:
             User: A new instance of Manager class , or Seller class or Supporter class.
         """
-        while True:
-            department_list = ["Manager", "Seller", "Supporter", "Back to previous menu"]
-            user_info = self.user_view.get_user_info_view(
-                section="Create new collaborator",
-                department=session.current_user_department,
-                current_user_name=session.current_user.name,
-            )
-            department = self.generic_view.select_element_in_menu_view(department_list)
+        section = "Create new collaborator"
+        department_list = ["Manager", "Seller", "Supporter"]
+        user_info = self.user_view.get_user_info_view(
+            section=section,
+            department=session.current_user_department,
+            current_user_name=session.current_user.name,
+        )
+        department = self.generic_view.select_element_in_menu_view(
+            section=section,
+            department=session.current_user_department,
+            current_user_name=session.current_user.name,
+            list_element=department_list,
+        )
+        if self.generic_view.ask_comfirmation(message=section):
             match department:
                 case 0:
-                    new_user = Manager().create_new_manager(session=session, user_info=user_info)
-                    return new_user
+                    new_collaborator = Manager().create_new_manager(session=session, user_info=user_info)
+                    self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                    return new_collaborator
                 case 1:
-                    new_user = Manager().create_new_seller(session=session, user_info=user_info)
-                    return new_user
+                    new_collaborator = Manager().create_new_seller(session=session, user_info=user_info)
+                    self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                    return new_collaborator
                 case 2:
-                    new_user = Manager().create_new_supporter(session=session, user_info=user_info)
-                    return new_user
-                case 3:
-                    break
+                    new_collaborator = Manager().create_new_supporter(session=session, user_info=user_info)
+                    self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                    return new_collaborator
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def get_info_contract(self, session) -> dict:
         """Function is used to get a contract info by user.
-        {"total_amount: int,
-        "remaining":int,
-        "signedècontract":bool,
-        "customer: Instance of Customer Class
-        }
 
         Args:
             session (_type_): Sqalachemay actual session.
@@ -93,29 +97,36 @@ class ManagerController:
             dict: {"total_amount: int, "remaining":int,"signed_contract":bool,"customer: Instance of Customer}
         """
         contract_info = self.manager_view.get_info_contract_view(
-            department=session.current_user_department, current_user_name=session.current_user.name
+            section="Create new Contract/ Contract Info",
+            department=session.current_user_department,
+            current_user_name=session.current_user.name,
         )
         contract_info["customer"] = self.select_customer_of_contract(session=session)
         return contract_info
 
     @auth.is_authenticated
-    def select_customer_of_contract(self, session) -> Customer:
+    def select_customer_of_contract(self, session) -> Customer or None:
         """The function is used to select a customer in customers list.
+
 
         Args:
             session (_type_): actual Sqlalchemy session.
 
         Returns:
-            Customer: Customer selected by user.
+            Customer: Customer selected by user or None if customer list is empty.
+
         """
         customers_list = Manager().get_all_customers(session=session)
-        choice = self.generic_view.select_element_in_menu_view(
-            section="Select Customer of contract",
-            department=session.current_user_department,
-            current_user_name=session.current_user.name,
-            list_element=customers_list,
-        )
-        return customers_list[choice]
+        if len(customers_list) > 0:
+            choice = self.generic_view.select_element_in_menu_view(
+                section="Select Customer of contract",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=customers_list,
+            )
+            return customers_list[choice]
+        else:
+            return None
 
     @auth.is_authenticated
     def create_new_contract(self, session) -> Contract:
@@ -127,9 +138,61 @@ class ManagerController:
         Returns:
             Contract: new contract created.
         """
+        section = "Create new Contract"
         contract_info = self.get_info_contract(session=session)
-        new_contract = Manager().create_new_contract(session=session, contract_info=contract_info)
-        return new_contract
+        if contract_info["customer"] != None:
+            if self.generic_view.ask_comfirmation(message=section):
+                new_contract = Manager().create_new_contract(session=session, contract_info=contract_info)
+                self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
+                return new_contract
+            else:
+                self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+        else:
+            self.generic_view.no_data_message(
+                session=session,
+                section=section,
+                msg="There are no availble customer. Create new Contract is not possible!",
+            )
+
+    @auth.is_authenticated
+    def display_all_event(self, session):
+        """The function is used for display all events.
+
+        Args:
+            session (_type_): _description_
+        """
+        event_list = Manager().get_all_events(session=session)
+        if len(event_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section="Display Events",
+                title_table="All Event",
+                elements_list=event_list,
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section="Display all Events", msg="No data for All Event"
+            )
+
+    @auth.is_authenticated
+    def display_all_event_without_supporter(self, session):
+        """The function is used for display all events.
+
+        Args:
+            session (_type_): _description_
+        """
+        events_without_support_list = Manager().get_all_event_without_support(session=session)
+        if len(events_without_support_list) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section="Display Events",
+                title_table="Event without Supporter",
+                elements_list=events_without_support_list,
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section="Display all Events", msg="No data for Event without Supporter"
+            )
 
     @auth.is_authenticated
     def display_event(self, session):
@@ -140,7 +203,6 @@ class ManagerController:
             _type_: Return the function executing the action chosen by user.
         """
         choice_list = ["Display all Events", "Display all Events without Supporter", "Back to previous menu"]
-        attributes_displayed = Event().availables_attribue_list()
         while True:
             choice = self.generic_view.select_element_in_menu_view(
                 section="Display Events/ Select an action",
@@ -150,30 +212,15 @@ class ManagerController:
             )
             match choice:
                 case 0:
-                    events_list = Manager().get_all_events(session=session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Events",
-                        title_table="All Event",
-                        elements_list=events_list,
-                        attributes=attributes_displayed,
-                    )
+                    self.display_all_event(session=session)
                 case 1:
-                    events_without_support_list = Manager().get_all_event_without_support(session=session)
-                    return self.generic_view.display_elements(
-                        session=session,
-                        section="Display Events",
-                        title_table="Event without Supporter",
-                        elements_list=events_without_support_list,
-                        attributes=attributes_displayed,
-                    )
+                    self.display_all_event_without_supporter(session=session)
                 case 2:
                     break
 
     @auth.is_authenticated
     def update_element(self, session):
-        """
-        Function enabling the user to select an action between:
+        """Function enabling the user to select an action between:
         "Update Collaborator",
         "Update Contract",
         "Update Event",
@@ -191,22 +238,26 @@ class ManagerController:
             "Back to previous menu",
         ]
         while True:
-            element = self.generic_view.select_element_in_menu_view(list_of_choice)
+            element = self.generic_view.select_element_in_menu_view(
+                section="Update/ Select element to Update",
+                department=session.current_user_department,
+                current_user_name=session.current_user.name,
+                list_element=list_of_choice,
+            )
             match element:
                 case 0:
-                    return self.update_collaborator(session=session)
+                    self.update_collaborator(session=session)
                 case 1:
-                    return self.update_contract(session=session)
+                    self.update_contract(session=session)
                 case 2:
-                    return self.update_event(session=session)
+                    self.update_event(session=session)
                 case 3:
-                    return self.utils.update_address(session=session)
+                    self.utils.update_address(session=session)
                 case 4:
                     break
 
     def _get_department_list(self, collaborator: User) -> list:
-        """
-        Function defines the departments available for a user to change department.
+        """Function defines the departments available for a user to change department.
 
         Returns:
             list: available department list.
@@ -241,13 +292,16 @@ class ManagerController:
         """The function is used to select a collaborator.
 
         Returns:
-            User: collaborator selected.
+            User: collaborator selected or None if len list collaborator=0.
         """
         collaborator_list = Manager().get_all_users(session=session)
-        collaborator_selected = self.utils._select_element_in_list(
-            session=session, section="Update Collaborator/Select Collaborator", element_list=collaborator_list
-        )
-        return collaborator_selected
+        if len(collaborator_list) > 0:
+            collaborator_selected = self.utils._select_element_in_list(
+                session=session, section="Update Collaborator/Select Collaborator", element_list=collaborator_list
+            )
+            return collaborator_selected
+        else:
+            return None
 
     @auth.is_authenticated
     def change_collaborator_department(self, session, collaborator_selected: User) -> User:
@@ -261,14 +315,23 @@ class ManagerController:
         Returns:
             User: Collaborator Updated.
         """
+        section = " Update Collaborator/Select new department"
         new_department = self.select_new_department(
             session=session,
-            section="Update Collaborator/Select new department",
+            section=" Update Collaborator/Select new department",
             collaborator=collaborator_selected,
         )
-        return Manager().change_user_department(
-            session=session, collaborator=collaborator_selected, new_department=new_department
-        )
+        if self.generic_view.ask_comfirmation(message=section):
+            Manager().change_user_department(
+                session=session, collaborator=collaborator_selected, new_department=new_department
+            )
+            self.generic_view.confirmation_msg(
+                session=session, section=" Update Collaborator", msg="Operation succesfull!"
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
 
     @auth.is_authenticated
     def change_collaborator_attribute(self, session, collaborator_selected: User, attribute_selected: str) -> User:
@@ -288,14 +351,22 @@ class ManagerController:
             department=session.current_user_department,
             current_user=session.current_user.name,
             element=collaborator_selected,
-            attribute_to_updated=attribute_selected,
+            attribute_selected=attribute_selected,
         )
-        return Manager().update_user(
-            session=session,
-            collaborator=collaborator_selected,
-            update_attribute=attribute_selected,
-            new_value=new_value,
-        )
+        if self.generic_view.ask_comfirmation(message="Upadte Callaborator"):
+            Manager().update_user(
+                session=session,
+                collaborator=collaborator_selected,
+                update_attribute=attribute_selected,
+                new_value=new_value,
+            )
+            self.generic_view.confirmation_msg(
+                session=session, section=" Update Collaborator", msg="Operation succesfull!"
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
 
     @auth.is_authenticated
     def change_password(self, session, collaborator_selected: User) -> User:
@@ -312,12 +383,20 @@ class ManagerController:
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
         password = self.user_view._get_user_password()
-        return Manager().update_user(
-            session=session,
-            collaborator=collaborator_selected,
-            update_attribute="password",
-            new_value=password,
-        )
+        if self.generic_view.ask_comfirmation(message="Upadte Callaborator"):
+            Manager().update_user(
+                session=session,
+                collaborator=collaborator_selected,
+                update_attribute="password",
+                new_value=password,
+            )
+            self.generic_view.confirmation_msg(
+                session=session, section=" Update Collaborator", msg="Operation succesfull!"
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
 
     @auth.is_authenticated
     def update_collaborator(self, session) -> User:
@@ -327,16 +406,25 @@ class ManagerController:
             _type_: collaborator updated.
         """
         collaborator_selected = self.select_collaborator(session=session)
-        attribute_selected = self.utils._select_attribut_of_element(
-            session=session, section="Update Collaborator/Select Attribute to updated", element=collaborator_selected
-        )
-        if attribute_selected == "department":
-            return self.change_collaborator_department(session=session, collaborator_selected=collaborator_selected)
-        elif attribute_selected == "password":
-            return self.change_password(session=session, collaborator_selected=collaborator_selected)
+        if collaborator_selected != None:
+            attribute_selected = self.utils._select_attribut_of_element(
+                session=session,
+                section="Update Collaborator/Select Attribute to updated",
+                element=collaborator_selected,
+            )
+            if attribute_selected == "department":
+                self.change_collaborator_department(session=session, collaborator_selected=collaborator_selected)
+            elif attribute_selected == "password":
+                self.change_password(session=session, collaborator_selected=collaborator_selected)
+            else:
+                self.change_collaborator_attribute(
+                    session=session, collaborator_selected=collaborator_selected, attribute_selected=attribute_selected
+                )
         else:
-            return self.change_collaborator_attribute(
-                session=session, collaborator_selected=collaborator_selected, attribute_selected=attribute_selected
+            self.generic_view.no_data_message(
+                session=session,
+                section="Upadte Collaborator",
+                msg="There are no availble Collaborator. Update is not possible!",
             )
 
     @auth.is_authenticated
@@ -347,11 +435,15 @@ class ManagerController:
             Contract: Contract selected.
         """
         contracts = Manager().get_all_contracts(session=session)
-        contract_selected = self.utils._select_element_in_list(
-            session=session, section="Update Contract/Select Contract", element_list=contracts
-        )
-        return contract_selected
+        if len(contracts) > 0:
+            contract_selected = self.utils._select_element_in_list(
+                session=session, section="Update Contract/Select Contract", element_list=contracts
+            )
+            return contract_selected
+        else:
+            return None
 
+    @auth.is_authenticated
     def change_customer_of_contract(self, session, contract_selected: Contract) -> Contract:
         """the function is used to change customer of contract, after selected a new customer by user.
 
@@ -362,10 +454,47 @@ class ManagerController:
         Returns:
             Contract: Contract updated.
         """
+        section = " Update Contract"
         new_customer = self.select_customer_of_contract(session=session)
-        return Manager().update_contract(
-            session=session, contract=contract_selected, attribute_update="customer", new_value=new_customer
+        if new_customer is None:
+            self.generic_view.no_data_message(
+                session=session,
+                section=section,
+                msg="There are no availble Customer. Update Contract is not possible!",
+            )
+        else:
+            if self.generic_view.ask_comfirmation(message=section):
+                Manager().update_contract(
+                    session=session, contract=contract_selected, attribute_update="customer", new_value=new_customer
+                )
+                self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+            else:
+                self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+
+    @auth.is_authenticated
+    def change_attribute_contract(self, session, attribute_selected: str, contract_selected: Contract) -> None:
+        """The function is used to change attribute of contract selected.
+
+        Args:
+            session (_type_): _description_
+            attribute_selected (str): attribute to be updated.
+            contract_selected (Contract): contract to be updates.
+        """
+        section = " Update Contract"
+        new_value = self.generic_view.get_new_value_of_attribute(
+            section=f"New Value of {attribute_selected}",
+            department=session.current_user_department,
+            current_user=session.current_user.name,
+            element=contract_selected,
+            attribute_selected=attribute_selected,
         )
+        if self.generic_view.ask_comfirmation(message=section):
+            Manager().update_contract(
+                session=session, contract=contract_selected, attribute_update=attribute_selected, new_value=new_value
+            )
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def update_contract(self, session) -> Contract:
@@ -378,21 +507,21 @@ class ManagerController:
             Contract: Contract updated.
         """
         contract = self.select_contract(session=session)
-        attribute_selected = self.utils._select_attribut_of_element(
-            session=session, section=" Update Contract/Select Attribute to updated", element=contract
-        )
-        if attribute_selected == "customer":
-            return self.change_customer_of_contract(session=session, contract_selected=contract)
-        else:
-            new_value = self.generic_view.get_new_value_of_attribute(
-                section=f"New Value of {attribute_selected}",
-                department=session.current_user_department,
-                current_user=session.current_user.name,
-                element=contract,
-                attribute_selected=attribute_selected,
+        if contract != None:
+            attribute_selected = self.utils._select_attribut_of_element(
+                session=session, section=" Update Contract/Select Attribute to updated", element=contract
             )
-            Manager().update_contract(
-                session=session, contract=contract, attribute_update=attribute_selected, new_value=new_value
+            if attribute_selected == "customer":
+                self.change_customer_of_contract(session=session, contract_selected=contract)
+            else:
+                self.change_attribute_contract(
+                    session=session, attribute_selected=attribute_selected, contract_selected=contract
+                )
+        else:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Update Contract",
+                msg="There are no availble contract. Update is not possible!",
             )
 
     @auth.is_authenticated
@@ -406,10 +535,32 @@ class ManagerController:
             Supporter: Supporter selected
         """
         supporters = Manager().get_all_supporter(session=session)
-        supporter = self.utils._select_element_in_list(
-            session=session, section="Update Event/ Select new Supporter", element_list=supporters
-        )
-        return supporter
+        if len(supporters) > 0:
+            supporter = self.utils._select_element_in_list(
+                session=session, section="Update Event/ Select new Supporter", element_list=supporters
+            )
+            return supporter
+        else:
+            return None
+
+    @auth.is_authenticated
+    def select_event(self, session) -> Event:
+        """the function is used to select an event.
+
+        Args:
+            session (_type_):sqlalchemy session
+
+        Returns:
+            Event: event selected.
+        """
+        events = Manager().get_all_events(session=session)
+        if len(events) > 0:
+            event = self.utils._select_element_in_list(
+                session=session, section="Update/Select Event", element_list=events
+            )
+            return event
+        else:
+            return None
 
     @auth.is_authenticated
     def update_event(self, session):
@@ -418,17 +569,52 @@ class ManagerController:
         Args:
             session (_type_): _description_
         """
-        events = Manager().get_all_events(session=session)
-        event = self.utils._select_element_in_list(session=session, section="Update/Select Event", element_list=events)
+        section = " Update event"
+        event = self.select_event(session=session)
         supporter = self.select_supporter(session=session)
-        Manager().change_supporter_of_event(session=session, event=event, new_supporter=supporter)
+        if event is None or supporter is None:
+            self.generic_view.no_data_message(
+                session=session,
+                section=section,
+                msg="There are no available Event or Supporter. Update Event is not possible!",
+            )
+        else:
+            if self.generic_view.ask_comfirmation(message=section):
+                Manager().change_supporter_of_event(session=session, event=event, new_supporter=supporter)
+                self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+            else:
+                self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+
+    @auth.is_authenticated
+    def select_and_delete_collaborator(self, session, section: str, collaborator_list: list[User]):
+        """The function is used to select and dlete user selected in list.
+
+        Args:
+            session (_type_): Sqlalchemy session
+            section (str): Information to section to display in header.
+            collaborator_list (list[User]): List of collaborator.
+        """
+
+        collaborator_selected = self.utils._select_element_in_list(
+            session=session, section="Delete/ Select collobarator", element_list=collaborator_list
+        )
+        if self.generic_view.ask_comfirmation(message=section):
+            Manager().delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def delete_collaborator(self, session):
         """The function is used to delete a collaborator."""
+        section = " Delete collaborator"
         collaborator_list = Manager().get_all_users(session=session)
-        collaborator_list.remove(session.current_user)
-        collaborator_selected = self.utils._select_element_in_list(
-            session=session, section="Delete/ Select collobarator", element_list=collaborator_list
-        )
-        Manager().delete_collaborator(session=session, collaborator_has_delete=collaborator_selected)
+        if len(collaborator_list) < 1 or collaborator_list == [session.current_user]:
+            self.generic_view.no_data_message(
+                session=session,
+                section="Delete collaborator",
+                msg="There are no available collaborator. Delete is not possible!",
+            )
+        else:
+            collaborator_list.remove(session.current_user)
+            self.select_and_delete_collaborator(session=session, section=section, collaborator_list=collaborator_list)

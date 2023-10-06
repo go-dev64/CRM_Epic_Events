@@ -3,6 +3,7 @@ from pytest_mock import mocker
 from sqlalchemy import select
 from crm.models.element_administratif import Address
 from crm.models.utils import Utils
+from crm.view.generic_view import GenericView
 
 
 class TestUtils:
@@ -42,19 +43,38 @@ class TestUtils:
                 "country": "country",
                 "note": "note",
             }
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mocker.patch("crm.view.generic_view.GenericView.get_address_info_view", return_value=address_info)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            list_address_before = session.scalars(select(Address)).all()
             u.create_new_address(session=session)
             list_address = session.scalars(select(Address)).all()
-            assert len(list_address) == 2
+            assert len(list_address) == len(list_address_before) + 1
+            mock_confirm.assert_called_once()
 
-    def test_select_address(self, db_session, users, current_user_is_user, address, mocker):
+    def test_create_new_address_no_confirm(self, db_session, users, current_user_is_user, address, mocker):
+        # test should return a new address.
+        u = Utils()
         with db_session as session:
             users
             address
             current_user_is_user
-            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=0)
-            result = Utils().select_address(session=session)
-            assert result == address
+            address_info = {
+                "number": 1,
+                "street": "address_info",
+                "city": "city",
+                "postal_code": 135,
+                "country": "country",
+                "note": "note",
+            }
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.view.generic_view.GenericView.get_address_info_view", return_value=address_info)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            list_address_before = session.scalars(select(Address)).all()
+            u.create_new_address(session=session)
+            list_address = session.scalars(select(Address)).all()
+            assert len(list_address) == len(list_address_before)
+            mock_confirm.assert_called_once()
 
     @pytest.mark.parametrize(
         "attribute, new_value",

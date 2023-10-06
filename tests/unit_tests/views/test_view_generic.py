@@ -64,11 +64,7 @@ class TestGenericView:
             assert i in out
 
     def test__set_table(self, capsys):
-        attributes = [
-            {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-            {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
-            {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
-        ]
+        attributes = ["name", "email_address", "phone_number"]
         result = GenericView()._set_table(title_table="test", attributes=attributes)
         assert len(result.columns) == len(attributes) + 1  # +1 is column of numero of row.
         assert "N°" == result.columns[0].header
@@ -79,18 +75,12 @@ class TestGenericView:
     def test_display_table_of_elements(self, capsys, mocker, db_session, users):
         with db_session as session:
             users
-            attributes = [
-                {"attribute_name": "name", "parametre": {"type": str, "max": 50}},
-                {"attribute_name": "email_address", "parametre": {"type": str, "max": 100}},
-                {"attribute_name": "phone_number", "parametre": {"type": str, "max": 10}},
-            ]
             toto = GenericView().display_table_of_elements(
                 section="",
                 department="",
                 current_user_name="",
                 title_table="test_title",
                 list_element=users,
-                attributes=attributes,
             )
             out, err = capsys.readouterr()
             assert "test_title" and "name" and "email_address" and "phone_number" and "N°" in out
@@ -143,7 +133,7 @@ class TestGenericView:
             mocker.patch("crm.view.generic_view.GenericView.display_detail_element")
             mocker.patch("crm.view.generic_view.GenericView.choice_display_details_of_element", return_value=1)
             result = GenericView().display_elements(
-                session, elements_list=clients, session=session, title_table="", attributes="", msg=""
+                session, elements_list=clients, session=session, title_table="", msg=""
             )
             assert result == 1
 
@@ -411,7 +401,7 @@ class TestGenericView:
     ):
         with db_session as session:
             users
-            clients
+            client = clients[0]
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.string_form", return_value="value")
             mocker.patch("crm.view.generic_view.GenericView.integer_form", return_value="value")
@@ -419,6 +409,22 @@ class TestGenericView:
             mocker.patch("crm.view.generic_view.GenericView.date_form", return_value="value")
 
             result = GenericView().get_new_value_of_attribute(
-                section="", department="", current_user="", element=clients[0], attribute_selected=attribute
+                section="", department="", current_user="", element=client, attribute_selected=attribute
             )
             assert result == "value"
+
+    def test_ask_confirmation_yes(self, db_session, current_user_is_user, mocker):
+        with db_session as session:
+            users
+            current_user_is_user
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            result = GenericView().ask_comfirmation(message="")
+            assert result == True
+
+    def test_ask_confirmation_no(self, db_session, current_user_is_user, mocker):
+        with db_session as session:
+            users
+            current_user_is_user
+            mocker.patch("rich.prompt.Confirm.ask", return_value=False)
+            result = GenericView().ask_comfirmation(message="")
+            assert result == False
