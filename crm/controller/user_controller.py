@@ -180,7 +180,7 @@ class UserController:
                 )
             else:
                 self.generic_view.no_data_message(
-                    session=session, section="Display all Contract", msg="for this section"
+                    session=session, section="Display all Contract", msg="No data for All Contracts"
                 )
 
     @auth.is_authenticated
@@ -210,7 +210,7 @@ class UserController:
                 )
             else:
                 self.generic_view.no_data_message(
-                    session=session, section="Display all Events", msg="for this section"
+                    session=session, section="Display all Events", msg="No data for All events"
                 )
 
     @auth.is_authenticated
@@ -229,4 +229,6 @@ class UserController:
                 elements_list=address_list,
             )
         else:
-            self.generic_view.no_data_message(session=session, section="Display all Address", msg="for this section")
+            self.generic_view.no_data_message(
+                session=session, section="Display all Address", msg="No data for All Address"
+            )

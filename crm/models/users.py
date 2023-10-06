@@ -70,7 +70,6 @@ class User(Base):
         except (KeyError, ValueError):
             return None
         else:
-            session.commit()
             return new_address
 
     def __repr__(self):
@@ -147,7 +146,6 @@ class Supporter(User):
         ]
         if attribute_updated not in forbidden_attribute:
             setattr(event, attribute_updated, new_value)
-            session.commit()
 
 
 class Manager(User):
@@ -208,7 +206,6 @@ class Manager(User):
         except (KeyError, ValueError):
             return None
         else:
-            session.commit()
             return new_manager
 
     def create_new_seller(self, session, user_info: dict):
@@ -231,7 +228,6 @@ class Manager(User):
         except (KeyError, ValueError):
             return None
         else:
-            session.commit()
             return new_seller
 
     def create_new_supporter(self, session, user_info: dict) -> Supporter:
@@ -253,7 +249,6 @@ class Manager(User):
         except (KeyError, ValueError):
             return None
         else:
-            session.commit()
             return new_supporter
 
     def create_new_contract(self, session, contract_info: dict) -> Contract:
@@ -278,7 +273,6 @@ class Manager(User):
             print(exc)
             return None
         else:
-            session.commit()
             return contract
 
     def update_user(self, session, collaborator, update_attribute: str, new_value) -> None:
@@ -292,7 +286,6 @@ class Manager(User):
             new_value (_type_): new value of update attribute.
         """
         setattr(collaborator, update_attribute, new_value)
-        session.commit()
 
     def change_user_department(self, session, collaborator, new_department: str):
         """
@@ -340,7 +333,6 @@ class Manager(User):
             setattr(contract, "seller", seller)
 
         setattr(contract, attribute_update, new_value)
-        session.commit()
 
     def update_seller_contact_of_customer(self, session, customer: Customer, new_seller):
         """
@@ -356,7 +348,6 @@ class Manager(User):
         setattr(customer, "seller_contact", new_seller)
         for contract in customer.contracts:
             setattr(contract, "seller", customer.seller_contact)
-        session.commit()
 
     def change_supporter_of_event(self, session, event: Event, new_supporter: Supporter) -> None:
         """
@@ -368,11 +359,9 @@ class Manager(User):
             new_supporter (class Supporter): New Supporter od event
         """
         setattr(event, "supporter", new_supporter)
-        session.commit()
 
     def delete_collaborator(self, session, collaborator_has_delete: User) -> None:
         session.delete(collaborator_has_delete)
-        session.commit()
 
 
 class Seller(User):
@@ -436,10 +425,8 @@ class Seller(User):
             )
             session.add(new_customer)
         except (KeyError, ValueError) as exc:
-            print(exc)
             return None
         else:
-            session.commit()
             return new_customer
 
     def create_new_event(self, session, event_info: dict) -> Event:
@@ -467,10 +454,8 @@ class Seller(User):
             session.add(new_event)
 
         except (KeyError, ValueError) as exc:
-            print(exc)
             return None
         else:
-            session.commit()
             return new_event
 
     def update_customer(self, session, customer: Customer, attribute_update: str, new_value) -> None:
@@ -489,7 +474,6 @@ class Seller(User):
         if attribute_update not in forbidden_attribut:
             setattr(customer, attribute_update, new_value)
             customer.set_updated_date()
-            session.commit()
         else:
             pass
 
@@ -507,6 +491,5 @@ class Seller(User):
         forbidden_attribut = ["created_date", "seller", "seller_id", "event", "customer", "customer_id"]
         if attribute_update not in forbidden_attribut:
             setattr(contract, attribute_update, new_value)
-            session.commit()
         else:
             pass

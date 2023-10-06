@@ -170,7 +170,9 @@ class ManagerController:
                 elements_list=event_list,
             )
         else:
-            self.generic_view.no_data_message(session=session, section="Display all Events", msg="for this section")
+            self.generic_view.no_data_message(
+                session=session, section="Display all Events", msg="No data for All Event"
+            )
 
     @auth.is_authenticated
     def display_all_event_without_supporter(self, session):
@@ -189,7 +191,7 @@ class ManagerController:
             )
         else:
             self.generic_view.no_data_message(
-                session=session, section="Display all Events", msg="event without supporter!"
+                session=session, section="Display all Events", msg="No data for Event without Supporter"
             )
 
     @auth.is_authenticated

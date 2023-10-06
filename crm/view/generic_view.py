@@ -77,8 +77,7 @@ class GenericView:
             current_user_name (str): function header information. user's connected Name
             list_element (list): list to display.
         """
-        header = self.header(section=section, department=department, current_user=current_user_name)
-        self.console.print(header)
+        self.header(section=section, department=department, current_user=current_user_name)
         for i in range(len(list_element)):
             self.console.print(Panel(Text(f"{i + 1} - {list_element[i]}", justify="center"), border_style="blue"))
 
