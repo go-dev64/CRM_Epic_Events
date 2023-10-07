@@ -24,12 +24,10 @@ class Utils:
         user_type = type(user).__name__
         return user_type
 
-    @auth.is_authenticated
-    def check_email_is_unique(self, session, email):
+    def check_customer_email_is_unique(self, session, email):
         try:
-            user_mail = Authentication().get_user_with_email(session=session, email=email)
             customer_mail = session.scalars(select(Customer).where(Customer.email_address == email))
-            if user_mail != None and customer_mail != None:
+            if customer_mail != None:
                 raise EmailError()
         except EmailError:
             return False

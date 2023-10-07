@@ -58,11 +58,7 @@ class ManagerController:
         """
         section = "Create new collaborator"
         department_list = ["Manager", "Seller", "Supporter"]
-        user_info = self.user_view.get_user_info_view(
-            section=section,
-            department=session.current_user_department,
-            current_user_name=session.current_user.name,
-        )
+        user_info = self.user_view.get_user_info_view(section=section, session=session)
         department = self.generic_view.select_element_in_menu_view(
             section=section,
             department=session.current_user_department,
@@ -355,7 +351,6 @@ class ManagerController:
         )
         if self.generic_view.ask_comfirmation(message="Upadte Callaborator"):
             Manager().update_user(
-                session=session,
                 collaborator=collaborator_selected,
                 update_attribute=attribute_selected,
                 new_value=new_value,
@@ -385,10 +380,38 @@ class ManagerController:
         password = self.user_view._get_user_password()
         if self.generic_view.ask_comfirmation(message="Upadte Callaborator"):
             Manager().update_user(
-                session=session,
                 collaborator=collaborator_selected,
                 update_attribute="password",
                 new_value=password,
+            )
+            self.generic_view.confirmation_msg(
+                session=session, section=" Update Collaborator", msg="Operation succesfull!"
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section=" Update Collaborator", msg="Operation Cancelled!"
+            )
+
+    @auth.is_authenticated
+    def change_email(self, session, collaborator_selected: User) -> User:
+        """The function is used to change password of collaborator selected.
+
+        Args:
+            session (_type_): _description_
+            collaborator_selected (User):Collaborator selected.
+        Returns:
+            User: Collaborator with new password.
+        """
+        section = f"Update/Changing the {collaborator_selected} email"
+        self.generic_view.header(
+            section=section, department=session.current_user_department, current_user=session.current_user.name
+        )
+        email = self.user_view._get_email(session=session)
+        if self.generic_view.ask_comfirmation(message="Upadte Callaborator"):
+            Manager().update_user(
+                collaborator=collaborator_selected,
+                update_attribute="email_adddress",
+                new_value=email,
             )
             self.generic_view.confirmation_msg(
                 session=session, section=" Update Collaborator", msg="Operation succesfull!"
@@ -416,6 +439,8 @@ class ManagerController:
                 self.change_collaborator_department(session=session, collaborator_selected=collaborator_selected)
             elif attribute_selected == "password":
                 self.change_password(session=session, collaborator_selected=collaborator_selected)
+            elif attribute_selected == "email_address":
+                self.change_email(session=session, collaborator_selected=collaborator_selected)
             else:
                 self.change_collaborator_attribute(
                     session=session, collaborator_selected=collaborator_selected, attribute_selected=attribute_selected
@@ -465,7 +490,7 @@ class ManagerController:
         else:
             if self.generic_view.ask_comfirmation(message=section):
                 Manager().update_contract(
-                    session=session, contract=contract_selected, attribute_update="customer", new_value=new_customer
+                    contract=contract_selected, attribute_update="customer", new_value=new_customer
                 )
                 self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
             else:
@@ -490,7 +515,7 @@ class ManagerController:
         )
         if self.generic_view.ask_comfirmation(message=section):
             Manager().update_contract(
-                session=session, contract=contract_selected, attribute_update=attribute_selected, new_value=new_value
+                contract=contract_selected, attribute_update=attribute_selected, new_value=new_value
             )
             self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
         else:

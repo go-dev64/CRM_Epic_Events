@@ -4,7 +4,6 @@ from crm.models.element_administratif import Address, Contract, Event
 from crm.models.users import Seller, User
 from crm.models.utils import Utils
 from crm.view.seller_view import SellerView
-from crm.view.event_view import EventView
 from crm.view.generic_view import GenericView
 
 
@@ -435,8 +434,24 @@ class SellerController:
         )
         if self.generic_view.ask_comfirmation(message=section):
             Seller().update_customer(
-                session=session, customer=customer_selected, attribute_update=attribute_selected, new_value=new_value
+                customer=customer_selected, attribute_update=attribute_selected, new_value=new_value
             )
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
+
+    def change_email_address(self, session, customer_selected: Customer) -> None:
+        """The function is used to update email address of customer.
+
+        Args:
+            session (_type_): _description_
+            customer_selected (Customer): Customer to be updated.
+        """
+        section = " Update Customer"
+        new_value = self.seller_view.get_customer_email(session=session, section=section)
+        if self.generic_view.ask_comfirmation(message=section):
+            Seller().update_customer(customer=customer_selected, attribute_update="email_address", new_value=new_value)
             self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
 
         else:
@@ -457,6 +472,10 @@ class SellerController:
             )
             if attribute_selected == "seller_contact":
                 self.generic_view.forbidden_acces(session=session, section=" Update your Customer")
+
+            elif attribute_selected == "email_address":
+                self.change_email_address(session=session, customer_selected=customer)
+
             else:
                 self.change_attribute_of_customer(
                     session=session, section=section, attribute_selected=attribute_selected, customer_selected=customer
@@ -499,7 +518,7 @@ class SellerController:
         )
         if self.generic_view.ask_comfirmation(message=section):
             Seller().update_contract(
-                session=session, contract=contract_selected, attribute_update=attribute_selected, new_value=new_value
+                contract=contract_selected, attribute_update=attribute_selected, new_value=new_value
             )
             self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
 

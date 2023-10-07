@@ -19,13 +19,12 @@ class LoginView:
     def get_email(self):
         while True:
             try:
-                email = Prompt.ask(":email:   Please enter your Email")
+                email = Prompt.ask(":email:   Please enter  Email")
                 email_info = validate_email(email, check_deliverability=False)
-                if 5 < len(email_info) < 255:
-                    break
-                self.console().print(":warning: [prompt.invalid]Invalid Email")
             except EmailNotValidError as e:
                 self.console.print(e)
+            else:
+                break
 
         return email_info.normalized
 

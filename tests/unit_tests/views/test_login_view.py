@@ -1,7 +1,6 @@
 import pytest
-from pytest_mock import mocker
 from crm.view.login_view import LoginView
-from unittest.mock import patch
+from email_validator import EmailNotValidError
 
 
 class TestLoginView:
@@ -19,3 +18,16 @@ class TestLoginView:
         assert "CRM Epic Event" and "Authentication" in out
         assert "unemail@gmail.com" == result[0]
         assert "un passport" == result[1]
+
+    def test_get_email(self, mocker):
+        mock_input = mocker.patch("rich.prompt.Prompt.ask")
+        mock_input.side_effect = ["wright.email@gmail.com"]
+        result = LoginView().get_email()
+        assert result == "wright.email@gmail.com"
+
+    def test_get_email_bad_mail(self, mocker, capsys):
+        mock_input = mocker.patch("rich.prompt.Prompt.ask")
+        mock_input.side_effect = ["badmail", "wright.email@gmail.com"]
+        LoginView().get_email()
+        out, err = capsys.readouterr()
+        assert "The email address is not valid. It must have exactly one @-sign." in out

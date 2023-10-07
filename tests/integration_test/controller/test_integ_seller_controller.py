@@ -306,10 +306,7 @@ class TestSellerController:
             result = SellerController().select_customer(session=session)
             assert result == None
 
-    @pytest.mark.parametrize(
-        "attribute,new_value",
-        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
-    )
+    @pytest.mark.parametrize("attribute,new_value", [("name", "test"), ("phone_number", "test")])
     def test_change_attribute_customer(
         self, db_session, users, clients, current_user_is_seller, mocker, attribute, new_value
     ):
@@ -332,10 +329,7 @@ class TestSellerController:
                 section=" Create new Customer", session=session, msg="Operation succesfull!"
             )
 
-    @pytest.mark.parametrize(
-        "attribute,new_value",
-        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
-    )
+    @pytest.mark.parametrize("attribute,new_value", [("name", "test"), ("phone_number", "test")])
     def test_change_attribute_customer_no_confirm(
         self, db_session, users, clients, current_user_is_seller, mocker, attribute, new_value
     ):
