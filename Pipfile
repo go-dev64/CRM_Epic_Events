@@ -23,6 +23,7 @@ curses-menu = "*"
 coverage = "*"
 pytest-cov = "*"
 sentry-sdk = "*"
+email-validator = "*"
 
 [dev-packages]
 

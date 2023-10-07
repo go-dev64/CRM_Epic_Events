@@ -1,15 +1,20 @@
 import time
 import argon2
+from crm.models.authentication import Authentication
+from crm.models.exceptions import EmailUniqueError
 from crm.models.users import User
 from crm.view.generic_view import GenericView
 from rich.console import Console, Group
 from rich.prompt import Prompt, IntPrompt
+
+from crm.view.login_view import LoginView
 
 
 class UserView:
     def __init__(self) -> None:
         self.generic_view = GenericView()
         self.console = Console()
+        self.login_view = LoginView()
 
     def _get_user_password(self) -> str:
         """
@@ -29,19 +34,29 @@ class UserView:
         ph = argon2.PasswordHasher()
         return ph.hash(password=password)
 
+    def _get_email(self, session) -> str:
+        while True:
+            try:
+                email = self.login_view.get_email()
+                if Authentication().get_user_with_email(session=session, email=email) is None:
+                    raise EmailUniqueError()
+            except EmailUniqueError as msg:
+                self.generic_view.console.print(msg)
+            else:
+                break
+        return email
+
     def get_user_info_view(
         self,
-        department: str,
-        current_user_name: str,
+        session,
         section: str = "Create New Collaborator/Get Information",
     ) -> dict:
         """
         Function get inforations for create a new collaborator. The Department will get in other function.
 
         Args:
+            session: session sqlalchemy.
             section (str): Section information to display in header
-            department (str): department name to display in header
-            current_user_name(str): Current user name to display in header
 
         Returns:
             dict: a dictionnary with informations to create a collaborator,
@@ -54,11 +69,16 @@ class UserView:
         """
         user_info = {}
         restrictions = [
-            x for x in User().availables_attribue_list() if x.get("attribute_name") not in ["password", "department"]
+            x
+            for x in User().availables_attribue_list()
+            if x.get("attribute_name") not in ["password", "email_address" "department"]
         ]
-        self.generic_view.header(department=department, current_user=current_user_name, section=section)
+        self.generic_view.header(
+            department=session.current_user_department, current_user=session.current_user.name, section=section
+        )
         for restriction in restrictions:
             attribute_name = restriction["attribute_name"]
             user_info[attribute_name] = self.generic_view.string_form(restriction=restriction)
         user_info["password"] = self._get_user_password()
+        user_info["email_address"] = self._get_email(session=session)
         return user_info

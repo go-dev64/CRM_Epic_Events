@@ -333,7 +333,6 @@ class TestManagerController:
         "choice, new_value",
         [
             ("name", "toto"),
-            ("email_address", "email@dfkjnekr"),
             ("phone_number", "12351"),
             ("password", "passwrgeord"),
         ],
@@ -379,6 +378,7 @@ class TestManagerController:
             )
 
     def test_change_password(self, db_session, users, current_user_is_manager, mocker):
+        # test should retrun call upadte user and confirm message.
         with db_session as session:
             users
             current_user_is_manager
@@ -392,6 +392,7 @@ class TestManagerController:
             )
 
     def test_change_password_with_no_confirm(self, db_session, users, current_user_is_manager, mocker):
+        # test should retrun message and not called update user.
         with db_session as session:
             users
             current_user_is_manager
@@ -400,6 +401,34 @@ class TestManagerController:
             mock_update = mocker.patch.object(Manager, "update_user")
             mocker.patch("crm.view.user_view.UserView._get_user_password", return_value="password")
             ManagerController().change_password(session=session, collaborator_selected=users[2])
+            mock_confirm.assert_called_once_with(
+                section=" Update Collaborator", session=session, msg="Operation Cancelled!"
+            )
+            mock_update.assert_not_called()
+
+    def test_change_email(self, db_session, users, current_user_is_manager, mocker):
+        # test should return a user with new email address.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mock_update = mocker.patch.object(Manager, "update_user")
+            mocker.patch("crm.view.user_view.UserView._get_email", return_value="email")
+            ManagerController().change_email(session=session, collaborator_selected=users[2])
+            mock_update.assert_called_once()
+            mock_confirm.assert_called_once()
+
+    def test_change_email_no_confirm(self, db_session, users, current_user_is_manager, mocker):
+        # test should return an error message and not call update_user.
+        with db_session as session:
+            users
+            current_user_is_manager
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Manager, "update_user")
+            mocker.patch("crm.view.user_view.UserView._get_email", return_value="")
+            ManagerController().change_email(session=session, collaborator_selected=users[2])
             mock_confirm.assert_called_once_with(
                 section=" Update Collaborator", session=session, msg="Operation Cancelled!"
             )
@@ -422,14 +451,17 @@ class TestManagerController:
                 "crm.models.utils.Utils._select_attribut_of_element",
                 return_value=choice,
             )
-            mock_department = mocker.patch.object(ManagerController, "change_collaborator_department", return_value="")
-            mock_password = mocker.patch.object(ManagerController, "change_password", return_value="")
-            mock_attribute = mocker.patch.object(ManagerController, "change_collaborator_attribute", return_value="")
+            mock_department = mocker.patch.object(ManagerController, "change_collaborator_department")
+            mock_password = mocker.patch.object(ManagerController, "change_password")
+            mock_email = mocker.patch.object(ManagerController, "change_email")
+            mock_attribute = mocker.patch.object(ManagerController, "change_collaborator_attribute")
             ManagerController().update_collaborator(session=session)
             if choice == "department":
                 mock_department.assert_called_once()
             elif choice == "password":
                 mock_password.assert_called_once()
+            elif choice == "email_address":
+                mock_email.assert_called_once()
             else:
                 mock_attribute.assert_called_once()
 

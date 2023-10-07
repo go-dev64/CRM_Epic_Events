@@ -1,6 +1,8 @@
 # View module of user login.
+from email_validator import validate_email, EmailNotValidError
 from rich.console import Console
 from rich.prompt import Prompt
+from crm.models.exceptions import PasswordError
 from crm.view.generic_view import GenericView
 from crm.models.authentication import Authentication
 
@@ -16,21 +18,29 @@ class LoginView:
 
     def get_email(self):
         while True:
-            email = Prompt.ask(":email:   Please enter your Email")
-            if 5 < len(email) < 255:
+            try:
+                email = Prompt.ask(":email:   Please enter  Email")
+                email_info = validate_email(email, check_deliverability=False)
+            except EmailNotValidError as e:
+                self.console.print(e)
+            else:
                 break
-            self.console().print(":warning: [prompt.invalid]Invalid Email")
 
-        return email
+        return email_info.normalized
 
     def get_password(self):
         while True:
-            password = Prompt.ask(
-                ":key:  Please enter your password [cyan](must be at least 8 characters)", password=True
-            )
-            if len(password) >= 8:
+            try:
+                password = Prompt.ask(
+                    ":key:  Please enter your password [cyan](must be at least 8 characters)", password=True
+                )
+
+                if self.auth._password_validator(password) is None:
+                    raise PasswordError()
+            except PasswordError as msg:
+                self.console().print(f"{msg}")
+            else:
                 break
-            self.console().print(":warning: [prompt.invalid]password too short")
         return password
 
     def get_user_email_and_password(self, msg=None):

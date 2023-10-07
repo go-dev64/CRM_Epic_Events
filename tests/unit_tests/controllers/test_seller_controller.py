@@ -495,8 +495,7 @@ class TestSellerController:
             mock_update.assert_called_once()
 
     @pytest.mark.parametrize(
-        "attribute,new_value",
-        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
+        "attribute,new_value", [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")]
     )
     def test_change_attribute_customer_no_confirm(
         self, db_session, users, clients, current_user_is_seller, mocker, attribute, new_value
@@ -521,12 +520,42 @@ class TestSellerController:
             )
             mock_update.assert_not_called()
 
+    def test_change_email_address_customer(self, db_session, users, current_user_is_seller, clients, mocker):
+        # test shoud return customer with new address.
+        with db_session as session:
+            users
+            current_user_is_seller
+            clients
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mocker.patch("crm.view.seller_view.SellerView.get_customer_email", return_value="email")
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            SellerController().change_email_address(session=session, customer_selected=clients[0])
+            assert clients[0].email_address == "email"
+            mock_confirm.assert_called_once()
+
+    def test_change_email_address_customer_with_no_data(
+        self, db_session, users, current_user_is_seller, clients, mocker
+    ):
+        # test shoud return customer with new address.
+        with db_session as session:
+            users
+            current_user_is_seller
+            clients
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+            mocker.patch("crm.view.seller_view.SellerView.get_customer_email", return_value="email")
+            mock_mesage = mocker.patch.object(GenericView, "no_data_message")
+            mock_update = mocker.patch.object(Seller, "update_customer")
+            SellerController().change_email_address(session=session, customer_selected=clients[0])
+            mock_mesage.assert_called_once()
+            mock_update.assert_not_called()
+
     def test_update_seller_customer_with_no_data(self, db_session, users, current_user_is_seller, mocker):
         # Test should retrun a msg no data.
         with db_session as session:
             users
             current_user_is_seller
             seller = SellerController()
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mocker.patch("crm.controller.seller_controller.SellerController.select_customer", return_value=None)
             mock_mesage = mocker.patch.object(GenericView, "no_data_message")
             mock_change_attribute = mocker.patch.object(SellerController, "change_attribute_of_customer")
@@ -536,10 +565,7 @@ class TestSellerController:
             )
             mock_change_attribute.assert_not_called()
 
-    @pytest.mark.parametrize(
-        "attribute,new_value",
-        [("name", "test"), ("email_address", "test@email"), ("phone_number", "test")],
-    )
+    @pytest.mark.parametrize("attribute,new_value", [("name", "test"), ("phone_number", "test")])
     def test_update_seller_customer(
         self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
     ):
@@ -553,6 +579,23 @@ class TestSellerController:
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             mock_change_attribute = mocker.patch.object(SellerController, "change_attribute_of_customer")
+            seller.update_seller_customer(session=session)
+            mock_change_attribute.assert_called_once()
+
+    @pytest.mark.parametrize("attribute,new_value", [("email_address", "test@email")])
+    def test_update_seller_customer_email(
+        self, db_session, clients, users, current_user_is_seller, mocker, attribute, new_value
+    ):
+        # Test should retrun a event with supporter updated.
+        with db_session as session:
+            clients
+            users
+            current_user_is_seller
+            seller = SellerController()
+            mocker.patch("crm.controller.seller_controller.SellerController.select_customer", return_value=clients[0])
+            mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
+            mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mock_change_attribute = mocker.patch.object(SellerController, "change_email_address")
             seller.update_seller_customer(session=session)
             mock_change_attribute.assert_called_once()
 

@@ -13,10 +13,11 @@ class TestSellerView:
             {"attribute_name": "company", "parametre": {"type": str, "max": 255}},
         ]
         mocker.patch("crm.models.customer.Customer.availables_attribue_list", return_value=customer_restriction)
+        mocker.patch("crm.view.seller_view.SellerView.get_customer_email", return_value="mail")
         mocker.patch("crm.view.generic_view.GenericView.string_form", return_value="a string")
         result = SellerView().get_info_customer_view(department="", current_user_name="")
         assert result.get("name") == "a string"
-        assert result.get("email_address") == "a string"
+        assert result.get("email_address") == "mail"
         assert result.get("phone_number") == "a string"
         assert result.get("company") == "a string"
 

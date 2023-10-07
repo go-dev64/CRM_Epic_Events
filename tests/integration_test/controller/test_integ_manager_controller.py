@@ -332,7 +332,6 @@ class TestManagerController:
             users
             current_user_is_manager
             contract = contracts[0]
-            manager = ManagerController()
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
             mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=contract)
@@ -341,7 +340,7 @@ class TestManagerController:
                 return_value=old_attribute,
             )
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
-            manager.update_contract(session=session)
+            ManagerController().update_contract(session=session)
             assert getattr(contract, old_attribute) == new_value
             mock_confirm.assert_called_once()
 

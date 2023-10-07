@@ -374,6 +374,7 @@ class Manager(User):
 
     def delete_collaborator(self, session, collaborator_has_delete: User) -> None:
         session.delete(collaborator_has_delete)
+        session.scalars(select(User).where(User.id == collaborator_has_delete.id))
         logger.info(f"The {collaborator_has_delete} has been delete")
 
 

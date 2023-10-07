@@ -1,13 +1,45 @@
 from crm.models.customer import Customer
 from crm.models.element_administratif import Event
+from crm.models.exceptions import EmailUniqueError
+from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
-from rich.table import Table
-from rich.prompt import Confirm
+
+from crm.view.login_view import LoginView
 
 
 class SellerView:
     def __init__(self) -> None:
         self.generic_view = GenericView()
+        self.login_view = LoginView()
+        self.utils = Utils()
+
+    def get_customer_email(self, session, section: str) -> str:
+        """The function is used to get a nomalize email and check if email is unique.
+
+        Args:
+            session (_type_): session sqlalchemy
+            section (str): section information o display in headers.
+
+        Raises:
+            EmailUniqueError: Exception of unique email.
+
+        Returns:
+            str: normalize email.
+        """
+        self.generic_view.header(
+            department=session.current_user_department, current_user=session.current_user.name, section=section
+        )
+        while True:
+            try:
+                email = self.login_view.get_email()
+                if not self.utils.check_customer_email_is_unique(session=session, email=email):
+                    raise EmailUniqueError()
+            except EmailUniqueError as msg:
+                self.generic_view.console.print(msg)
+            else:
+                break
+
+        return email
 
     def get_info_customer_view(
         self, department: str, current_user_name: str, section: str = "Create New Customer/Get Information"
@@ -34,7 +66,10 @@ class SellerView:
         self.generic_view.header(department=department, current_user=current_user_name, section=section)
         for restriction in restrictions:
             attribute_name = restriction["attribute_name"]
-            customer_info[attribute_name] = self.generic_view.string_form(restriction=restriction)
+            if attribute_name == "email_address":
+                customer_info["email_address"] = self.get_customer_email()
+            else:
+                customer_info[attribute_name] = self.generic_view.string_form(restriction=restriction)
         return customer_info
 
     def get_event_info_view(
