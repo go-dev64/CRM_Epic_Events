@@ -549,7 +549,7 @@ class SellerController:
         Returns:
             _type_: Uppdate function for element choosen.
         """
-        element_list = ["Update your customer", "Update your contracts", "Back"]
+        element_list = ["Update your customer", "Update your contracts", "Update Address", "Back"]
         while True:
             element_selected = self.generic_view.select_element_in_menu_view(
                 section="Update/Select element to be updated",

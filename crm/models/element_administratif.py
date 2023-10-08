@@ -53,6 +53,9 @@ class Event(Base):
         attribut.insert(1, "customer")
         return attribut
 
+    def __repr__(self) -> str:
+        return f"Event : {self.name} of client :{self.customer.name}"
+
 
 class Contract(Base):
     __tablename__ = "contract_table"
@@ -126,3 +129,6 @@ class Address(Base):
                     list: List of attribute name.
         """
         return [x["attribute_name"] for x in self.availables_attribue_list()]
+
+    def __repr__(self) -> str:
+        return f"{self.number}, street:{self.street} of {self.city}"

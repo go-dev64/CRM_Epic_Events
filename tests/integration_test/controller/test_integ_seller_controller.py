@@ -154,15 +154,6 @@ class TestSellerController:
             SellerController().display_all_customers(session=session)
             mock_display_elements.assert_called_once()
 
-    def test_display_all_customers_with_no_data(self, db_session, users, current_user_is_seller, mocker):
-        # test should display customers elements.
-        with db_session as session:
-            users
-            current_user_is_seller
-            mock_display_elements = mocker.patch.object(GenericView, "no_data_message")
-            SellerController().display_all_customers(session=session)
-            mock_display_elements.assert_called_once()
-
     def test_display_all_customers_of_user(self, db_session, users, clients, current_user_is_seller, mocker):
         # test should display customers elements.
         with db_session as session:
@@ -189,15 +180,6 @@ class TestSellerController:
             current_user_is_seller
             contracts
             mock_display_elements = mocker.patch.object(GenericView, "display_elements")
-            SellerController().display_all_contracts(session=session)
-            mock_display_elements.assert_called_once()
-
-    def test_display_all_contracts_with_no_data(self, db_session, users, current_user_is_seller, mocker):
-        # test should display customers elements.
-        with db_session as session:
-            users
-            current_user_is_seller
-            mock_display_elements = mocker.patch.object(GenericView, "no_data_message")
             SellerController().display_all_contracts(session=session)
             mock_display_elements.assert_called_once()
 

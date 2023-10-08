@@ -93,11 +93,14 @@ class TestUtils:
             users
             address
             current_user_is_user
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mocker.patch("crm.models.utils.Utils.select_address", return_value=address)
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
             result = Utils().update_address(session=session)
             assert getattr(address, attribute) == new_value
+            mock_confirm.assert_called_once()
 
     @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
     def test_select_element_in_list(self, db_session, users, current_user_is_manager, choice, mocker):

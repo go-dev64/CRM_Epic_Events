@@ -113,25 +113,12 @@ class TestGenericView:
         )
         assert resultat == result - 1
 
-    def test_choice_display_details_of_element(self, mocker):
-        mocker.patch("rich.prompt.Confirm.ask", return_value=True)
-        mocker.patch("crm.view.generic_view.GenericView._select_element_in_list", return_value=1)
-        result = GenericView().choice_display_details_of_element(element_list=[1, 2, 3, 4, 5, 6])
-        assert result == 1
-
-    def test_choice_display_details_of_element_false(self, mocker):
-        mocker.patch("rich.prompt.Confirm.ask", return_value=False)
-        mocker.patch("crm.view.generic_view.GenericView._select_element_in_list", return_value=1)
-        result = GenericView().choice_display_details_of_element(element_list=[1, 2, 3, 4, 5, 6])
-        assert result == False
-
-    def test_display_elements(self, mocker, db_session, clients, current_user_is_user, capsys):
+    def test_display_elements(self, mocker, db_session, clients, current_user_is_user):
         with db_session as session:
             clients
             current_user_is_user
             mocker.patch("crm.view.generic_view.GenericView.display_table_of_elements")
             mocker.patch("crm.view.generic_view.GenericView.display_detail_element")
-            mocker.patch("crm.view.generic_view.GenericView.choice_display_details_of_element", return_value=1)
             result = GenericView().display_elements(
                 session, elements_list=clients, session=session, title_table="", msg=""
             )

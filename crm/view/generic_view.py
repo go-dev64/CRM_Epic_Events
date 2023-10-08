@@ -169,24 +169,6 @@ class GenericView:
         index_element = self._select_element_in_list(list_element=list_element)
         return index_element
 
-    def choice_display_details_of_element(
-        self, element_list: list, msg: str = "Do you want to see details of an element of the list?"
-    ):
-        """the function is used to give choice to user to select an element.
-
-        Args:
-            element_list (list): list of element
-            msg (str, optional): _description_. Defaults to "Do you want to see details of an element of the list?".
-
-        Returns:
-            _type_: Index element chossen
-        """
-        if Confirm.ask(f"{msg}", default=True):
-            index_element = self._select_element_in_list(element_list)
-            return index_element
-        else:
-            return False
-
     def display_elements(
         self,
         section,
@@ -215,12 +197,11 @@ class GenericView:
             list_element=elements_list,
             title_table=title_table,
         )
-        index_of_element = self.choice_display_details_of_element(element_list=elements_list, msg=msg)
-        if index_of_element != False:
-            self.display_detail_element(session, element=elements_list[index_of_element], title="")
-            return index_of_element
+        if Confirm.ask(f"{msg}", default=True):
+            index_of_element = self._select_element_in_list(elements_list)
+            self.display_detail_element(session=session, section=section, element=elements_list[index_of_element])
         else:
-            return False
+            pass
 
     def display_detail_element(self, session, section: str, element):
         """Function display details of element.
@@ -270,9 +251,10 @@ class GenericView:
             if restriction["parametre"]["type"] == str:
                 address_info[attribute_name] = self.string_form(restriction=restriction)
             elif restriction["parametre"]["type"] == int:
+                self.console.print(f"Please, enter {attribute_name}:")
                 address_info[attribute_name] = self.integer_form(restriction=restriction)
             elif restriction["parametre"]["type"] == bool:
-                address_info[attribute_name] = self.bool_form(restriction=restriction)
+                address_info[attribute_name] = self.bool_form()
         return address_info
 
     def string_form(self, restriction: dict) -> str:
@@ -443,6 +425,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
+        self.console.print("")
         messsage = Panel(Text(f"✅ {msg} ✅", justify="center"))
         self.console.print(messsage)
         time.sleep(3)
@@ -452,6 +435,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
+        self.console.print("")
         messsage = Panel(Text(f"{msg}", justify="center"))
         self.console.print(messsage)
         time.sleep(3)

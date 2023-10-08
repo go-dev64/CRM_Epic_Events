@@ -34,7 +34,8 @@ class ManagerView:
             if restriction["parametre"]["type"] == str:
                 contract_info[attribute_name] = self.generic_view.string_form(restriction=restriction)
             elif restriction["parametre"]["type"] == int:
+                self.generic_view.console.print(f"enter the {restriction['attribute_name']} of new Contract")
                 contract_info[attribute_name] = self.generic_view.integer_form(restriction=restriction)
             elif restriction["parametre"]["type"] == bool:
-                contract_info[attribute_name] = self.generic_view.bool_form(restriction=restriction)
+                contract_info[attribute_name] = self.generic_view.bool_form()
         return contract_info

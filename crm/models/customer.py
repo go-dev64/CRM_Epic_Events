@@ -51,4 +51,4 @@ class Customer(Base):
         return list_attribute + add_attribute
 
     def __repr__(self) -> str:
-        return f"Client: {self.name} - company: {self.company} - contact Epic Event: {self.seller_contact}"
+        return f"Client: {self.name} : {self.company} company"
