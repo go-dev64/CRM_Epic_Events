@@ -1,7 +1,8 @@
+from sqlalchemy import select
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
 from crm.models.element_administratif import Contract, Event
-from crm.models.users import Manager, Supporter, User
+from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
 from crm.view.manager_view import ManagerView
@@ -191,6 +192,21 @@ class ManagerController:
             )
 
     @auth.is_authenticated
+    def display_customer_without_seller(self, session):
+        customer_without_seller = Manager().get_customer_without_seller(session=session)
+        if len(customer_without_seller) > 0:
+            self.generic_view.display_elements(
+                session=session,
+                section="Display Customer without Seller",
+                title_table="Customer without Seller",
+                elements_list=customer_without_seller,
+            )
+        else:
+            self.generic_view.no_data_message(
+                session=session, section="Display Customer without Seller", msg="No data for Customer without Seller"
+            )
+
+    @auth.is_authenticated
     def display_event(self, session):
         """Function enabling the user to select an action between display all events,
         all events without supporter , and back.
@@ -219,6 +235,7 @@ class ManagerController:
         """Function enabling the user to select an action between:
         "Update Collaborator",
         "Update Contract",
+        "Upadate Customer without Seller contact,
         "Update Event",
         "Update Address",
         "back to previous menu".
@@ -246,10 +263,12 @@ class ManagerController:
                 case 1:
                     self.update_contract(session=session)
                 case 2:
-                    self.update_event(session=session)
+                    self.update_customer_without_seller(session=session)
                 case 3:
-                    self.utils.update_address(session=session)
+                    self.update_event(session=session)
                 case 4:
+                    self.utils.update_address(session=session)
+                case 5:
                     break
 
     def _get_department_list(self, collaborator: User) -> list:
@@ -548,6 +567,73 @@ class ManagerController:
                 section="Update Contract",
                 msg="There are no availble contract. Update is not possible!",
             )
+
+    @auth.is_authenticated
+    def select_customer_without_seller(self, session) -> Customer:
+        """The function is used to select a customer.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            Customer: Customer selected.
+        """
+        customers = Manager().get_customer_without_seller(session=session)
+        if len(customers) > 0:
+            customer = self.utils._select_element_in_list(
+                session=session, section="Update Event/ Select new Supporter", element_list=customers
+            )
+            return customer
+        else:
+            return None
+
+    def get_seller(self, session) -> list[Seller]:
+        """The function return list of sellers.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+             list[Seller]: List o seller.
+        """
+        return session.scalars(select(Seller)).all()
+
+    @auth.is_authenticated
+    def select_seller(self, session) -> Seller:
+        """The function is used to select a seller.
+
+        Args:
+            session (_type_): _description_
+
+        Returns:
+            Seller: Customer selected.
+        """
+        sellers = self.get_seller(session=session)
+        if len(sellers) > 0:
+            seller = self.utils._select_element_in_list(
+                session=session, section="Update Event/ Select new Supporter", element_list=sellers
+            )
+            return seller
+        else:
+            return None
+
+    @auth.is_authenticated
+    def update_customer_without_seller(self, session):
+        section = " Update customer seller contact"
+        customer = self.select_customer_without_seller(session=session)
+        new_seller = self.select_seller(session=session)
+        if customer is None or new_seller is None:
+            self.generic_view.no_data_message(
+                session=session,
+                section=section,
+                msg="There are no available Event or Supporter. Update Event is not possible!",
+            )
+        else:
+            if self.generic_view.ask_comfirmation(message=section):
+                Manager().update_seller_contact_of_customer(customer=customer, new_seller=new_seller)
+                self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+            else:
+                self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     @auth.is_authenticated
     def select_supporter(self, session) -> Supporter:

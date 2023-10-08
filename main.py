@@ -2,7 +2,6 @@ import jwt
 from crm.controller.db_controller import Database
 from crm.controller.login_controller import LoginController
 from crm.controller.user_controller import UserController
-from crm.models.exceptions import SessionEnd
 from crm.models.sentry import Sentry
 from crm.view.generic_view import GenericView
 
