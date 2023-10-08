@@ -75,6 +75,17 @@ class TestManager:
             result_excepted = len(session.scalars(select(Event).where(Event.supporter == None)).all())
             assert result_excepted == len(events_list)
 
+    def test_get_customer_without_seller(sel, db_session, users, clients, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            clients
+            clients[0].seller_contact = None
+            result = Manager().get_customer_without_seller(session=session)
+            for r in result:
+                assert isinstance(r, Customer)
+                assert r.seller_contact == None
+
     # ------------- Test Create Functions ---------#
 
     def test_add_new_manager(self, db_session, users, current_user_is_manager):

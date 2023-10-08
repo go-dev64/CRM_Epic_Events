@@ -1,3 +1,4 @@
+import jwt
 from crm.controller.db_controller import Database
 from crm.controller.login_controller import LoginController
 from crm.controller.user_controller import UserController
@@ -12,19 +13,24 @@ from crm.view.generic_view import GenericView
 def main():
     db = Database()
 
-    db_session = db.create_session()
-    try:
-        with db_session.begin() as session:
-            # db.create_popultaes(session=session)
-            LoginController().user_login(session=session)
-            UserController().home_page(session=session)
-            session.current_user = None
-            session.current_user_department = None
-    except SessionEnd as msg:
-        GenericView().confirmation_msg(session=session, section="disconnect", msg=msg)
-    finally:
-        session.commit()
-        session.close()
+    while True:
+        try:
+            db_session = db.create_session()
+            with db_session.begin() as session:
+                # db.create_popultaes(session=session)
+                user = LoginController().user_login(session=session)
+                LoginController().define_main_user_of_session(session=session, user_connected=user)
+                UserController().home_page(session=session)
+                session.current_user = None
+                session.current_user_department = None
+        except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError):
+            GenericView().console.print("session expired. Disconned!")
+        finally:
+            session.commit()
+            session.close()
+
+        if GenericView().ask_comfirmation(message=" quit programme?"):
+            break
 
 
 if __name__ == "__main__":

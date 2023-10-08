@@ -189,6 +189,10 @@ class Manager(User):
         event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
         return event_without_supporter
 
+    def get_customer_without_seller(self, session):
+        customers_list = session.scalars(select(Customer).where(Customer.seller_contact == None)).all()
+        return customers_list
+
     def create_new_manager(self, session, user_info: dict) -> "Manager":
         """Function add a new Manager to database.
 

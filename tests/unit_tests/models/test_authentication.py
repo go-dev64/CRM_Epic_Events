@@ -4,7 +4,6 @@ import os
 import jwt
 import pytest
 from dotenv import load_dotenv
-from crm.controller.reconnect_controller import ReconnectingUser
 from crm.models.authentication import Authentication
 from crm.models.users import Manager
 
@@ -99,8 +98,8 @@ class TestAuthentication:
     def test_decode_token_with_bad_key(self):
         # test should return None with wrong key.
         auth = Authentication()
-        user_token_decoded = auth.decode_token(TOKEN, token_key="toto")
-        assert user_token_decoded == None
+        with pytest.raises(jwt.DecodeError):
+            auth.decode_token(TOKEN, token_key="toto")
 
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_login_with_wrong_email_and_good_password(self, db_session, users, email, user_name, password):
@@ -137,9 +136,8 @@ class TestAuthentication:
             user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
             user_manager.token = "xx"
             session.current_user = user_manager
-            mock_reconnect = mocker.patch.object(ReconnectingUser, "reconneting_choice")
-            self._foo(session=session)
-            mock_reconnect.assert_colled_once_with(session=session, user_expired=user_manager)
+            with pytest.raises(jwt.DecodeError):
+                self._foo(session=session)
 
     def test__password_validator_with_good_password(
         self,
