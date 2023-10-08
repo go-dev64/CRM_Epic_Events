@@ -32,3 +32,13 @@ class EmailUniqueError(BaseException):
 
     def __str__(self) -> str:
         return "Email already use!"
+
+
+class SessionEnd(BaseException):
+    """
+    Exception class to close session.
+
+    """
+
+    def __str__(self) -> str:
+        return "Disconned! Bye Bye"

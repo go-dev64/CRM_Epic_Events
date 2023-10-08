@@ -75,6 +75,17 @@ class TestManager:
             result_excepted = len(session.scalars(select(Event).where(Event.supporter == None)).all())
             assert result_excepted == len(events_list)
 
+    def test_get_customer_without_seller(sel, db_session, users, clients, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            clients
+            clients[0].seller_contact = None
+            result = Manager().get_customer_without_seller(session=session)
+            for r in result:
+                assert isinstance(r, Customer)
+                assert r.seller_contact == None
+
     # ------------- Test Create Functions ---------#
 
     def test_add_new_manager(self, db_session, users, current_user_is_manager):
@@ -158,9 +169,7 @@ class TestManager:
             current_user = current_user_is_manager
             update_attribute = "name"
             new_value = "toto"
-            current_user.update_user(
-                session=session, collaborator=user, update_attribute=update_attribute, new_value=new_value
-            )
+            Manager().update_user(collaborator=user, update_attribute=update_attribute, new_value=new_value)
             test = session.scalars(select(User).where(User.id == user.id)).all()
             assert test[0].name == new_value
 
@@ -180,7 +189,7 @@ class TestManager:
             current_user = current_user_is_manager
             list_user_before = self._count_number_of_user(session)[0]
             list_of_department_before = len(session.scalars(select(new_class_department)).all())
-            new_user = current_user.change_user_department(
+            new_user = Manager().change_user_department(
                 session=session, collaborator=user, new_department=new_department
             )
             list_user = self._count_number_of_user(session)[0]
@@ -198,9 +207,7 @@ class TestManager:
             session.add(seller2)
             client.seller_contact = seller2
             contract.customer = client
-            current_user.update_contract(
-                session=session, contract=contract, attribute_update="customer", new_value=client
-            )
+            current_user.update_contract(contract=contract, attribute_update="customer", new_value=client)
             assert contract.seller_id == contract.customer.seller_contact_id
 
     @pytest.mark.parametrize(
@@ -211,9 +218,7 @@ class TestManager:
         with db_session as session:
             contract = contracts[0]
             current_user = current_user_is_manager
-            current_user.update_contract(
-                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
-            )
+            current_user.update_contract(contract=contract, attribute_update=attribute_update, new_value=new_value)
             assert getattr(contract, attribute_update) == new_value
 
     def test_change_supporter_of_event(self, db_session, events, current_user_is_manager):
@@ -223,7 +228,7 @@ class TestManager:
             supporter = session.scalars(select(Supporter)).first()
             assert event.supporter == None
             current_user = current_user_is_manager
-            current_user.change_supporter_of_event(session=session, event=event, new_supporter=supporter)
+            Manager().change_supporter_of_event(session=session, event=event, new_supporter=supporter)
             assert getattr(event, "supporter") == supporter
 
     def test_update_seller_contact_of_customer(self, db_session, clients, contracts, current_user_is_manager):
@@ -234,7 +239,7 @@ class TestManager:
             current_user = current_user_is_manager
             seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
             session.add(seller2)
-            current_user.update_seller_contact_of_customer(session=session, customer=client, new_seller=seller2)
+            Manager().update_seller_contact_of_customer(customer=client, new_seller=seller2)
             assert client.seller_contact == seller2
             assert contract.seller == client.seller_contact
 

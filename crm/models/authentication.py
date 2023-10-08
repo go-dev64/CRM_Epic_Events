@@ -88,13 +88,9 @@ class Authentication:
         Returns:
             {dict}: dictionnaire within id, name and department of user.
         """
-        try:
-            headres_token = jwt.get_unverified_header(token)
-            token_decoded = jwt.decode(token, key=token_key, algorithms=[headres_token["alg"]])
-        except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError):
-            return print("totot")
-        else:
-            return token_decoded
+        headres_token = jwt.get_unverified_header(token)
+        token_decoded = jwt.decode(token, key=token_key, algorithms=[headres_token["alg"]])
+        return token_decoded
 
     @staticmethod
     def is_authenticated(func):
@@ -111,18 +107,16 @@ class Authentication:
         @wraps(func)
         def validation_token(*args, **kwargs):
             try:
-                user = kwargs["session"].current_user
-                token_decoded = Authentication.decode_token(token=user.token)
+                session = kwargs["session"]
+                user = session.current_user
+                Authentication.decode_token(token=user.token)
             except AttributeError:
                 return None
             else:
-                if token_decoded is not None:
-                    kwargs["session"].current_user = Authentication.get_token(user)
-                    value = func(*args, **kwargs)
-                    return value
-                else:
-                    print("token decode eror")
-                    return None
+                session.current_user = Authentication.get_token(user)
+                session.current_user_department = type(user).__name__
+                value = func(*args, **kwargs)
+                return value
 
         return validation_token
 

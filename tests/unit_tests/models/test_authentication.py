@@ -98,8 +98,8 @@ class TestAuthentication:
     def test_decode_token_with_bad_key(self):
         # test should return None with wrong key.
         auth = Authentication()
-        user_token_decoded = auth.decode_token(TOKEN, token_key="toto")
-        assert user_token_decoded == None
+        with pytest.raises(jwt.DecodeError):
+            auth.decode_token(TOKEN, token_key="toto")
 
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_login_with_wrong_email_and_good_password(self, db_session, users, email, user_name, password):
@@ -123,23 +123,21 @@ class TestAuthentication:
     def _foo(self, *args, **kwargs):
         return True
 
-    def test_decorator_is_authenticated(self, db_session):
+    def test_decorator_is_authenticated(self, db_session, current_user_is_manager):
         # Test should return True if user have a valid token.
         with db_session as session:
-            user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
-            user_manager.token = TOKEN
-            session.current_user = user_manager
+            current_user_is_manager
             result_excepted = self._foo(session=session)
             assert result_excepted == True
 
-    def test_decorator_is_authenticated_without_token(self, db_session):
+    def test_decorator_is_authenticated_without_token(self, db_session, mocker):
         # Test should return None.
         with db_session as session:
             user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
             user_manager.token = "xx"
             session.current_user = user_manager
-            result_excepted = self._foo(session=session)
-            assert result_excepted == None
+            with pytest.raises(jwt.DecodeError):
+                self._foo(session=session)
 
     def test__password_validator_with_good_password(
         self,

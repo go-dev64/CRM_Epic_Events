@@ -54,7 +54,6 @@ class UserController:
                 case 4:
                     break
 
-    @auth.is_authenticated
     def user_choice_is_creating(self, session):
         """
         Function redirect to create function of user's departement.
@@ -104,13 +103,13 @@ class UserController:
                 case 4:
                     break
 
-    @auth.is_authenticated
     def user_choice_is_updating(self, session):
         """Function redirect to updating function of user's department.
 
         Returns:
             _type_: Updating function.
         """
+        print("test user user_choice_is_updating _current user:", session.current_user_department)
         match session.current_user_department:
             case "Manager":
                 self.manager_controller.update_element(session=session)
@@ -129,7 +128,6 @@ class UserController:
         Returns:
             _type_: Delete function of department.
         """
-
         match session.current_user_department:
             case "Manager":
                 self.manager_controller.delete_collaborator(session=session)

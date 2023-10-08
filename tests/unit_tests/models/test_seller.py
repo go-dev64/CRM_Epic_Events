@@ -105,9 +105,7 @@ class TestSeller:
         with db_session as session:
             customer = clients[0]
             current_user = current_user_is_seller
-            current_user.update_customer(
-                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
-            )
+            current_user.update_customer(customer=customer, attribute_update=attribute_update, new_value=new_value)
             assert getattr(customer, attribute_update) == new_value
             assert customer.updated_date != None
 
@@ -126,9 +124,7 @@ class TestSeller:
         with db_session as session:
             customer = clients[0]
             current_user_is_seller
-            Seller().update_customer(
-                session=session, customer=customer, attribute_update=attribute_update, new_value=new_value
-            )
+            Seller().update_customer(customer=customer, attribute_update=attribute_update, new_value=new_value)
             assert getattr(customer, attribute_update) != new_value
             assert customer.updated_date == None
 
@@ -141,9 +137,7 @@ class TestSeller:
         with db_session as session:
             contract = contracts[0]
             current_user = current_user_is_seller
-            current_user.update_contract(
-                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
-            )
+            current_user.update_contract(contract=contract, attribute_update=attribute_update, new_value=new_value)
             assert getattr(contract, attribute_update) == new_value
 
     @pytest.mark.parametrize(
@@ -164,9 +158,7 @@ class TestSeller:
         with db_session as session:
             contract = contracts[0]
             current_user = current_user_is_seller
-            current_user.update_contract(
-                session=session, contract=contract, attribute_update=attribute_update, new_value=new_value
-            )
+            current_user.update_contract(contract=contract, attribute_update=attribute_update, new_value=new_value)
             assert getattr(contract, attribute_update) != new_value
 
     def test_attribute_to_display(self):

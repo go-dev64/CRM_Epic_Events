@@ -71,7 +71,7 @@ class UserView:
         restrictions = [
             x
             for x in User().availables_attribue_list()
-            if x.get("attribute_name") not in ["password", "email_address" "department"]
+            if x.get("attribute_name") not in ["password", "email_address", "department"]
         ]
         self.generic_view.header(
             department=session.current_user_department, current_user=session.current_user.name, section=section
