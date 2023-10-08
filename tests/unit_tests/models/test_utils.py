@@ -1,6 +1,7 @@
 import pytest
 from pytest_mock import mocker
 from sqlalchemy import select
+from crm.models.customer import Customer
 from crm.models.element_administratif import Address
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
@@ -123,7 +124,7 @@ class TestUtils:
         with db_session as session:
             users
             current_user_is_user
-            result = Utils().check_email_is_unique(session=session, email=clients[0].email_address)
+            result = Utils().check_customer_email_is_unique(session=session, email=clients[0].email_address)
             assert result == False
 
     def test_check_mail_is_unique_with_unique_email(self, db_session, users, current_user_is_user):
@@ -131,5 +132,5 @@ class TestUtils:
         with db_session as session:
             users
             current_user_is_user
-            result = Utils().check_email_is_unique(session=session, email="unique_email@123.com")
+            result = Utils().check_customer_email_is_unique(session=session, email="unique_email@123.com")
             assert result == True

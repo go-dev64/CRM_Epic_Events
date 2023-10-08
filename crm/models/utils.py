@@ -2,7 +2,7 @@ from sqlalchemy import select
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
 from crm.models.element_administratif import Address
-from crm.models.exceptions import EmailError
+from crm.models.exceptions import EmailError, EmailUniqueError
 from crm.view.generic_view import GenericView
 
 
@@ -26,10 +26,10 @@ class Utils:
 
     def check_customer_email_is_unique(self, session, email):
         try:
-            customer_mail = session.scalars(select(Customer).where(Customer.email_address == email))
-            if customer_mail != None:
-                raise EmailError()
-        except EmailError:
+            customer_mail = len(session.scalars(select(Customer).where(Customer.email_address == email)).all())
+            if customer_mail > 0:
+                raise EmailUniqueError()
+        except EmailUniqueError:
             return False
         else:
             return True

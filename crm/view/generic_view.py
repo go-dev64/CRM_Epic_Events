@@ -394,7 +394,7 @@ class GenericView:
                 if Authentication()._password_validator(password) is None:
                     raise PasswordError()
             except PasswordError as msg:
-                self.console().print(f"{msg}")
+                self.console.print(f"{msg}")
             else:
                 break
         return password

@@ -61,9 +61,7 @@ class SellerController:
             _type_: a new instance of Customer class.
         """
         section = " Create new Customer"
-        customer_info = self.seller_view.get_info_customer_view(
-            department=session.current_user_department, current_user_name=session.current_user.name
-        )
+        customer_info = self.seller_view.get_info_customer_view(session=session)
         if self.generic_view.ask_comfirmation(message=section):
             new_customer = Seller().create_new_customer(session=session, customer_info=customer_info)
             self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")

@@ -564,9 +564,7 @@ class TestManagerController:
             ManagerController().change_attribute_contract(
                 session=session, attribute_selected=name, contract_selected=contracts[0]
             )
-            mock_update.assert_called_once_with(
-                session=session, contract=contracts[0], attribute_update=name, new_value=new_value
-            )
+            mock_update.assert_called_once_with(contract=contracts[0], attribute_update=name, new_value=new_value)
             mock_confirm.assert_called_once_with(
                 session=session, section=" Update Contract", msg="Operation succesfull!"
             )

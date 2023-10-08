@@ -202,19 +202,31 @@ class TestUserController:
             elif user == "Supporter":
                 mock_suporter.assert_called_once()
 
-    @pytest.mark.parametrize("user", [("Manager"), ("Seller"), ("Supporter")])
-    def test_user_choice_is_deleting(self, db_session, users, current_user_is_user, mocker, user):
+    def test_user_choice_is_deleting(self, db_session, users, current_user_is_manager, mocker):
+        # test check if the wright function is returned according to current user's department.
         with db_session as session:
             users
-            current_user_is_user
-            session.current_user_department = user
+            current_user_is_manager
             mock_manager = mocker.patch.object(ManagerController, "delete_collaborator")
             mock_generic = mocker.patch.object(GenericView, "forbidden_acces")
-
             UserController().user_choice_is_deleting(session=session)
-            if user == "Manager":
-                mock_manager.assert_called_once()
-            elif user == "Seller":
-                mock_generic.assert_called_once()
-            elif user == "Supporter":
-                mock_generic.assert_called_once()
+
+            mock_manager.assert_called_once()
+
+    def test_user_choice_is_deleting_seller(self, db_session, users, current_user_is_seller, mocker):
+        # test check if the wright function is returned according to current user's department.
+        with db_session as session:
+            users
+            current_user_is_seller
+            mock_generic = mocker.patch.object(GenericView, "forbidden_acces")
+            UserController().user_choice_is_deleting(session=session)
+            mock_generic.assert_called_once()
+
+    def test_user_choice_is_deleting_supporter(self, db_session, users, current_user_is_supporter, mocker):
+        # test check if the wright function is returned according to current user's department.
+        with db_session as session:
+            users
+            current_user_is_supporter
+            mock_generic = mocker.patch.object(GenericView, "forbidden_acces")
+            UserController().user_choice_is_deleting(session=session)
+            mock_generic.assert_called_once()

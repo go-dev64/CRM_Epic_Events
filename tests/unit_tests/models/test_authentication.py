@@ -4,6 +4,7 @@ import os
 import jwt
 import pytest
 from dotenv import load_dotenv
+from crm.controller.reconnect_controller import ReconnectingUser
 from crm.models.authentication import Authentication
 from crm.models.users import Manager
 
@@ -123,23 +124,22 @@ class TestAuthentication:
     def _foo(self, *args, **kwargs):
         return True
 
-    def test_decorator_is_authenticated(self, db_session):
+    def test_decorator_is_authenticated(self, db_session, current_user_is_manager):
         # Test should return True if user have a valid token.
         with db_session as session:
-            user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
-            user_manager.token = TOKEN
-            session.current_user = user_manager
+            current_user_is_manager
             result_excepted = self._foo(session=session)
             assert result_excepted == True
 
-    def test_decorator_is_authenticated_without_token(self, db_session):
+    def test_decorator_is_authenticated_without_token(self, db_session, mocker):
         # Test should return None.
         with db_session as session:
             user_manager = Manager(name="manager", email_address="manager@gmail.com", phone_number="+0335651")
             user_manager.token = "xx"
             session.current_user = user_manager
-            result_excepted = self._foo(session=session)
-            assert result_excepted == None
+            mock_reconnect = mocker.patch.object(ReconnectingUser, "reconneting_choice")
+            self._foo(session=session)
+            mock_reconnect.assert_colled_once_with(session=session, user_expired=user_manager)
 
     def test__password_validator_with_good_password(
         self,

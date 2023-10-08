@@ -1,26 +1,28 @@
 from crm.controller.db_controller import Database
 from crm.controller.login_controller import LoginController
 from crm.controller.user_controller import UserController
-from crm.models.utils import Utils
+from crm.models.exceptions import SessionEnd
 from crm.models.sentry import Sentry
+from crm.view.generic_view import GenericView
 
 
-Sentry().sentry_skd()
+# Sentry().sentry_skd()
 
 
 def main():
     db = Database()
 
     db_session = db.create_session()
-    with db_session.begin() as session:
-        # db.create_popultaes(session=session)
-        user = LoginController().user_login(session=session)
-        session.current_user = user
-        current_user_department = Utils().get_type_of_user(user=user)
-        session.current_user_department = current_user_department
-        UserController().home_page(session=session)
-        session.current_user = None
-        session.current_user_department = None
+    try:
+        with db_session.begin() as session:
+            # db.create_popultaes(session=session)
+            LoginController().user_login(session=session)
+            UserController().home_page(session=session)
+            session.current_user = None
+            session.current_user_department = None
+    except SessionEnd as msg:
+        GenericView().confirmation_msg(session=session, section="disconnect", msg=msg)
+    finally:
         session.commit()
         session.close()
 

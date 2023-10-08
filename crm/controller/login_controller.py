@@ -1,6 +1,7 @@
-from crm.controller.manager_controller import ManagerController
 from crm.models.authentication import Authentication
 from crm.models.exceptions import EmailError, PasswordError
+from crm.models.users import User
+from crm.models.utils import Utils
 from crm.view.login_view import LoginView
 import time
 
@@ -11,11 +12,10 @@ class LoginController:
     def __init__(self) -> None:
         self.login_view = LoginView()
         self.auth = Authentication()
-        self.manager = ManagerController()
 
     def user_login(self, session):
         """
-        Function enabling to log up a user.
+        Function enabling to log up a user and pass like main user of session.
 
         Raises:
             EmailError: If email is invalid or unknow.
@@ -39,6 +39,17 @@ class LoginController:
                 msg = error_mesage
 
             else:
-                self.login_view.authentication_ok()
-                time.sleep(2)
-                return self.auth.get_token(user)
+                return user
+
+    def define_main_user_of_session(self, session, user_connected: User) -> None:
+        """The fonction define the main user session and this department.
+
+        Args:
+            session (_type_): _description_
+            user_connected (User): User connected.
+        """
+        main_user = self.auth.get_token(user_connected)
+        session.current_user = main_user
+        session.current_user_department = Utils().get_type_of_user(user=main_user)
+        self.login_view.authentication_ok()
+        time.sleep(2)
