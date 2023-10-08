@@ -198,6 +198,28 @@ class TestManagerController:
             ManagerController().display_all_event_without_supporter(session=session)
             mock_display_elements.assert_called_once()
 
+    def test_display_customer_without_seller(self, db_session, users, current_user_is_manager, mocker):
+        # test should call a display_customer_without_seller.
+        with db_session as session:
+            users
+            current_user_is_manager
+            list_collab = ["A", "B", "C"]
+            mocker.patch("crm.models.users.Manager.get_customer_without_seller", return_value=list_collab)
+            mock_display_elements = mocker.patch.object(GenericView, "display_elements")
+            ManagerController().display_customer_without_seller(session=session)
+            mock_display_elements.assert_called_once()
+
+    def test_display_customer_without_seller_with_no_data(self, db_session, users, current_user_is_manager, mocker):
+        # test should call a message no data.
+        with db_session as session:
+            users
+            current_user_is_manager
+            list_collab = []
+            mocker.patch("crm.models.users.Manager.get_customer_without_seller", return_value=list_collab)
+            mock_display_elements = mocker.patch.object(GenericView, "no_data_message")
+            ManagerController().display_customer_without_seller(session=session)
+            mock_display_elements.assert_called_once()
+
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_display_event(self, db_session, users, current_user_is_manager, mocker, choice):
         # test should return a good element to display according to user 's choice.
@@ -216,16 +238,19 @@ class TestManagerController:
             elif choice == 1:
                 mock_display_all_event_without_supporter.assert_called_once()
 
-    @pytest.mark.parametrize("choice", [(0), (1), (2), (3)])
+    @pytest.mark.parametrize("choice", [(0), (1), (2), (3), (4)])
     def test_update_element(self, db_session, users, current_user_is_manager, mocker, choice):
         # test should a return a good function according to user's choice.
         with db_session as session:
             users
             current_user_is_manager
             mock_choice = mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view")
-            mock_choice.side_effect = [choice, 4]
+            mock_choice.side_effect = [choice, 5]
             mock_collaborator = mocker.patch.object(ManagerController, "update_collaborator")
             mock_contract = mocker.patch.object(ManagerController, "update_contract")
+            mock_update_customer_without_seller = mocker.patch.object(
+                ManagerController, "update_customer_without_seller"
+            )
             mock_update_event = mocker.patch.object(ManagerController, "update_event")
             mock_update_address = mocker.patch.object(Utils, "update_address")
             ManagerController().update_element(session=session)
@@ -234,8 +259,10 @@ class TestManagerController:
             elif choice == 1:
                 mock_contract.assert_called_once()
             elif choice == 2:
-                mock_update_event.assert_called_once()
+                mock_update_customer_without_seller.assert_called_once()
             elif choice == 3:
+                mock_update_event.assert_called_once()
+            elif choice == 4:
                 mock_update_address.assert_called_once()
 
     @pytest.mark.parametrize("collaborator", [("Manager"), ("Seller"), ("Supporter")])
@@ -641,6 +668,87 @@ class TestManagerController:
             mock_change = mocker.patch.object(ManagerController, "change_attribute_contract")
             ManagerController().update_contract(session=session)
             mock_change.assert_called_once()
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_customer_without_seller(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return wright supporter.
+        with db_session as session:
+            users
+            current_user_is_manager
+            list_collab = ["A", "B", "C"]
+            mocker.patch("crm.models.users.Manager.get_customer_without_seller", return_value=list_collab)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
+            result = ManagerController().select_customer_without_seller(session=session)
+            assert result == list_collab[choice]
+
+    def test_select_customer_without_seller_with_no_data(self, db_session, users, current_user_is_manager, mocker):
+        # test should reti=urn None with empty list.
+        with db_session as session:
+            users
+            current_user_is_manager
+            list_collab = []
+            mocker.patch("crm.models.users.Manager.get_customer_without_seller", return_value=list_collab)
+            result = ManagerController().select_customer_without_seller(session=session)
+            assert result == None
+
+    @pytest.mark.parametrize("choice", [(0), (1)])
+    def test_select_seller(self, db_session, users, current_user_is_manager, mocker, choice):
+        # test should return wright supporter.
+        with db_session as session:
+            users
+            current_user_is_manager
+            list_collab = ["A", "B", "C"]
+            mocker.patch("crm.controller.manager_controller.ManagerController.get_seller", return_value=list_collab)
+            mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=choice)
+            result = ManagerController().select_seller(session=session)
+            assert result == list_collab[choice]
+
+    def test_select_seller_with_no_data(self, db_session, users, current_user_is_manager, mocker):
+        # test should reti=urn None with empty list.
+        with db_session as session:
+            users
+            current_user_is_manager
+            list_collab = []
+            mocker.patch("crm.controller.manager_controller.ManagerController.get_seller", return_value=list_collab)
+            result = ManagerController().select_seller(session=session)
+            assert result == None
+
+    def test_update_customer_without_seller(self, db_session, users, clients, current_user_is_manager, mocker):
+        with db_session as session:
+            users
+            current_user_is_manager
+            client = clients[0]
+            seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+            session.add(seller2)
+            mocker.patch(
+                "crm.controller.manager_controller.ManagerController.select_customer_without_seller",
+                return_value=client,
+            )
+            mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
+            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mocker.patch("crm.controller.manager_controller.ManagerController.select_seller", return_value=seller2)
+            ManagerController().update_customer_without_seller(session=session)
+            assert client.seller_contact == seller2
+            mock_confirm.assert_called_once()
+
+        def test_update_customer_without_seller_no_confirm(
+            self, db_session, users, clients, current_user_is_manager, mocker
+        ):
+            with db_session as session:
+                users
+                current_user_is_manager
+                client = clients[0]
+                seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
+                session.add(seller2)
+                mocker.patch(
+                    "crm.controller.manager_controller.ManagerController.select_customer_without_seller",
+                    return_value=seller2,
+                )
+                mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=False)
+                mock_confirm = mocker.patch.object(GenericView, "no_data_message")
+                mocker.patch("crm.controller.manager_controller.ManagerController.select_seller", return_value=seller2)
+                ManagerController().update_customer_without_seller(session=session)
+                mock_confirm.assert_called_once()
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_supporter(self, db_session, users, current_user_is_manager, mocker, choice):
