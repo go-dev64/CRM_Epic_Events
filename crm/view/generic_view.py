@@ -405,7 +405,7 @@ class GenericView:
         elif attribute_dict["parametre"]["type"] == int:
             new_value = self.integer_form(restriction=attribute_dict)
         elif attribute_dict["parametre"]["type"] == bool:
-            new_value = self.bool_form(restriction=attribute_dict)
+            new_value = self.bool_form()
         elif attribute_dict["parametre"]["type"] == "date":
             new_value = self.date_form(restriction=attribute_dict)
 
@@ -416,7 +416,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        msg = Panel(Text(":cross: You have not permission for that! Sorry :cross:"), style="red")
+        msg = Panel(Text(":cross_mark: You have not permission for that! Sorry :cross_mark:"), style="red")
         self.console.print(msg)
         time.sleep(3)
 
@@ -425,9 +425,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        self.console.print("")
-        messsage = Panel(Text(f"✅ {msg} ✅", justify="center"))
-        self.console.print(messsage)
+        self.console.print(f"✅ {msg} ✅", justify="center")
         time.sleep(3)
 
     def no_data_message(self, session, section, msg):
@@ -435,9 +433,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        self.console.print("")
-        messsage = Panel(Text(f"{msg}", justify="center"))
-        self.console.print(messsage)
+        self.console.print(f"{msg}", justify="center")
         time.sleep(3)
 
     def ask_comfirmation(self, message: str) -> True or False:

@@ -423,13 +423,17 @@ class Seller(User):
         return available_contracts_list
 
     def get_unsigned_contracts(self, session) -> list:
-        # Function return all unsigned contracts.
-        unsigned_contracts_list = session.scalars(select(Contract).where(Contract.signed_contract == False)).all()
+        # Function return all unsigned contracts managed by current user.
+        unsigned_contracts_list = session.scalars(
+            select(Contract).where((Contract.seller == session.current_user) & (Contract.signed_contract == False))
+        ).all()
         return unsigned_contracts_list
 
     def get_unpayed_contracts(self, session) -> list:
-        # Function return all unpayed contracts.
-        unpayed_contracts_list = session.scalars(select(Contract).where(Contract.remaining > 0)).all()
+        # Function return all unpayed contracts managed by current user.
+        unpayed_contracts_list = session.scalars(
+            select(Contract).where((Contract.seller == session.current_user) & (Contract.remaining > 0))
+        ).all()
         return unpayed_contracts_list
 
     def create_new_customer(self, session, customer_info: dict) -> Customer:

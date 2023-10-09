@@ -115,8 +115,7 @@ class TestSellerController:
             users
             current_user_is_seller
             seller = SellerController()
-            element_list = None
-            mocker.patch("crm.models.users.Seller.get_all_adress", return_value=element_list)
+            mocker.patch("crm.models.utils.Utils.select_address", return_value=None)
             mocker.patch("crm.models.utils.Utils.create_new_address", return_value="toto")
             mock_message = mocker.patch.object(GenericView, "no_data_message")
             result = seller.select_address_of_event(session=session)

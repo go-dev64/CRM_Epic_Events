@@ -117,12 +117,15 @@ class TestGenericView:
         with db_session as session:
             clients
             current_user_is_user
-            mocker.patch("crm.view.generic_view.GenericView.display_table_of_elements")
-            mocker.patch("crm.view.generic_view.GenericView.display_detail_element")
+            mocker.patch("rich.prompt.Confirm.ask", return_value=True)
+            mock_select_element = mocker.patch.object(GenericView, "_select_element_in_list")
+
+            mock_display_details = mocker.patch.object(GenericView, "display_detail_element")
             result = GenericView().display_elements(
                 session, elements_list=clients, session=session, title_table="", msg=""
             )
-            assert result == 1
+            mock_select_element.assert_called_once()
+            mock_display_details.assert_called_once()
 
     def test_display_detail_element_with_customer(self, mocker, db_session, clients, current_user_is_user, capsys):
         # test dislpay customer details.

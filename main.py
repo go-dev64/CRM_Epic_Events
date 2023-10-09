@@ -6,7 +6,7 @@ from crm.models.sentry import Sentry
 from crm.view.generic_view import GenericView
 
 
-# Sentry().sentry_skd()
+# sentry = Sentry().sentry_skd()
 
 
 def main():
@@ -22,8 +22,14 @@ def main():
                 UserController().home_page(session=session)
                 session.current_user = None
                 session.current_user_department = None
-        except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError):
+        except (jwt.InvalidTokenError, jwt.InvalidSignatureError, jwt.ExpiredSignatureError, jwt.DecodeError) as e:
             GenericView().console.print("session expired. Disconned!")
+            # sentry.capture_exception(e)
+        except KeyboardInterrupt as e:
+            GenericView().console.print("Programme Stopped!")
+        except Exception as e:
+            GenericView().console.print("OOoops, an error has occurred, session disconnected")
+            # sentry.capture_exception(e)
         finally:
             session.commit()
             session.close()

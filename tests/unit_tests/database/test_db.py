@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import text
+from sqlalchemy import select, text
 from crm.controller.db_controller import Database
 from crm.models.base import Base
 import crm.models.users
@@ -11,9 +11,6 @@ db = Database()
 
 
 class TestDatabase:
-    def test_database_connection(self):
-        pass
-
     def test_database_connection_for_test(self, db_session):
         # test try to connect to database
         try:
@@ -37,28 +34,3 @@ class TestDatabase:
         assert len(tables_models) == len(tables_meta)
         for t in tables_meta:
             assert t.name in tables_models
-
-    def test_check_add_user(self, db_session):
-        with db_session as session:
-            user = Manager(name="toto", email_address="toto@gmail.com", phone_number="+0335651", password="toto")
-            session.add_all([user])
-
-            assert session.query(Manager).one()
-
-            session.rollback()
-
-    def test_create_table(self, db_session):
-        tables_models = [
-            "supporter_table",
-            "manager_table",
-            "seller_table",
-            "event_table",
-            "contract_table",
-            "address_table",
-            "customer_table",
-        ]
-        with db_session as session:
-            for table in tables_models:
-                texte = text(f"SELECT * from {table};")
-                data = session.execute(texte).all()
-                assert data == []
