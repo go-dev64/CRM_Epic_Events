@@ -4,7 +4,6 @@ from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
-from urllib.parse import unquote
 from crm.models.element_administratif import Event, Contract
 from crm.models.base import Base, intpk, required_name, timestamp
 
@@ -42,7 +41,8 @@ class Customer(Base):
 
     def attribute_to_display(self) -> list:
         """Function return all attribute availble to be displayed.
-        ["name", "email_address", "phone_number", "company", "seller_contact", "created_date", "updated_date", "contracts", "events"]
+        ["name", "email_address", "phone_number", "company", "seller_contact",
+        "created_date", "updated_date", "contracts", "events"]
 
         Returns:
             list: List of attribute name.

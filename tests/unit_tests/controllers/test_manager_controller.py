@@ -1,7 +1,6 @@
 import pytest
 from sqlalchemy import select
 from crm.controller.manager_controller import ManagerController
-from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
@@ -128,7 +127,7 @@ class TestManagerController:
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
             mock_contract = mocker.patch.object(Manager, "create_new_contract")
             mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
-            result = ManagerController().create_new_contract(session=session)
+            ManagerController().create_new_contract(session=session)
             mock_contract.assert_called_once_with(session=session, contract_info=self.info_contract)
             mock_confirm.assert_called_once_with(
                 section="Create new Contract", session=session, msg="Operation succesfull!"
@@ -268,7 +267,7 @@ class TestManagerController:
     @pytest.mark.parametrize("collaborator", [("Manager"), ("Seller"), ("Supporter")])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, mocker, collaborator):
         # test should return available department list for change user's department.
-        with db_session as session:
+        with db_session:
             user = users[0]
             current_user_is_manager
             manager = ManagerController()
@@ -323,7 +322,7 @@ class TestManagerController:
 
             mocker.patch("crm.models.users.Manager.get_all_users", return_value=list_collab)
             result = ManagerController().select_collaborator(session=session)
-            assert result == None
+            assert result is None
 
     def test_change_collaborator_department(self, db_session, users, current_user_is_manager, mocker):
         with db_session as session:
@@ -517,7 +516,7 @@ class TestManagerController:
             list_collab = []
             mocker.patch("crm.models.users.Manager.get_all_contracts", return_value=list_collab)
             result = ManagerController().select_contract(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_change_customer_contract(
@@ -689,7 +688,7 @@ class TestManagerController:
             list_collab = []
             mocker.patch("crm.models.users.Manager.get_customer_without_seller", return_value=list_collab)
             result = ManagerController().select_customer_without_seller(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_seller(self, db_session, users, current_user_is_manager, mocker, choice):
@@ -711,7 +710,7 @@ class TestManagerController:
             list_collab = []
             mocker.patch("crm.controller.manager_controller.ManagerController.get_seller", return_value=list_collab)
             result = ManagerController().select_seller(session=session)
-            assert result == None
+            assert result is None
 
     def test_update_customer_without_seller(self, db_session, users, clients, current_user_is_manager, mocker):
         with db_session as session:
@@ -737,7 +736,7 @@ class TestManagerController:
             with db_session as session:
                 users
                 current_user_is_manager
-                client = clients[0]
+                clients[0]
                 seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
                 session.add(seller2)
                 mocker.patch(
@@ -770,7 +769,7 @@ class TestManagerController:
             list_collab = []
             mocker.patch("crm.models.users.Manager.get_all_supporter", return_value=list_collab)
             result = ManagerController().select_supporter(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize("choice", [(0), (1)])
     def test_select_event(self, db_session, users, current_user_is_manager, mocker, choice):
@@ -792,7 +791,7 @@ class TestManagerController:
             list_collab = []
             mocker.patch("crm.models.users.Manager.get_all_events", return_value=list_collab)
             result = ManagerController().select_event(session=session)
-            assert result == None
+            assert result is None
 
     def test_update_event_with_no_event(self, db_session, users, current_user_is_manager, mocker):
         # Test should retrun a event with supporter updated.

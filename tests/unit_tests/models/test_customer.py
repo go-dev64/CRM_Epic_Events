@@ -1,4 +1,3 @@
-import pytest
 from crm.models.customer import Customer
 
 

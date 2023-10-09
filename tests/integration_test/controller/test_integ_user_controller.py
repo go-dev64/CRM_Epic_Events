@@ -1,5 +1,4 @@
 import pytest
-from crm.controller.seller_controller import SellerController
 
 from crm.controller.user_controller import UserController
 from crm.view.generic_view import GenericView

@@ -2,7 +2,7 @@ from sqlalchemy import select
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
 from crm.models.element_administratif import Address
-from crm.models.exceptions import EmailError, EmailUniqueError
+from crm.models.exceptions import EmailUniqueError
 from crm.view.generic_view import GenericView
 
 

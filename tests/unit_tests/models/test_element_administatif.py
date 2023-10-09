@@ -1,4 +1,3 @@
-import pytest
 from crm.models.element_administratif import Address, Contract, Event
 
 

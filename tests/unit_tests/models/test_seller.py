@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
 from sqlalchemy import select
+from crm.models.element_administratif import Contract
 from crm.models.users import Event, Seller
 from crm.models.customer import Customer
 
@@ -12,7 +13,9 @@ class TestSeller:
             clients
             current_user = current_user_is_seller
             clients_list = current_user.get_all_clients_of_user(session=session)
-            result_excepted = 2
+            result_excepted = len(
+                session.scalars(select(Customer).where(Customer.seller_contact == current_user)).all()
+            )
             assert len(clients_list) == result_excepted
 
     def test_get_all_contracts_of_user(self, db_session, contracts, current_user_is_seller):
@@ -21,7 +24,7 @@ class TestSeller:
             contracts
             current_user = current_user_is_seller
             contracts_list = current_user.get_all_contracts_of_user(session=session)
-            result_excepted = 2
+            result_excepted = len(session.scalars(select(Contract).where(Contract.seller == current_user)).all())
             assert len(contracts_list) == result_excepted
 
     def test_get_unsigned_contracts(self, db_session, contracts, current_user_is_seller):
@@ -29,8 +32,14 @@ class TestSeller:
         with db_session as session:
             contracts
             current_user = current_user_is_seller
-            unsigned_contracts_list = current_user.get_all_contracts_of_user(session=session)
-            result_excepted = 2
+            unsigned_contracts_list = Seller().get_unsigned_contracts(session=session)
+            result_excepted = len(
+                session.scalars(
+                    select(Contract).where(
+                        (Contract.seller == current_user) & (Contract.signed_contract == False)  # noqa
+                    )  # noqa
+                ).all()
+            )
             assert len(unsigned_contracts_list) == result_excepted
 
     def test_get_unpayed_contracts(self, db_session, contracts, current_user_is_seller):
@@ -39,7 +48,11 @@ class TestSeller:
             contracts
             current_user = current_user_is_seller
             unpayed_contracts_list = current_user.get_unpayed_contracts(session=session)
-            result_excepted = 1
+            result_excepted = len(
+                session.scalars(
+                    select(Contract).where((Contract.seller == current_user) & (Contract.remaining > 0))
+                ).all()
+            )
             assert len(unpayed_contracts_list) == result_excepted
 
     def test_get_all_contract_available_for_event(self, db_session, contracts, current_user_is_seller):
@@ -50,7 +63,15 @@ class TestSeller:
             contracts
             current_user = current_user_is_seller
             contract_available = current_user.get_all_contracts_of_user_without_event(session=session)
-            result_excepted = 1
+            result_excepted = len(
+                session.scalars(
+                    select(Contract).where(
+                        (Contract.seller == current_user)
+                        & (Contract.signed_contract == True)  # noqa
+                        & (Contract.event == None)  # noqa
+                    )
+                ).all()
+            )
             assert len(contract_available) == result_excepted
 
     # ------------- Test Create Functions ---------#
@@ -102,12 +123,12 @@ class TestSeller:
     )
     def test_update_customers(self, db_session, clients, current_user_is_seller, attribute_update, new_value):
         # Test dhould return a customer updated.
-        with db_session as session:
+        with db_session:
             customer = clients[0]
             current_user = current_user_is_seller
             current_user.update_customer(customer=customer, attribute_update=attribute_update, new_value=new_value)
             assert getattr(customer, attribute_update) == new_value
-            assert customer.updated_date != None
+            assert customer.updated_date is not None
 
     @pytest.mark.parametrize(
         "attribute_update, new_value",
@@ -121,12 +142,12 @@ class TestSeller:
         self, db_session, clients, current_user_is_seller, attribute_update, new_value
     ):
         # Test dhould return a customer updated.
-        with db_session as session:
+        with db_session:
             customer = clients[0]
             current_user_is_seller
             Seller().update_customer(customer=customer, attribute_update=attribute_update, new_value=new_value)
             assert getattr(customer, attribute_update) != new_value
-            assert customer.updated_date == None
+            assert customer.updated_date is None
 
     @pytest.mark.parametrize(
         "attribute_update, new_value",
@@ -134,7 +155,7 @@ class TestSeller:
     )
     def test_update_contract(self, db_session, contracts, current_user_is_seller, attribute_update, new_value):
         # Test dhould return a customer updated.
-        with db_session as session:
+        with db_session:
             contract = contracts[0]
             current_user = current_user_is_seller
             current_user.update_contract(contract=contract, attribute_update=attribute_update, new_value=new_value)
@@ -155,7 +176,7 @@ class TestSeller:
         self, db_session, contracts, current_user_is_seller, attribute_update, new_value
     ):
         # Test dhould return a customer updated.
-        with db_session as session:
+        with db_session:
             contract = contracts[0]
             current_user = current_user_is_seller
             current_user.update_contract(contract=contract, attribute_update=attribute_update, new_value=new_value)

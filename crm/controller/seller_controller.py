@@ -1,7 +1,7 @@
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
 from crm.models.element_administratif import Address, Contract, Event
-from crm.models.users import Seller, User
+from crm.models.users import Seller
 from crm.models.utils import Utils
 from crm.view.seller_view import SellerView
 from crm.view.generic_view import GenericView
@@ -158,7 +158,7 @@ class SellerController:
         """
         section = " Create New event"
         event_info = self.get_event_info(session=session)
-        if event_info["contract"] != None:
+        if event_info["contract"] is not None:
             if self.generic_view.ask_comfirmation(message=section):
                 new_event = Seller().create_new_event(session=session, event_info=event_info)
                 self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
@@ -464,7 +464,7 @@ class SellerController:
         """
         section = " Update your Customer "
         customer = self.select_customer(session=session)
-        if customer != None:
+        if customer is not None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session, section="Update your Customer/Select Attribute", element=customer
             )
@@ -530,7 +530,7 @@ class SellerController:
         """
         section = " Upadte Contract"
         contract = self.select_contract(session=session)
-        if contract != None:
+        if contract is not None:
             self.change_attribute_of_contract(session=session, contract_selected=contract)
         else:
             self.generic_view.no_data_message(

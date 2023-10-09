@@ -1,5 +1,3 @@
-from datetime import datetime
-import pytest
 from sqlalchemy import select
 from crm.models.element_administratif import Contract, Event
 from crm.models.users import Manager, Seller, Supporter, Address, User

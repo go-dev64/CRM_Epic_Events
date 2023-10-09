@@ -88,7 +88,7 @@ class TestSupportController:
             mocker.patch("crm.models.users.Supporter.get_event_of_supporter", return_value=element_list)
 
             result = SupporterController().select_event(session=session)
-            assert result == None
+            assert result is None
 
     def test_change_addres_of_event(self, db_session, users, current_user_is_supporter, events, mocker):
         # test should return an event with new address.

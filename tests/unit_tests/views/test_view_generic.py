@@ -1,13 +1,9 @@
 from datetime import datetime
-import re
 import pytest
 from crm.models import users
 from crm.view.generic_view import GenericView
-from crm.models.users import Manager, Seller, Supporter
-from rich.layout import Layout
+
 from rich.panel import Panel
-from rich.console import Console
-from rich.prompt import Confirm
 
 
 class TestGenericView:
@@ -73,9 +69,9 @@ class TestGenericView:
         assert "phone_number" == result.columns[3].header
 
     def test_display_table_of_elements(self, capsys, mocker, db_session, users):
-        with db_session as session:
+        with db_session:
             users
-            toto = GenericView().display_table_of_elements(
+            GenericView().display_table_of_elements(
                 section="",
                 department="",
                 current_user_name="",
@@ -100,7 +96,7 @@ class TestGenericView:
         list_element = ["element 1", " element 2", "element 3"]
         GenericView()._select_element_in_list(list_element=list_element)
         out, err = capsys.readouterr()
-        assert out == f"💩 Number must be between 1 and 3\n"
+        assert out == "💩 Number must be between 1 and 3\n"
 
     @pytest.mark.parametrize("result", [(1), (2), (3)])
     def test_select_element_in_menu_view(self, mocker, result):
@@ -121,9 +117,7 @@ class TestGenericView:
             mock_select_element = mocker.patch.object(GenericView, "_select_element_in_list")
 
             mock_display_details = mocker.patch.object(GenericView, "display_detail_element")
-            result = GenericView().display_elements(
-                session, elements_list=clients, session=session, title_table="", msg=""
-            )
+            GenericView().display_elements(session, elements_list=clients, session=session, title_table="", msg="")
             mock_select_element.assert_called_once()
             mock_display_details.assert_called_once()
 
@@ -204,7 +198,7 @@ class TestGenericView:
         restriction = {"attribute_name": "name", "parametre": {"type": str, "max": 2}}
         GenericView().string_form(restriction=restriction)
         out, err = capsys.readouterr()
-        assert out == f"name too long\n\n"
+        assert out == "name too long\n"
 
     def test_integer_form(self, mocker):
         # test should return input if his respect condition(input < 50).
@@ -213,14 +207,14 @@ class TestGenericView:
         result = GenericView().integer_form(restriction=restriction)
         assert result == 12
 
-    def test_string_form_with_bad_input(self, mocker, capsys):
+    def test_integer_form_with_bad_input(self, mocker, capsys):
         # test should return msg "name is toll long  with input > 10).
         mock = mocker.patch("rich.prompt.IntPrompt.ask")
         mock.side_effect = [55, 3]
         restriction = {"attribute_name": "attendees", "parametre": {"type": int, "max": 10}}
         GenericView().integer_form(restriction=restriction)
         out, err = capsys.readouterr()
-        assert out == f"Number must be between 0 and 10\n"
+        assert out == "Number must be between 0 and 10\n"
 
     def test__input_password(self, mocker):
         # test check if password entered is valid. Should return value entered.
@@ -264,13 +258,13 @@ class TestGenericView:
         # test check if is datetime.
         mocker.patch("rich.prompt.Prompt.ask", return_value="10-10-2020")
         result = GenericView().get_date(msg="")
-        assert type(result) == datetime
+        assert type(result) is datetime
 
     def test_get_date_with_bad_input(self, mocker, capsys):
         # test should return error msg.
         mock = mocker.patch("rich.prompt.Prompt.ask")
         mock.side_effect = ["toto", "10-10-2020"]
-        result = GenericView().get_date(msg="")
+        GenericView().get_date(msg="")
         out, err = capsys.readouterr()
         assert "Format date invalid" in out
 
@@ -278,13 +272,13 @@ class TestGenericView:
         # test valid if is hour datetime.
         mocker.patch("rich.prompt.Prompt.ask", return_value="10")
         result = GenericView().get_hour(msg="")
-        assert type(result) == datetime
+        assert type(result) is datetime
 
     def test_get_hour_with_bad_input(self, mocker, capsys):
         # test should return error msg.
         mock = mocker.patch("rich.prompt.Prompt.ask")
         mock.side_effect = ["toto", "10"]
-        result = GenericView().get_hour(msg="")
+        GenericView().get_hour(msg="")
         out, err = capsys.readouterr()
         assert "Format hour invalid" in out
 
@@ -293,7 +287,7 @@ class TestGenericView:
         date = datetime.strptime("10-10-2023", "%d-%m-%Y")
         mocker.patch("crm.view.generic_view.GenericView.get_date", return_value=date)
         result = GenericView().date_validator(msg="")
-        assert type(result) == datetime
+        assert type(result) is datetime
 
     def test_date_validator_with_bad_input(self, mocker, capsys):
         # test should return error msg with date earlier than today.
@@ -318,7 +312,7 @@ class TestGenericView:
 
     @pytest.mark.parametrize("attribute", [("name"), ("email_address"), ("phone_number"), ("password")])
     def test_get_new_value_of_attribute_for_user(self, mocker, db_session, users, current_user_is_manager, attribute):
-        with db_session as session:
+        with db_session:
             users
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.string_form", return_value="value")
@@ -335,7 +329,7 @@ class TestGenericView:
     def test_get_new_value_of_attribute_for_contract(
         self, mocker, db_session, users, current_user_is_manager, contracts, attribute
     ):
-        with db_session as session:
+        with db_session:
             users
             contracts
             current_user_is_manager
@@ -353,7 +347,7 @@ class TestGenericView:
     def test_get_new_value_of_attribute_for_event(
         self, mocker, db_session, users, current_user_is_manager, events, attribute
     ):
-        with db_session as session:
+        with db_session:
             users
             events
             current_user_is_manager
@@ -371,7 +365,7 @@ class TestGenericView:
     def test_get_new_value_of_attribute_for_address(
         self, mocker, db_session, users, current_user_is_manager, address, attribute
     ):
-        with db_session as session:
+        with db_session:
             users
             address
             current_user_is_manager
@@ -389,7 +383,7 @@ class TestGenericView:
     def test_get_new_value_of_attribute_for_customer(
         self, mocker, db_session, users, current_user_is_manager, clients, attribute
     ):
-        with db_session as session:
+        with db_session:
             users
             client = clients[0]
             current_user_is_manager
@@ -404,17 +398,17 @@ class TestGenericView:
             assert result == "value"
 
     def test_ask_confirmation_yes(self, db_session, current_user_is_user, mocker):
-        with db_session as session:
+        with db_session:
             users
             current_user_is_user
             mocker.patch("rich.prompt.Confirm.ask", return_value=True)
             result = GenericView().ask_comfirmation(message="")
-            assert result == True
+            assert result is True
 
     def test_ask_confirmation_no(self, db_session, current_user_is_user, mocker):
-        with db_session as session:
+        with db_session:
             users
             current_user_is_user
             mocker.patch("rich.prompt.Confirm.ask", return_value=False)
             result = GenericView().ask_comfirmation(message="")
-            assert result == False
+            assert result is False

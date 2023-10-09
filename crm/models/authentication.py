@@ -44,7 +44,7 @@ class Authentication:
         """
 
         user = self.get_user_with_email(session, email=email)
-        if user == None:
+        if user is None:
             return None
         else:
             try:
@@ -109,7 +109,9 @@ class Authentication:
             try:
                 session = kwargs["session"]
                 user = session.current_user
-                Authentication.decode_token(token=user.token)
+                token = Authentication.decode_token(token=user.token)
+                if token["sub"] != session.current_user.id and token["department"] != session.current_user_department:
+                    raise jwt.DecodeError()
             except AttributeError:
                 return None
             else:

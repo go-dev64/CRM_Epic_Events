@@ -3,7 +3,6 @@ from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController
 from crm.controller.supporter_controller import SupporterController
 from crm.controller.user_controller import UserController
-from crm.models.users import User
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
 
@@ -208,7 +207,6 @@ class TestUserController:
             users
             current_user_is_manager
             mock_manager = mocker.patch.object(ManagerController, "delete_collaborator")
-            mock_generic = mocker.patch.object(GenericView, "forbidden_acces")
             UserController().user_choice_is_deleting(session=session)
 
             mock_manager.assert_called_once()

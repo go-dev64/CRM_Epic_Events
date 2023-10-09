@@ -137,7 +137,7 @@ class ManagerController:
         """
         section = "Create new Contract"
         contract_info = self.get_info_contract(session=session)
-        if contract_info["customer"] != None:
+        if contract_info["customer"] is not None:
             if self.generic_view.ask_comfirmation(message=section):
                 new_contract = Manager().create_new_contract(session=session, contract_info=contract_info)
                 self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
@@ -449,7 +449,7 @@ class ManagerController:
             _type_: collaborator updated.
         """
         collaborator_selected = self.select_collaborator(session=session)
-        if collaborator_selected != None:
+        if collaborator_selected is not None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session,
                 section="Update Collaborator/Select Attribute to updated",
@@ -552,7 +552,7 @@ class ManagerController:
             Contract: Contract updated.
         """
         contract = self.select_contract(session=session)
-        if contract != None:
+        if contract is not None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session, section=" Update Contract/Select Attribute to updated", element=contract
             )

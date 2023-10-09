@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import datetime
 import time
-from rich import print
-from rich.console import Console, Group
+
+from rich.console import Console
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.prompt import Prompt, IntPrompt, Confirm
@@ -10,10 +10,8 @@ from rich.text import Text
 from rich.color import ANSI_COLOR_NAMES
 
 from crm.models.authentication import Authentication
-from crm.models.customer import Customer
 from crm.models.element_administratif import Address
 from crm.models.exceptions import PasswordError
-from crm.models.users import User
 
 
 class GenericView:
@@ -310,7 +308,7 @@ class GenericView:
                 date_input = Prompt.ask(f"Enter a date of {msg} of event(dd-mm-yyyy):")
                 date_obj = datetime.strptime(date_input, "%d-%m-%Y")
             except ValueError:
-                self.console.print(f"[prompt.invalid] Format date invalid")
+                self.console.print("[prompt.invalid] Format date invalid")
             else:
                 break
         return date_obj
@@ -328,7 +326,7 @@ class GenericView:
                 hour_input = Prompt.ask(f"Enter a hour of {msg} of event(hh-24h):")
                 date_obj = datetime.strptime(hour_input, "%H")
             except ValueError:
-                self.console.print(f"[prompt.invalid] Format hour invalid")
+                self.console.print("[prompt.invalid] Format hour invalid")
             else:
                 break
         return date_obj
@@ -342,12 +340,12 @@ class GenericView:
             datetime: date entered by user.
         """
         while True:
-            date = self.get_date(msg=msg)
-            if date > datetime.today():
+            date_input = self.get_date(msg=msg)
+            if date_input > datetime.today():
                 break
             else:
-                self.console.print(f"[prompt.invalid]the date must be greater than today.")
-        return date
+                self.console.print("[prompt.invalid]the date must be greater than today.")
+        return date_input
 
     def date_form(self, msg: str) -> datetime:
         """The function is used to get date and hour of event by input user.
@@ -358,9 +356,9 @@ class GenericView:
         Returns:
             datetime: return the date.
         """
-        date = self.date_validator(msg=msg)
+        date_input = self.date_validator(msg=msg)
         hour = self.get_hour(msg=msg)
-        complet_date = datetime(year=date.year, month=date.month, day=date.day, hour=hour.hour)
+        complet_date = datetime(year=date_input.year, month=date_input.month, day=date_input.day, hour=hour.hour)
         return complet_date
 
     def _input_password(self) -> str:

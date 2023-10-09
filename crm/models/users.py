@@ -186,11 +186,11 @@ class Manager(User):
         Returns:
             list[Event]: Event list without Supporter.
         """
-        event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()
+        event_without_supporter = session.scalars(select(Event).where(Event.supporter == None)).all()  # noqa
         return event_without_supporter
 
     def get_customer_without_seller(self, session):
-        customers_list = session.scalars(select(Customer).where(Customer.seller_contact == None)).all()
+        customers_list = session.scalars(select(Customer).where(Customer.seller_contact == None)).all()  # noqa
         return customers_list
 
     def create_new_manager(self, session, user_info: dict) -> "Manager":
@@ -283,7 +283,7 @@ class Manager(User):
             print(exc)
             return None
         else:
-            if contract.signed_contract == True:
+            if contract.signed_contract == True:  # noqa
                 logger.info(f"{contract} has been signed.")
             return contract
 
@@ -415,9 +415,9 @@ class Seller(User):
         # The function returns all contracts signed by the seller that are not linked to an event.
         available_contracts_list = session.scalars(
             select(Contract).where(
-                (Contract.seller == session.current_user)
-                & (Contract.signed_contract == True)
-                & (Contract.event == None)
+                (Contract.seller_id == session.current_user.id)
+                & (Contract.signed_contract == True)  # noqa
+                & (Contract.event == None)  # noqa
             )
         ).all()
         return available_contracts_list
@@ -425,7 +425,9 @@ class Seller(User):
     def get_unsigned_contracts(self, session) -> list:
         # Function return all unsigned contracts managed by current user.
         unsigned_contracts_list = session.scalars(
-            select(Contract).where((Contract.seller == session.current_user) & (Contract.signed_contract == False))
+            select(Contract).where(
+                (Contract.seller == session.current_user) & (Contract.signed_contract == False)  # noqa
+            )
         ).all()
         return unsigned_contracts_list
 
@@ -446,7 +448,7 @@ class Seller(User):
                 seller_contact=session.current_user,
             )
             session.add(new_customer)
-        except (KeyError, ValueError) as exc:
+        except (KeyError, ValueError):
             return None
         else:
             return new_customer
@@ -475,7 +477,7 @@ class Seller(User):
             new_event.customer = customer
             session.add(new_event)
 
-        except (KeyError, ValueError) as exc:
+        except (KeyError, ValueError):
             return None
         else:
             return new_event

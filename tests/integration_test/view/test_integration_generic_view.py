@@ -1,9 +1,5 @@
-import re
 import pytest
 from crm.view.generic_view import GenericView
-from crm.models.users import Manager, Seller, Supporter
-from rich.layout import Layout
-from rich.panel import Panel
 
 
 class TestIntGenericView:
@@ -52,7 +48,7 @@ class TestIntGenericView:
             section="", department="", current_user_name=",", list_element=list_element
         )
         out, err = capsys.readouterr()
-        assert f"💩 Number must be between 1 and 3\n" in out
+        assert "💩 Number must be between 1 and 3\n" in out
         assert "element 1" and " element 2" and "element 3" in out
 
     def test__input_password(self, mocker):

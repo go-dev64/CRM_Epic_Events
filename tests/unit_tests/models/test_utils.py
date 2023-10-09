@@ -1,7 +1,5 @@
 import pytest
-from pytest_mock import mocker
 from sqlalchemy import select
-from crm.models.customer import Customer
 from crm.models.element_administratif import Address
 from crm.models.utils import Utils
 from crm.view.generic_view import GenericView
@@ -98,7 +96,7 @@ class TestUtils:
             mocker.patch("crm.models.utils.Utils._select_attribut_of_element", return_value=attribute)
             mocker.patch("crm.view.generic_view.GenericView.get_new_value_of_attribute", return_value=new_value)
             mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
-            result = Utils().update_address(session=session)
+            Utils().update_address(session=session)
             assert getattr(address, attribute) == new_value
             mock_confirm.assert_called_once()
 
@@ -128,7 +126,7 @@ class TestUtils:
             users
             current_user_is_user
             result = Utils().check_customer_email_is_unique(session=session, email=clients[0].email_address)
-            assert result == False
+            assert result is False
 
     def test_check_mail_is_unique_with_unique_email(self, db_session, users, current_user_is_user):
         # test should return True with a no existing email.
@@ -136,4 +134,4 @@ class TestUtils:
             users
             current_user_is_user
             result = Utils().check_customer_email_is_unique(session=session, email="unique_email@123.com")
-            assert result == True
+            assert result is True

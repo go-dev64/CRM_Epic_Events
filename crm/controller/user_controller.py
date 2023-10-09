@@ -1,7 +1,5 @@
 from crm.models.authentication import Authentication
-from crm.models.customer import Customer
-from crm.models.element_administratif import Address, Contract, Event
-from crm.models.users import Supporter, User
+from crm.models.users import User
 from crm.models.utils import Utils
 from crm.controller.manager_controller import ManagerController
 from crm.controller.seller_controller import SellerController

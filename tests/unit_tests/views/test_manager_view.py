@@ -1,4 +1,3 @@
-import pytest
 from crm.view.manager_view import ManagerView
 
 
@@ -19,5 +18,5 @@ class TestManagerView:
         result = ManagerView().get_info_contract_view(department="", current_user_name="")
         assert result.get("total_amount") == 500
         assert result.get("remaining") == 500
-        assert result.get("signed_contract") == True
+        assert result.get("signed_contract") is True
         assert len(result.keys()) == 3

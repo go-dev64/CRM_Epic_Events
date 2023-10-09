@@ -1,4 +1,3 @@
-import pytest
 from crm.controller.supporter_controller import SupporterController
 from crm.view.generic_view import GenericView
 
@@ -61,4 +60,4 @@ class TestIntSupporterController:
             users
             current_user_is_supporter
             result = SupporterController().select_event(session=session)
-            assert result == None
+            assert result is None

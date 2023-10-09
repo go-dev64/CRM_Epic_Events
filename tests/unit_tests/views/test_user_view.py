@@ -1,4 +1,3 @@
-import pytest
 from crm.view.user_view import UserView
 import argon2
 
