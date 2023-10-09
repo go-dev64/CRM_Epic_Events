@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import datetime
 import time
-from rich import print
-from rich.console import Console, Group
+
+from rich.console import Console
 from rich.columns import Columns
 from rich.panel import Panel
 from rich.prompt import Prompt, IntPrompt, Confirm
@@ -10,10 +10,8 @@ from rich.text import Text
 from rich.color import ANSI_COLOR_NAMES
 
 from crm.models.authentication import Authentication
-from crm.models.customer import Customer
 from crm.models.element_administratif import Address
 from crm.models.exceptions import PasswordError
-from crm.models.users import User
 
 
 class GenericView:
@@ -169,24 +167,6 @@ class GenericView:
         index_element = self._select_element_in_list(list_element=list_element)
         return index_element
 
-    def choice_display_details_of_element(
-        self, element_list: list, msg: str = "Do you want to see details of an element of the list?"
-    ):
-        """the function is used to give choice to user to select an element.
-
-        Args:
-            element_list (list): list of element
-            msg (str, optional): _description_. Defaults to "Do you want to see details of an element of the list?".
-
-        Returns:
-            _type_: Index element chossen
-        """
-        if Confirm.ask(f"{msg}", default=True):
-            index_element = self._select_element_in_list(element_list)
-            return index_element
-        else:
-            return False
-
     def display_elements(
         self,
         section,
@@ -215,12 +195,11 @@ class GenericView:
             list_element=elements_list,
             title_table=title_table,
         )
-        index_of_element = self.choice_display_details_of_element(element_list=elements_list, msg=msg)
-        if index_of_element != False:
-            self.display_detail_element(session, element=elements_list[index_of_element], title="")
-            return index_of_element
+        if Confirm.ask(f"{msg}", default=True):
+            index_of_element = self._select_element_in_list(elements_list)
+            self.display_detail_element(session=session, section=section, element=elements_list[index_of_element])
         else:
-            return False
+            pass
 
     def display_detail_element(self, session, section: str, element):
         """Function display details of element.
@@ -270,9 +249,10 @@ class GenericView:
             if restriction["parametre"]["type"] == str:
                 address_info[attribute_name] = self.string_form(restriction=restriction)
             elif restriction["parametre"]["type"] == int:
+                self.console.print(f"Please, enter {attribute_name}:")
                 address_info[attribute_name] = self.integer_form(restriction=restriction)
             elif restriction["parametre"]["type"] == bool:
-                address_info[attribute_name] = self.bool_form(restriction=restriction)
+                address_info[attribute_name] = self.bool_form()
         return address_info
 
     def string_form(self, restriction: dict) -> str:
@@ -328,7 +308,7 @@ class GenericView:
                 date_input = Prompt.ask(f"Enter a date of {msg} of event(dd-mm-yyyy):")
                 date_obj = datetime.strptime(date_input, "%d-%m-%Y")
             except ValueError:
-                self.console.print(f"[prompt.invalid] Format date invalid")
+                self.console.print("[prompt.invalid] Format date invalid")
             else:
                 break
         return date_obj
@@ -346,7 +326,7 @@ class GenericView:
                 hour_input = Prompt.ask(f"Enter a hour of {msg} of event(hh-24h):")
                 date_obj = datetime.strptime(hour_input, "%H")
             except ValueError:
-                self.console.print(f"[prompt.invalid] Format hour invalid")
+                self.console.print("[prompt.invalid] Format hour invalid")
             else:
                 break
         return date_obj
@@ -360,12 +340,12 @@ class GenericView:
             datetime: date entered by user.
         """
         while True:
-            date = self.get_date(msg=msg)
-            if date > datetime.today():
+            date_input = self.get_date(msg=msg)
+            if date_input > datetime.today():
                 break
             else:
-                self.console.print(f"[prompt.invalid]the date must be greater than today.")
-        return date
+                self.console.print("[prompt.invalid]the date must be greater than today.")
+        return date_input
 
     def date_form(self, msg: str) -> datetime:
         """The function is used to get date and hour of event by input user.
@@ -376,9 +356,9 @@ class GenericView:
         Returns:
             datetime: return the date.
         """
-        date = self.date_validator(msg=msg)
+        date_input = self.date_validator(msg=msg)
         hour = self.get_hour(msg=msg)
-        complet_date = datetime(year=date.year, month=date.month, day=date.day, hour=hour.hour)
+        complet_date = datetime(year=date_input.year, month=date_input.month, day=date_input.day, hour=hour.hour)
         return complet_date
 
     def _input_password(self) -> str:
@@ -423,7 +403,7 @@ class GenericView:
         elif attribute_dict["parametre"]["type"] == int:
             new_value = self.integer_form(restriction=attribute_dict)
         elif attribute_dict["parametre"]["type"] == bool:
-            new_value = self.bool_form(restriction=attribute_dict)
+            new_value = self.bool_form()
         elif attribute_dict["parametre"]["type"] == "date":
             new_value = self.date_form(restriction=attribute_dict)
 
@@ -434,7 +414,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        msg = Panel(Text(":cross: You have not permission for that! Sorry :cross:"), style="red")
+        msg = Panel(Text(":cross_mark: You have not permission for that! Sorry :cross_mark:"), style="red")
         self.console.print(msg)
         time.sleep(3)
 
@@ -443,8 +423,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        messsage = Panel(Text(f"✅ {msg} ✅", justify="center"))
-        self.console.print(messsage)
+        self.console.print(f"✅ {msg} ✅", justify="center")
         time.sleep(3)
 
     def no_data_message(self, session, section, msg):
@@ -452,8 +431,7 @@ class GenericView:
         self.header(
             section=section, department=session.current_user_department, current_user=session.current_user.name
         )
-        messsage = Panel(Text(f"{msg}", justify="center"))
-        self.console.print(messsage)
+        self.console.print(f"{msg}", justify="center")
         time.sleep(3)
 
     def ask_comfirmation(self, message: str) -> True or False:

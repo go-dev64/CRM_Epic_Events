@@ -47,7 +47,7 @@ class LoginView:
         section = "Authentication"
         while True:
             self.generic.header(section=section)
-            if msg != None:
+            if msg is not None:
                 self.console.print(f":warning: {msg} :warning:")
             email = self.get_email()
             password = self.get_password()

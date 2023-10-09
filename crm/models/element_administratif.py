@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped
@@ -52,6 +51,9 @@ class Event(Base):
         attribut = [x["attribute_name"] for x in self.availables_attribue_list()]
         attribut.insert(1, "customer")
         return attribut
+
+    def __repr__(self) -> str:
+        return f"Event : {self.name} of client :{self.customer.name}"
 
 
 class Contract(Base):
@@ -126,3 +128,6 @@ class Address(Base):
                     list: List of attribute name.
         """
         return [x["attribute_name"] for x in self.availables_attribue_list()]
+
+    def __repr__(self) -> str:
+        return f"{self.number}, street:{self.street} of {self.city}"

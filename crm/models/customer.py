@@ -41,7 +41,8 @@ class Customer(Base):
 
     def attribute_to_display(self) -> list:
         """Function return all attribute availble to be displayed.
-        ["name", "email_address", "phone_number", "company", "seller_contact", "created_date", "updated_date", "contracts", "events"]
+        ["name", "email_address", "phone_number", "company", "seller_contact",
+        "created_date", "updated_date", "contracts", "events"]
 
         Returns:
             list: List of attribute name.
@@ -51,4 +52,4 @@ class Customer(Base):
         return list_attribute + add_attribute
 
     def __repr__(self) -> str:
-        return f"Client: {self.name} - company: {self.company} - contact Epic Event: {self.seller_contact}"
+        return f"Client: {self.name} : {self.company} company"

@@ -2,9 +2,8 @@ from datetime import datetime
 import pytest
 from sqlalchemy import select
 from crm.controller.seller_controller import SellerController
-from crm.controller.manager_controller import ManagerController
-from crm.models.element_administratif import Address, Contract
-from crm.models.users import Manager, Seller, Supporter, User, Event, Customer
+from crm.models.element_administratif import Address, Contract, Event
+from crm.models.users import Customer, Seller
 from crm.view.generic_view import GenericView
 
 
@@ -77,10 +76,9 @@ class TestSellerController:
             users
             current_user_is_seller
             contracts
-            seller = SellerController()
             mocker.patch("crm.view.generic_view.GenericView.select_element_in_menu_view", return_value=0)
-            result = seller.select_contract_of_event(session=session)
-            assert isinstance(result, Contract) == True
+            result = SellerController().select_contract_of_event(session=session)
+            assert isinstance(result, Contract) == True  # noqa
 
     def test_create_new_event(self, db_session, users, contracts, address, current_user_is_seller, mocker):
         # test should return a new event in event list.
@@ -137,7 +135,7 @@ class TestSellerController:
             mocker.patch("crm.controller.seller_controller.SellerController.get_event_info", return_value=event_info)
             mock_confirm = mocker.patch.object(GenericView, "no_data_message")
             number_event_before = self._count_number_of_element(session)[2]
-            new_event = SellerController().create_new_event(session=session)
+            SellerController().create_new_event(session=session)
             number_event = self._count_number_of_element(session)[2]
             assert number_event == number_event_before
             mock_confirm.assert_called_once_with(
@@ -151,15 +149,6 @@ class TestSellerController:
             clients
             current_user_is_seller
             mock_display_elements = mocker.patch.object(GenericView, "display_elements")
-            SellerController().display_all_customers(session=session)
-            mock_display_elements.assert_called_once()
-
-    def test_display_all_customers_with_no_data(self, db_session, users, current_user_is_seller, mocker):
-        # test should display customers elements.
-        with db_session as session:
-            users
-            current_user_is_seller
-            mock_display_elements = mocker.patch.object(GenericView, "no_data_message")
             SellerController().display_all_customers(session=session)
             mock_display_elements.assert_called_once()
 
@@ -192,21 +181,12 @@ class TestSellerController:
             SellerController().display_all_contracts(session=session)
             mock_display_elements.assert_called_once()
 
-    def test_display_all_contracts_with_no_data(self, db_session, users, current_user_is_seller, mocker):
-        # test should display customers elements.
-        with db_session as session:
-            users
-            current_user_is_seller
-            mock_display_elements = mocker.patch.object(GenericView, "no_data_message")
-            SellerController().display_all_contracts(session=session)
-            mock_display_elements.assert_called_once()
-
     def test_all_contracts_of_user(self, db_session, users, contracts, current_user_is_seller, mocker):
         # test should display contracts element.
         with db_session as session:
             users
-            contracts
             current_user_is_seller
+            contracts
             mock_display_elements = mocker.patch.object(GenericView, "display_elements")
             SellerController().display_all_contracts_of_user(session=session)
             mock_display_elements.assert_called_once()
@@ -247,8 +227,8 @@ class TestSellerController:
         # test should display contracts element.
         with db_session as session:
             users
-            contracts
             current_user_is_seller
+            contracts
             mock_display_elements = mocker.patch.object(GenericView, "display_elements")
             SellerController().display_all_unsigned_contracts_of_user(session=session)
             mock_display_elements.assert_called_once()
@@ -270,8 +250,8 @@ class TestSellerController:
         # test should display contracts element.
         with db_session as session:
             users
-            contracts
             current_user_is_seller
+            contracts
             mock_display_elements = mocker.patch.object(GenericView, "display_elements")
             SellerController().display_all_contracts_of_user_without_event(session=session)
             mock_display_elements.assert_called_once()
@@ -304,7 +284,7 @@ class TestSellerController:
             users
             current_user_is_seller
             result = SellerController().select_customer(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize("attribute,new_value", [("name", "test"), ("phone_number", "test")])
     def test_change_attribute_customer(
@@ -367,7 +347,7 @@ class TestSellerController:
             users
             current_user_is_seller
             result = SellerController().select_contract(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize(
         "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]

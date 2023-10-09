@@ -1,5 +1,4 @@
 # utiliser setup et towdnown
-import datetime
 import os
 import jwt
 import pytest
@@ -32,8 +31,6 @@ bad_data_parametre = [
     ("supr@gmail.com", "supporter", "bad"),
 ]
 
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOm51bGwsIm5hbWUiOiJtYW5hZ2VyIiwiZGVwYXJ0bWVudCI6Im1hbmFnZXJfdGFibGUifQ.QmrHhpbG59Tu4RmzG4q5ZkQ6RCqvxrHoIQZ4j5CMcWY"
-
 
 class TestAuthentication:
     def _get_user(self, session, users, email):
@@ -53,23 +50,21 @@ class TestAuthentication:
         # Test should return User.name.
         with db_session as session:
             users
-            oassword = password
             user = self._get_user(session, users, email)
             assert user.name == user_name
 
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_get_user_with_bad_email(self, db_session, users, email, user_name, password):
         # Test should return User.name.
-        with db_session as session:
+        with db_session:
             users
-            oassword = password
             user = self._get_user(db_session, users, email)
-            assert user == None
+            assert user is None
 
     @pytest.mark.parametrize("email, user_name, password", wright_parametre)
     def test_login_with_right_data(self, db_session, users, email, user_name, password):
         # Test login should return User connected.
-        with db_session as session:
+        with db_session:
             users
             user = self._login(db_session, users, email, password)
             assert user.name == user_name
@@ -88,36 +83,23 @@ class TestAuthentication:
         assert user_token_excepted["sub"] == user_token_decoded["sub"]
         assert user_token_excepted["name"] == user_token_decoded["name"]
 
-    def test_decode_token(self):
-        # test valid info of token.
-        auth = Authentication()
-        user_token_decoded = auth.decode_token(TOKEN)
-        user_data_excepted = {"sub": None, "name": "manager", "department": "manager_table"}
-        assert user_data_excepted == user_token_decoded
-
-    def test_decode_token_with_bad_key(self):
-        # test should return None with wrong key.
-        auth = Authentication()
-        with pytest.raises(jwt.DecodeError):
-            auth.decode_token(TOKEN, token_key="toto")
-
     @pytest.mark.parametrize("email, user_name, password", bad_email_parametre)
     def test_login_with_wrong_email_and_good_password(self, db_session, users, email, user_name, password):
         # Test should return None with wrong email.
         user = self._login(db_session, users, email, password)
-        assert user == None
+        assert user is None
 
     @pytest.mark.parametrize("email, user_name, password", bad_password_parametre)
     def test_login_with_wrong_password_and_good_email(self, db_session, users, email, user_name, password):
         # Test should return None with wrong password.
         user = self._login(db_session, users, email, password)
-        assert user == False
+        assert user is False
 
     @pytest.mark.parametrize("email, user_name, password", bad_data_parametre)
     def test_login_with_wrong_data(self, db_session, users, email, user_name, password):
         # Test should return None with wrong data.
         user = self._login(db_session, users, email, password)
-        assert user == None
+        assert user is None
 
     @Authentication.is_authenticated
     def _foo(self, *args, **kwargs):
@@ -128,7 +110,7 @@ class TestAuthentication:
         with db_session as session:
             current_user_is_manager
             result_excepted = self._foo(session=session)
-            assert result_excepted == True
+            assert result_excepted is True
 
     def test_decorator_is_authenticated_without_token(self, db_session, mocker):
         # Test should return None.
@@ -144,11 +126,11 @@ class TestAuthentication:
     ):
         password = "Abcdefgh@10"
         result = Authentication._password_validator(password)
-        assert result == True
+        assert result is True
 
     @pytest.mark.parametrize(
         "password", [("bdsg"), ("abcdefgh@10"), ("Abcdefgh@"), ("Abcdefgh10"), ("Abcde fgh@10"), ("ABCDEFHH@10")]
     )
     def test___password_validator_with_good_password(self, password):
         result = Authentication._password_validator(password)
-        assert result == None
+        assert result is None

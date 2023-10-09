@@ -1,12 +1,11 @@
 import pytest
 from sqlalchemy import select
 from crm.controller.manager_controller import ManagerController
-from crm.models import users
 from crm.models.element_administratif import Contract
 from crm.models.users import Manager, Seller, Supporter, User
-from crm.models.utils import Utils
+
 import argon2
-from rich.console import Console
+
 
 from crm.view.generic_view import GenericView
 
@@ -128,7 +127,7 @@ class TestManagerController:
             assert number_of_contract == number_of_contract_before + 1
             assert result.total_amount == 2133333
             assert result.remaining == 123
-            assert result.signed_contract == True
+            assert result.signed_contract is True
             assert result.customer == client
             mock_confirm.assert_called_once_with(
                 section="Create new Contract", session=session, msg="Operation succesfull!"
@@ -158,7 +157,7 @@ class TestManagerController:
     @pytest.mark.parametrize("choice", [(0), (1), (2)])
     def test__get_departement_list(self, db_session, users, current_user_is_manager, choice):
         # test should return the available department list.
-        with db_session as session:
+        with db_session:
             user = users[choice]
             current_user_is_manager
             manager = ManagerController()
@@ -319,7 +318,7 @@ class TestManagerController:
             )
             ph = argon2.PasswordHasher()
             ManagerController().update_collaborator(session=session)
-            assert ph.verify(user.password, "Abcdefgh@45") == True
+            assert ph.verify(user.password, "Abcdefgh@45") is True
 
     @pytest.mark.parametrize(
         "old_attribute, new_value",
@@ -365,11 +364,11 @@ class TestManagerController:
             contracts
             current_user_is_manager
             mocker.patch("crm.view.generic_view.GenericView.ask_comfirmation", return_value=True)
-            mock_confirm = mocker.patch.object(GenericView, "confirmation_msg")
+            mocker.patch.object(GenericView, "confirmation_msg")
             mocker.patch("crm.models.utils.Utils._select_element_in_list", return_value=users[1])
             number_before = self._count_number_of_user(session=session)
             ManagerController().select_and_delete_collaborator(session=session, section="", collaborator_list=users)
             number = self._count_number_of_user(session=session)
             assert number_before[2] == number[2] + 1
-            assert clients[0].seller_contact == None
-            assert clients[0].contracts[0].seller == None
+            assert clients[0].seller_contact is None
+            assert clients[0].contracts[0].seller is None

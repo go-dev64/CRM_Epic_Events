@@ -93,6 +93,7 @@ class SellerView:
             if restriction["parametre"]["type"] == str:
                 event_info[attribute_name] = self.generic_view.string_form(restriction=restriction)
             elif restriction["parametre"]["type"] == int:
+                self.generic_view.console.print(f"Please, enter number of {attribute_name}")
                 event_info[attribute_name] = self.generic_view.integer_form(restriction=restriction)
             elif restriction["parametre"]["type"] == "date":
                 if restriction["attribute_name"] == "date_start":

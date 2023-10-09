@@ -72,10 +72,10 @@ class TestManager:
             events
             current_user_is_manager
             events_list = Manager().get_all_event_without_support(session=session)
-            result_excepted = len(session.scalars(select(Event).where(Event.supporter == None)).all())
+            result_excepted = len(session.scalars(select(Event).where(Event.supporter == None)).all())  # noqa
             assert result_excepted == len(events_list)
 
-    def test_get_customer_without_seller(sel, db_session, users, clients, current_user_is_manager, mocker):
+    def test_get_customer_without_seller(sel, db_session, users, clients, current_user_is_manager):
         with db_session as session:
             users
             current_user_is_manager
@@ -84,7 +84,7 @@ class TestManager:
             result = Manager().get_customer_without_seller(session=session)
             for r in result:
                 assert isinstance(r, Customer)
-                assert r.seller_contact == None
+                assert r.seller_contact is None
 
     # ------------- Test Create Functions ---------#
 
@@ -95,7 +95,7 @@ class TestManager:
             current_user = current_user_is_manager
             list_user_before = self._count_number_of_user(session)[0]
             list_manager_before = self._count_number_of_user(session)[1]
-            new_manager = current_user.create_new_manager(session=session, user_info=user_info)
+            current_user.create_new_manager(session=session, user_info=user_info)
             list_user = self._count_number_of_user(session)[0]
             list_manager = self._count_number_of_user(session)[1]
 
@@ -109,7 +109,7 @@ class TestManager:
             current_user = current_user_is_manager
             list_user_before = self._count_number_of_user(session)[0]
             list_seller_before = self._count_number_of_user(session)[2]
-            new_seller = current_user.create_new_seller(session=session, user_info=user_info)
+            current_user.create_new_seller(session=session, user_info=user_info)
             list_user = self._count_number_of_user(session)[0]
             list_seller = self._count_number_of_user(session)[2]
 
@@ -124,7 +124,7 @@ class TestManager:
             list_user_before = self._count_number_of_user(session)[0]
             list_supporter_before = self._count_number_of_user(session)[3]
 
-            new_supporter = current_user.create_new_supporter(session=session, user_info=user_info)
+            current_user.create_new_supporter(session=session, user_info=user_info)
             list_user = self._count_number_of_user(session)[0]
             list_supporter = self._count_number_of_user(session)[3]
 
@@ -145,7 +145,7 @@ class TestManager:
             new_supporter = current_user.create_new_supporter(session=session, user_info=bad_user_info)
             list_user = self._count_number_of_user(session)[0]
             assert list_user == list_user_before
-            assert new_supporter == None
+            assert new_supporter is None
 
     def test_create_new_contract(self, db_session, clients, current_user_is_manager):
         # Test should return a new contract in contracts list.
@@ -166,7 +166,7 @@ class TestManager:
         # Test should update a  attribut of user.
         with db_session as session:
             user = users[1]
-            current_user = current_user_is_manager
+            current_user_is_manager
             update_attribute = "name"
             new_value = "toto"
             Manager().update_user(collaborator=user, update_attribute=update_attribute, new_value=new_value)
@@ -185,13 +185,10 @@ class TestManager:
 
         with db_session as session:
             user = users[old_department]
-            id = user.id
-            current_user = current_user_is_manager
+            current_user_is_manager
             list_user_before = self._count_number_of_user(session)[0]
             list_of_department_before = len(session.scalars(select(new_class_department)).all())
-            new_user = Manager().change_user_department(
-                session=session, collaborator=user, new_department=new_department
-            )
+            Manager().change_user_department(session=session, collaborator=user, new_department=new_department)
             list_user = self._count_number_of_user(session)[0]
             list_of_department = len(session.scalars(select(new_class_department)).all())
             assert list_of_department == list_of_department_before + 1
@@ -215,7 +212,7 @@ class TestManager:
     )
     def test_update_contract(self, db_session, contracts, current_user_is_manager, attribute_update, new_value):
         # Test should return a updated contract.
-        with db_session as session:
+        with db_session:
             contract = contracts[0]
             current_user = current_user_is_manager
             current_user.update_contract(contract=contract, attribute_update=attribute_update, new_value=new_value)
@@ -226,8 +223,8 @@ class TestManager:
         with db_session as session:
             event = events[0]
             supporter = session.scalars(select(Supporter)).first()
-            assert event.supporter == None
-            current_user = current_user_is_manager
+            assert event.supporter is None
+            current_user_is_manager
             Manager().change_supporter_of_event(session=session, event=event, new_supporter=supporter)
             assert getattr(event, "supporter") == supporter
 
@@ -236,7 +233,7 @@ class TestManager:
         with db_session as session:
             client = clients[0]
             contract = contracts[0]
-            current_user = current_user_is_manager
+            current_user_is_manager
             seller2 = Seller(name="seller_2", email_address="hhh@", password="password")
             session.add(seller2)
             Manager().update_seller_contact_of_customer(customer=client, new_seller=seller2)

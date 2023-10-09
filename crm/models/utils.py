@@ -2,7 +2,7 @@ from sqlalchemy import select
 from crm.models.authentication import Authentication
 from crm.models.customer import Customer
 from crm.models.element_administratif import Address
-from crm.models.exceptions import EmailError, EmailUniqueError
+from crm.models.exceptions import EmailUniqueError
 from crm.view.generic_view import GenericView
 
 
@@ -45,7 +45,9 @@ class Utils:
             Address: address created.
         """
         section = " Create new address"
-        address_info = self.generic_view.get_address_info_view()
+        address_info = self.generic_view.get_address_info_view(
+            department=session.current_user_department, current_user_name=session.current_user.name
+        )
         if self.generic_view.ask_comfirmation(message=section):
             new_address = session.current_user.create_new_address(session=session, address_info=address_info)
             self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
@@ -74,6 +76,7 @@ class Utils:
 
     @auth.is_authenticated
     def update_address(self, session):
+        section = " Update address"
         address = self.select_address(session=session)
         attribute = self._select_attribut_of_element(
             session=session, section="Update/ Select attribute", element=address
@@ -82,10 +85,15 @@ class Utils:
             section="Update/ Select attribute",
             department="session.current_user_department",
             current_user=session.current_user.name,
-            attribute_to_updated=attribute,
+            attribute_selected=attribute,
             element=address,
         )
-        setattr(address, attribute, new_value)
+        if self.generic_view.ask_comfirmation(message=section):
+            setattr(address, attribute, new_value)
+            self.generic_view.confirmation_msg(session=session, section=section, msg="Operation succesfull!")
+
+        else:
+            self.generic_view.no_data_message(session=session, section=section, msg="Operation Cancelled!")
 
     def _select_element_in_list(self, session, section: str, element_list: list):
         """The function is used to select and return element in list.

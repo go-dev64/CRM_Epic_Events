@@ -1,6 +1,4 @@
-import pytest
 from crm.view.login_view import LoginView
-from email_validator import EmailNotValidError
 
 
 class TestLoginView:

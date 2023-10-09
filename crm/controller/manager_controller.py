@@ -137,7 +137,7 @@ class ManagerController:
         """
         section = "Create new Contract"
         contract_info = self.get_info_contract(session=session)
-        if contract_info["customer"] != None:
+        if contract_info["customer"] is not None:
             if self.generic_view.ask_comfirmation(message=section):
                 new_contract = Manager().create_new_contract(session=session, contract_info=contract_info)
                 self.generic_view.confirmation_msg(section=section, session=session, msg="Operation succesfull!")
@@ -246,6 +246,7 @@ class ManagerController:
         list_of_choice = [
             "Update Collaborator",
             "Update Contract",
+            "Upadte Customer without Seller",
             "Update Event",
             "Update Address",
             "Back to previous menu",
@@ -448,7 +449,7 @@ class ManagerController:
             _type_: collaborator updated.
         """
         collaborator_selected = self.select_collaborator(session=session)
-        if collaborator_selected != None:
+        if collaborator_selected is not None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session,
                 section="Update Collaborator/Select Attribute to updated",
@@ -551,7 +552,7 @@ class ManagerController:
             Contract: Contract updated.
         """
         contract = self.select_contract(session=session)
-        if contract != None:
+        if contract is not None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session, section=" Update Contract/Select Attribute to updated", element=contract
             )
@@ -581,7 +582,7 @@ class ManagerController:
         customers = Manager().get_customer_without_seller(session=session)
         if len(customers) > 0:
             customer = self.utils._select_element_in_list(
-                session=session, section="Update Event/ Select new Supporter", element_list=customers
+                session=session, section="Update Customer/ select Cusomer", element_list=customers
             )
             return customer
         else:
@@ -611,7 +612,7 @@ class ManagerController:
         sellers = self.get_seller(session=session)
         if len(sellers) > 0:
             seller = self.utils._select_element_in_list(
-                session=session, section="Update Event/ Select new Supporter", element_list=sellers
+                session=session, section="Update Customer / select new seller", element_list=sellers
             )
             return seller
         else:
@@ -626,7 +627,7 @@ class ManagerController:
             self.generic_view.no_data_message(
                 session=session,
                 section=section,
-                msg="There are no available Event or Supporter. Update Event is not possible!",
+                msg="There are no available Customer or seller. Update Customer is not possible!",
             )
         else:
             if self.generic_view.ask_comfirmation(message=section):

@@ -1,11 +1,15 @@
 from logging.config import fileConfig
+from crm.models.base import Base
+import crm.models.users
+import crm.models.customer
+import crm.models.element_administratif
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool, URL
 
 from alembic import context
 
-import os, sys
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,10 +40,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from crm.models.base import Base
-import crm.models.users
-import crm.models.customer
-import crm.models.element_administratif
+
 
 target_metadata = Base.metadata
 

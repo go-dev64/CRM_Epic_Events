@@ -96,7 +96,7 @@ class TestSellerController:
             element_list = []
             mocker.patch("crm.models.users.Seller.get_all_contracts_of_user_without_event", return_value=element_list)
             result = seller.select_contract_of_event(session=session)
-            assert result == None
+            assert result is None
 
     def test_select_address_of_event(self, db_session, users, current_user_is_seller, mocker):
         with db_session as session:
@@ -115,8 +115,7 @@ class TestSellerController:
             users
             current_user_is_seller
             seller = SellerController()
-            element_list = None
-            mocker.patch("crm.models.users.Seller.get_all_adress", return_value=element_list)
+            mocker.patch("crm.models.utils.Utils.select_address", return_value=None)
             mocker.patch("crm.models.utils.Utils.create_new_address", return_value="toto")
             mock_message = mocker.patch.object(GenericView, "no_data_message")
             result = seller.select_address_of_event(session=session)
@@ -465,7 +464,7 @@ class TestSellerController:
             element_list = []
             mocker.patch("crm.models.users.Seller.get_all_clients_of_user", return_value=element_list)
             result = SellerController().select_customer(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize(
         "attribute,new_value",
@@ -621,7 +620,7 @@ class TestSellerController:
             element_list = []
             mocker.patch("crm.models.users.Seller.get_all_contracts_of_user", return_value=element_list)
             result = SellerController().select_contract(session=session)
-            assert result == None
+            assert result is None
 
     @pytest.mark.parametrize(
         "attribute,new_value", [("total_amount", 1233), ("remaining", 12), ("signed_contract", True)]

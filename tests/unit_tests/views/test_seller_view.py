@@ -1,4 +1,3 @@
-import pytest
 from crm.view.seller_view import SellerView
 
 

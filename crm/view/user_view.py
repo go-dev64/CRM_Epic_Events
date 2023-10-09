@@ -1,11 +1,10 @@
-import time
 import argon2
 from crm.models.authentication import Authentication
 from crm.models.exceptions import EmailUniqueError
 from crm.models.users import User
 from crm.view.generic_view import GenericView
-from rich.console import Console, Group
-from rich.prompt import Prompt, IntPrompt
+from rich.console import Console
+from rich.prompt import Prompt
 
 from crm.view.login_view import LoginView
 
@@ -38,7 +37,7 @@ class UserView:
         while True:
             try:
                 email = self.login_view.get_email()
-                if Authentication().get_user_with_email(session=session, email=email) is None:
+                if Authentication().get_user_with_email(session=session, email=email) is not None:
                     raise EmailUniqueError()
             except EmailUniqueError as msg:
                 self.generic_view.console.print(msg)
@@ -76,9 +75,10 @@ class UserView:
         self.generic_view.header(
             department=session.current_user_department, current_user=session.current_user.name, section=section
         )
+
         for restriction in restrictions:
             attribute_name = restriction["attribute_name"]
             user_info[attribute_name] = self.generic_view.string_form(restriction=restriction)
-        user_info["password"] = self._get_user_password()
         user_info["email_address"] = self._get_email(session=session)
+        user_info["password"] = self._get_user_password()
         return user_info

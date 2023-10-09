@@ -136,7 +136,7 @@ class SupporterController:
         """
 
         event = self.select_event(session=session)
-        if event != None:
+        if event is not None:
             attribute_selected = self.utils._select_attribut_of_element(
                 session=session, section="Update your Event/Select Attribute", element=event
             )
